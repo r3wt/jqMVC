@@ -1,0 +1,4 @@
+jQuery (DUUUHHHH https://code.jquery.com/jquery-2.1.4.min.js)
+jqMVC-router.js ( a fork of jquery.router.js by Camilo Tapia LINK: https://github.com/camme/jquery-router-plugin)
+twig.js (A javascript port of the powerful templating engine for PHP LINK:  https://github.com/justjohn/twig.js )
+NProgress.js ( cool progress bars like on youtube LINK: https://github.com/rstacruz/nprogress)
