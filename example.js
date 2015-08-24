@@ -32,13 +32,32 @@ $(function(){
 	});
 	
 	//add a route to the application
-	$app.add('/',function(){
+	$app.add('/',function(data){
 		//this example fetches some data before rendering the view.
 		$app.get($app.api+'index.json',function(data){
 			$app.render('index.twig',data,function(){
 				$app.controller('index.js');
 				$app.done(); //stops the progress bar
 			});
+		});
+	});
+	
+	//lets try a more advance route with a paramter and some error handling
+	$app.app('/posts/:title/:id',function(data){
+		var title = data.title;
+		var id = data.id;
+		$app.get($app.api+'retrieve/post/'+id,function(data){
+			if(data.error == 0){
+				$('title').html(data.post.title);
+				$app.render('post.twig',data,function(){
+					$app.controller('post.js');
+					$app.done();
+				})
+			}else{
+				//we need to handle an error
+				//currently no error handling is implemented.
+				$app.go('/404'); //show a 404 page as an example.
+			}
 		});
 	});
 	

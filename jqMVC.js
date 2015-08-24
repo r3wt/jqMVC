@@ -75,7 +75,7 @@ var $app = {
 		}
 		
 		if($app.ctrl !== null){
-			if($app.ctrl.hasOwnProperty('destroy'))
+			if($app.ctrl.hasOwnProperty('destroy')){
 				if(typeof $app.ctrl.destroy === "function"){
 					$app.ctrl.destroy();
 				}
