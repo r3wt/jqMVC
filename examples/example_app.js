@@ -1,8 +1,10 @@
-//include jQuery, twig.js, Nprogress.js, Nprogress.css, jQuery-router.js, and finally jqMVC.js before this file.
-
-
 //document ready.
 $(function(){
+	
+	$app.api_path = 'http://example.com/api/v1/';
+	$app.ctrl_path = 'http://example.com/controllers/';
+	$app.view_path = 'http://example.com/templates/';
+	$app.view = $('div.view');
 	
 	$app.start(); //starts the application on load.
 	
@@ -13,7 +15,7 @@ $(function(){
 		console.log(user);
 		//since were not using our normal render function, we must configure twig ourselves.
 		twig({
-			href: 'twig/nav.twig?v=1.1',
+			href: $app.view_path+'widgets/nav.twig',
 			load: function(template) { 
 				//twig loads the template and passes it here. 
 				//render the template and insert it into `nav` element.

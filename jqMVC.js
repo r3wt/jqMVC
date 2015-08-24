@@ -6,18 +6,18 @@
  */
 var $app = {
 	
-	api: '', //path to your api
+	api_path: '', //path to your api
 	ctrl_path: '',//path to your controllers.
-	templates: '',//path to your templates
+	view_path: '',//path to your templates
 	ctrl: null, //this is where the app stores whatever controller is loaded.
 	
-	view: $('div.view'), //define your main view element.
+	view: $('body'), //define your main view element.
 	
 	
 	//adds a route
 	add : function(path,id,callback){
-		$.router.add(path,id,callback);
-		return $app;
+		$.router.add(path,id,callback); //id is optional
+		return $app; //add is chainable.
 	},
 	
 	//the router than runs 1 time on page load
@@ -52,10 +52,10 @@ var $app = {
 	//fetch a view and render it with the supplied args, then perform a callback.
 	render: function(template,args,callback){
 		twig({
-			href: $app.templates+template,
+			href: $app.view_path+template,
 			load: function(template) { 
 				var html = template.render(args);
-				$('.view').html(html).promise().done(function(){
+				$app.view.html(html).promise().done(function(){
 					if(typeof callback === "function"){
 						callback();
 					}
