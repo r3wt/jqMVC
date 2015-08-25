@@ -1,16 +1,9 @@
 # jqMVC.js
 
-jqMVC.js is a javascript framework aimed at jQuery developers.
+jqMVC.js is a javascript framework aimed at jQuery developers. its simple design brings fun to a tedious MVC landscape.
 
-  - Routing inspired by PHP's Slim Framework with named routes and parameter parsing. `$app.add(route[,id],callback)`
-  - Templating with Twig.js, a port of PHP's powerful Twig Templating Engine. `$app.render(template,data,callback);
-  - Services inspired by Angular.js's services.`$app.service(name,handler)` called like `$app.svc.name()`
-  - Progress Indicators via NProgress.js `$app.start()` and `$app.done()`
-  - Simple controller system `$ctrl = { initialize: function(){} };` that just makes more sense for client side MVC. a controller in client code needs to handle actions for that specific route, and interact with the main app, and nothing else.
-  - Event manager maintains a list of events bound from controllers using the `$app.on(event,target,handler)` method.
-  - Immutable events via `$app.immutable(event,target,handler)`
-  - Loading a new controller automatically cleans previous controllers events via `$app.clean()`.
-  - controllers can implement a `destroy()` method in order to destroy anything the framework cant handle on its own.
+  - `$.jqMVC` rocks!
+
 
 ---
 ### Dependencies
@@ -19,25 +12,17 @@ jQmvc depends on the following resources to function:
 * [jQuery] - https://code.jquery.com/
 * [Nprogress] - https://github.com/rstacruz/nprogress
 * [Twig.js] - https://github.com/justjohn/twig.js
-* [jqMVC.router] (included)
 
 ---
 ### Getting Started
 
-See the examples to get started
+See the demo app below for a quick start.
 
-* https://github.com/r3wt/jqMVC/blob/master/examples/example_index.html
-* https://github.com/r3wt/jqMVC/blob/master/examples/example_app.js
-* https://github.com/r3wt/jqMVC/blob/master/examples/example_controller.js
+* https://github.com/r3wt/jqMVC/blob/master/examples/demo/
+
 ---
 ### Notes
-* you should instantiate your app inside of document ready. in this system, your app acts as the server handling the routing, fetching data from api, rendering views, and instantiating controllers.
-```
-$(function(){
-    $app.start();
-});
-```
-* you should define all your routes before calling `$app.run()` obviously.
+
 * an example configuration for nginx with a Slim REST Api in the same folder, named api.php
 ```
 location ~ ^/api {
