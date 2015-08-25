@@ -3,162 +3,465 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
+ * @version 0.1
  */
-var $app = {
+;!(function($,n,twig){
 	
-	api_path: '', //path to your api
-	ctrl_path: '',//path to your controllers.
-	view_path: '',//path to your templates
-	ctrl: null, //this is where the app stores whatever controller is loaded.
+	var events = [];
 	
-	view: $('body'), //define your main view element.
+	var settings = {
+		debug: false,
+		api_path : '',
+		element : '',
+		view_path : '',
+		ctrl_path : ''
+	};
+	
+	var services = {};
+	
+	var controller = null;
+	
+	//code from jquery-router plugin
+	var hasPushState = (history && history.pushState);    
+    var hasHashState = !hasPushState && ("onhashchange" in window) && false;
+    var routeList = [];
+    var eventAdded = false;
+    var currentUsedUrl = location.href;
+    var firstRoute = true;
 	
 	
-	//adds a route
-	add : function(path,id,callback){
-		$.router.add(path,id,callback); //id is optional
-		return $app; //add is chainable.
-	},
+	//app
+	var app = {};
+	app.router = {};
+	app.router.currentId = "";
+	app.router.currentParameters = {};
+    app.router.capabilities = {
+        hash: hasHashState,
+        pushState: hasPushState,
+        timer: !hasHashState && !hasPushState
+    };
 	
-	//the router than runs 1 time on page load
-	router : function(){
-		if($.router.checkRoute(location.href) == false) {
-			$app.go('/404');
-		}else{
-			$app.go(location.href);
+	app.path = function(route,callback){
+		var isRegExp = typeof route == "object";
+        
+        if (!isRegExp)
+        {
+            
+            // remove the last slash to unifiy all routes
+            if (route.lastIndexOf("/") == route.length - 1)
+            {
+                route = route.substring(0, route.length - 1);
+            }
+            
+            // if the routes where created with an absolute url ,we have to remove the absolut part anyway, since we cant change that much
+            route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+        }
+
+        var routeItem = {
+            route: route,
+            callback: callback,
+            type: isRegExp ? "regexp" : "string",
+        }
+
+        routeList.push(routeItem);
+        
+        // we add the event listener after the first route is added so that we dont need to listen to events in vain
+        if (!eventAdded)
+        {
+            bindStateEvents();
+        }
+		return app;
+	};
+	
+	function bindStateEvents()
+    {
+        eventAdded = true;
+        
+        // default value telling router that we havent replaced the url from a hash. yet.
+        app.router.fromHash = false;
+
+        
+        if (hasPushState)
+        {
+            // if we get a request with a qualified hash (ie it begins with #!)
+            if (location.hash.indexOf("#!/") === 0)
+            {
+                // replace the state
+                var url = location.pathname + location.hash.replace(/^#!\//gi, "");
+                history.replaceState({}, "", url);
+                
+                // this flag tells router that the url was converted from hash to popstate
+                app.router.fromHash = true;
+            }
+            
+            $(window).bind("popstate", handleRoutes);
+        }
+        else if (hasHashState)
+        {
+            $(window).bind("hashchange.router", handleRoutes);
+        }
+        else
+        {
+            // if no events are available we use a timer to check periodically for changes in the url
+            setInterval(
+                function()
+                {
+                    if (location.href != currentUsedUrl)
+                    {
+                        handleRoutes();
+                        currentUsedUrl = location.href;
+                    }
+                }, 500
+            );
+        }
+       
+    }
+    
+    bindStateEvents();
+	
+	app.router.checkRoute = function(url) {
+		if(location.pathname == '/'){
+			return true;
 		}
-	},
+		return getParameters(parseUrl(url)).length > 0;
+	}
 	
-	//get some json and perform a callback with the data.
-	get: function(path,callback){
-		$.getJSON(path,callback);
-	},
+	app.go = function(url, title)
+    {   
+        if (hasPushState)
+        {
+            history.pushState({}, title, url);
+            checkRoutes();
+        }
+        else
+        {
+            // remove part of url that we dont use
+            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
+            var hash = url.replace(location.pathname, "");
+            
+            if (hash.indexOf("!") < 0)
+            {
+                hash = "!/" + hash;
+            }
+            location.hash = hash;
+        }
+    };
 	
-	//navigate to a route, setting title to loading incase of blocking while waiting on template to render.
-	go: function(href){
-		$.router.go(href,'Loading...');
-	},
+	 // parse and wash the url to process
+    function parseUrl(url)
+    {
+        var currentUrl = url ? url : location.pathname;
+        
+        currentUrl = decodeURI(currentUrl);
+        
+        // if no pushstate is availabe we have to use the hash
+        if (!hasPushState)
+        {   
+            if (location.hash.indexOf("#!/") === 0)
+            {
+                currentUrl += location.hash.substring(3);
+            }
+            else
+            {
+                return '';
+            }
+        }
+        
+        // and if the last character is a slash, we just remove it
+        currentUrl = currentUrl.replace(/\/$/, "");
+
+        return currentUrl;
+    }
 	
-	//start the app should probably rename this to onload or something
-	start: function(){
-		NProgress.start();
-	},
+	// get the current parameters for either a specified url or the current one if parameters is ommited
+    app.router.parameters = function(url)
+    {
+        // parse the url so that we handle a unified url
+        var currentUrl = parseUrl(url);
+        
+        // get the list of actions for the current url
+        var list = getParameters(currentUrl);
+        
+        // if the list is empty, return an empty object
+        if (list.length == 0)
+        {
+            app.router.currentParameters = {};
+        }
+        
+        // if we got results, return the first one. at least for now
+        else 
+        {
+            app.router.currentParameters = list[0].data;
+        }
+        
+        return app.router.currentParameters;
+    }
 	
-	//whenever a view is done, it needs to call $app.done() to stop NProgress
-	done: function(){
-		NProgress.done();
-	},
+	function getParameters(url)
+    {
+
+        var dataList = [];
+        
+       // console.log("ROUTES:");
+
+        for(var i = 0, ii = routeList.length; i < ii; i++)
+        {
+            var route = routeList[i];
+            
+            // check for mathing reg exp
+            if (route.type == "regexp")
+            {
+                var result = url.match(route.route);
+                if (result)
+                {
+                    var data = {};
+                    data.matches = result;
+                    
+                    dataList.push(
+                        {
+                            route: route,
+                            data: data
+                        }
+                    );
+                    
+                    // break after first hit
+                    break;
+                }
+            }
+            
+            // check for mathing string routes
+            else
+            {
+                var currentUrlParts = url.split("/");
+                var routeParts = route.route.split("/");
+                
+                //console.log("matchCounter ", matchCounter, url, route.route)
+
+                // first check so that they have the same amount of elements at least
+                if (routeParts.length == currentUrlParts.length)
+                {
+                    var data = {};
+                    var matched = true;
+                    var matchCounter = 0;
+
+                    for(var j = 0, jj = routeParts.length; j < jj; j++)
+                    {
+                        var isParam = routeParts[j].indexOf(":") === 0;
+                        if (isParam)
+                        {
+                            data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
+                            matchCounter++;
+                        }
+                        else
+                        {
+                            if (routeParts[j] == currentUrlParts[j])
+                            {
+                                matchCounter++;
+                            }
+                        }
+                    }
+
+                    // break after first hit
+                    if (routeParts.length == matchCounter)
+                    {
+                        dataList.push(
+                            {
+                                route: route,
+                                data: data
+                            }
+                        );
+						
+                        app.router.currentParameters = data;
+                        
+                        break; 
+                    }
+                    
+                }
+            }
+            
+        }
+        
+        return dataList;
+    }
+    
+    function checkRoutes()
+    {
+        var currentUrl = parseUrl(location.pathname);
+
+        // check if something is catched
+        var actionList = getParameters(currentUrl);
+        
+        // ietrate trough result (but it will only kick in one)
+        for(var i = 0, ii = actionList.length; i < ii; i++)
+        {
+            actionList[i].route.callback(actionList[i].data);
+        }
+    }
+    
+
+    function handleRoutes(e)
+    {
+        if (e != null && e.originalEvent && e.originalEvent.state !== undefined)
+        {
+            checkRoutes();
+        }
+        else if (hasHashState)
+        {
+            checkRoutes();
+        }
+        else if (!hasHashState && !hasPushState)
+        {
+            checkRoutes();
+        }
+    }
 	
-	//fetch a view and render it with the supplied args, then perform a callback.
-	render: function(template,args,callback){
+	
+	$(document).on('click','a[data-href]',function(e){
+		e.preventDefault();
+		app.go( $(this).data('href'),'Loading');
+		return false;
+	});
+	
+	// end router code
+	
+	app.config = function(args){
+		$.extend(true,settings,args);
+		return app;
+	};
+	
+	app.before = function(){
+		n.start();
+		return app;
+	}
+	
+	app.done = function(){
+		n.done();
+		return app;
+	};
+	
+	app.run = function(){
+		if(app.router.checkRoute(location.href) == false) {
+			app.go('/404');
+		}else{
+			app.go(location.href);
+		}
+		return app;
+	}
+	
+	app.notFound = function(){
+		console.warn('jqMVC :: 404 Not Found');
+	};
+	/*
+	app.set(k,v){
+		app[k] = null;
+		delete app[k];
+		app[k] = v;
+		return app;
+	};
+	*/
+	
+	app.render = function(file,args,callback){
+		console.log('jqMVC :: render');
+		var self = app;
 		twig({
-			href: $app.view_path+template,
+			href: settings.view_path+file,
 			load: function(template) { 
 				var html = template.render(args);
-				$app.view.html(html).promise().done(function(){
-					if(typeof callback === "function"){
-						callback();
-					}
-				});
-			}
-		});
-	},
-	
-	//destroys any events created by a controller, removes the script tag, and optionally calls the controllers destroy() method, then sets $app.ctrl to null.
-	clean : function(){
-		
-		if($app.events.length > 0){
-			for(var i=0; i<$app.events.length;i++){
-				$app.off($app.events[i].event,$app.events[i].target,$app.events[i].callback);
-			}
-			$app.events = [];	
-		}
-		
-		if($app.ctrl !== null){
-			if($app.ctrl.hasOwnProperty('destroy')){
-				if(typeof $app.ctrl.destroy === "function"){
-					$app.ctrl.destroy();
+				settings.element.html(html);
+				if(typeof callback === "function"){
+					console.log('jqMVC :: udc');
+					callback.call(self);
 				}
 			}
-			$app.ctrl = null;	
-		}
-		
-		if($('script.ctrl').length > 0){
-			$('script.ctrl').remove();	
-		}
-		
-	},
+		});
+		return app;
+	};
 	
-	//loads and executes a controller, optionally removing a current controller first.
-	controller : function(controller){
-		$app.clean();
+	app.clean = function(){
+		if(events.length > 0){
+			for(var i=0; i<events.length;i++){
+				$app.off(events[i].event,events[i].target,events[i].callback);
+			}
+			events = [];	
+		}
+		
+		if(controller !== null){
+			if(controller.hasOwnProperty('destroy')){
+				if(typeof controller.destroy === "function"){
+					controller.destroy();
+				}
+			}
+			controller = null;	
+		}
+		
+		if($('script.jqMVCctrl').length > 0){
+			$('script.jqMVCctrl').remove();	
+		}
+		return app;
+	};
+	
+	app.controller = function(ctrl){
+		if(controller !== null){
+			app.clean();
+		}
 		var s = document.createElement('script');
-		s.setAttribute('src', $app.ctrl_path+controller);
+		s.setAttribute('src', settings.ctrl_path+controller);
 		s.className = 'ctrl';
 		s.onload= function(){
-			$app.ctrl = $ctrl;
-			$app.ctrl.initialize();
+			$.extend(true,controller,$ctrl); //copy our controller in
+			$ctrl = null; //set $ctrl to null;
+			controller.initialize();
 		};
 		document.body.appendChild( s );
-	},
+		return app;
+	};
 	
 	
 	
-	//services are controllers that live forever.
-	svc: {},
+	app.addSvc = function(name,callback){
+		console.log('app.service :: '+name);
+		var obj = {}
+		obj[name] = callback;
+		$.extend(true,services,obj);
+		return app;
+	};
 	
-	//define a service.
-	service: function(name,callback){
-		$app.svc[name] = callback;
-	},
 	
+	app.svc = function(name){
+		if(typeof services[name] === "function"){
+			var svc = Array.prototype.shift.apply(arguments);
+			console.log('jqMVC :: services :: run -> ( '+ name +')');
+			return services[svc].apply(this, arguments);
+		}
+		return app;
+	};
 	
-	
-	//hooks
-	hooks: {
-		before: function(){},
-		after: function(){},
-		//in the future more hooks will be added to allow greater control of the app.
-	},
-	
-	//define a hook.
-	hook: function(what,callback){
-		$app.hooks[what] = callback;
-	},
-	
-	//events 
-	events: [],
-	
-	//controllers can bind events here.
-	on: function(event,target,callback){
+	app.on = function(event,target,callback){
 		if($.isWindow(target)){
 			$(window).on(event,callback);
 		}else{
 			$(document).on(event,target,callback);
 		}
-		
-		$app.events.push({event:event,target:target,callback:callback});
-	},
-	
+		events.push({event:event,target:target,callback:callback});
+		return app;
+	};
+
 	//controllers can remove events
-	off: function(event,target,callback){
+	app.off = function(event,target,callback){
 		if($.isWindow(target)){
 			$(window).unbind(event,callback);
 		}else{
 			$(document).off(event,target,callback);
 		}
-	},
-	
+		return app;
+	};
+
 	//immutable events are application wide events you don't want to ever unbind.
-	immutable: function(event,target,callback){
+	app.immutable = function(event,target,callback){
 		$(document).on(event,target,callback);
-	},
+		return app;
+	};
 	
+	$.jqMVC = app;
 	
-	//stack initialization
-	run: function(){
-		$app.hooks.before();
-		$app.router();
-		$app.hooks.after();
-	}
-};
+})(jQuery,NProgress,twig);
