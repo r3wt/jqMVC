@@ -1,0 +1,7 @@
+{
+	"error":0,
+	"result":{
+		"csrf":"csrftokenhere",
+		"user":0
+	}
+}

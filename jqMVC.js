@@ -5,7 +5,11 @@
  * @license MIT
  * @version 0.1
  */
-;!(function($,n,twig){
+;!(function($,n,twig,window){
+	
+	if (!window.location.origin) {
+	  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+	}
 	
 	var events = [];
 	
@@ -326,6 +330,7 @@
 	
 	app.config = function(args){
 		$.extend(true,settings,args);
+		console.log(settings);
 		return app;
 	};
 	
@@ -405,13 +410,14 @@
 			app.clean();
 		}
 		var s = document.createElement('script');
-		s.setAttribute('src', settings.ctrl_path+controller);
-		s.className = 'ctrl';
-		s.onload= function(){
-			$.extend(true,controller,$ctrl); //copy our controller in
-			$ctrl = null; //set $ctrl to null;
-			controller.initialize();
+		s.setAttribute('src', settings.ctrl_path+ctrl);
+		s.className = 'jqMVCctrl';
+		var z = null;
+		s.onload = function(){
+			z = $ctrl;
+			z.initialize();
 		};
+		controller = z;
 		document.body.appendChild( s );
 		return app;
 	};
@@ -428,9 +434,10 @@
 	
 	
 	app.svc = function(name){
+		
 		if(typeof services[name] === "function"){
 			var svc = Array.prototype.shift.apply(arguments);
-			console.log('jqMVC :: services :: run -> ( '+ name +')');
+			console.log('jqMVC :: services :: run -> ('+ svc +')');
 			return services[svc].apply(this, arguments);
 		}
 		return app;
@@ -464,4 +471,4 @@
 	
 	$.jqMVC = app;
 	
-})(jQuery,NProgress,twig);
+})(jQuery,NProgress,twig,window);
