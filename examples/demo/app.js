@@ -1,13 +1,14 @@
 $(function(){
 
 	var config = {
-		api_path : window.location.origin+'/api/',
-		ctrl_path : window.location.origin+'/controllers/',
-		view_path : 'templates/',
-		element : $('div.view'),
+		api_path : 'http://2fleek.com/api/v1/',//full path
+		ctrl_path : 'http://2fleek.com/ctrl/', //full path
+		view_path : 'twig/views/', //it should be noted that twig only accepts a relative path at the moment.
+		element : $('div.view'), //main view element where views are rendered.
+		debug : true //whether or not to display debugging info. doesnt do much currently other than show emitted events.
 	};
 
-	$.jqMVC.config(config);
+	$.jqMVC.config(config); //configs the app, obviously.
 	
 	$.jqMVC.before(); // before() starts the progress bar. done() stops and removes it.
 	
@@ -56,9 +57,15 @@ $(function(){
 			error: '404 Not Found'
 		};
 		$.jqMVC.render('error.twig',args,function(){
+			//notice this view loads no controller.
 			$('title').html('404 Not Found');
 			$.jqMVC.done();
 		});
+	});
+	
+	//listen for navigation change and start the progress bar.
+	$.jqMVC.listen('before.go',function(){
+		$.jqMVC.before();
 	});
 	
 	//now that we have fully defined our application, we can run it for the first time. 

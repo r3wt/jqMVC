@@ -11,6 +11,20 @@
 	  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
 	}
 	
+	var emittable = [
+		'on.config',
+		'before.go',
+		'on.go',
+		'before.render',
+		'on.render',
+		'on.done',
+		'on.controller',
+		'on.service',
+		'on.module',
+		'on.clean',
+	]; // a list of emittable events
+	
+	//controller events are managed here
 	var events = [];
 	
 	var settings = {
@@ -21,6 +35,7 @@
 		ctrl_path : ''
 	};
 	
+	//services are managed here.
 	var services = {};
 	
 	var controller = null;
@@ -45,7 +60,8 @@
         timer: !hasHashState && !hasPushState
     };
 	
-	app.path = function(route,callback){
+	app.path = function(route,callback)
+	{
 		var isRegExp = typeof route == "object";
         
         if (!isRegExp)
@@ -136,6 +152,7 @@
         {
             history.pushState({}, title, url);
             checkRoutes();
+			emit('on.go');
         }
         else
         {
@@ -319,18 +336,41 @@
         }
     }
 	
+	function debugmsg(msg)
+	{
+		if(settings.debug){
+			window.console && console.log('$.jqMVC :: ' + msg);
+		}
+	}
 	
-	$(document).on('click','a[data-href]',function(e){
-		e.preventDefault();
-		app.go( $(this).data('href'),'Loading');
-		return false;
-	});
+	function emit(event)
+	{
+		debugmsg('emit -> `'+event+'`');
+		$(app).trigger(event);
+	};
+	
+	function bind_href()
+	{
+		emit('on.bindhref');
+		$(document).on('click','a[data-href]',function(e){
+			e.preventDefault();
+			emit('before.go');
+			app.go( $(this).data('href'),'Loading');
+			return false;
+		});	
+	}
+	
+	
+	app.listen = function(event,callback){
+		debugmsg
+		$(app).bind(event,callback);
+	};
 	
 	// end router code
 	
 	app.config = function(args){
 		$.extend(true,settings,args);
-		console.log(settings);
+		emit('on.config');
 		return app;
 	};
 	
@@ -340,6 +380,8 @@
 	}
 	
 	app.done = function(){
+		emit('on.done');
+		bind_href();
 		n.done();
 		return app;
 	};
@@ -356,25 +398,18 @@
 	app.notFound = function(){
 		console.warn('jqMVC :: 404 Not Found');
 	};
-	/*
-	app.set(k,v){
-		app[k] = null;
-		delete app[k];
-		app[k] = v;
-		return app;
-	};
-	*/
+
 	
 	app.render = function(file,args,callback){
-		console.log('jqMVC :: render');
+		emit('before.render');
 		var self = app;
 		twig({
 			href: settings.view_path+file,
 			load: function(template) { 
 				var html = template.render(args);
+				emit('on.render');
 				settings.element.html(html);
 				if(typeof callback === "function"){
-					console.log('jqMVC :: udc');
 					callback.call(self);
 				}
 			}
@@ -385,7 +420,7 @@
 	app.clean = function(){
 		if(events.length > 0){
 			for(var i=0; i<events.length;i++){
-				$app.off(events[i].event,events[i].target,events[i].callback);
+				app.off(events[i].event,events[i].target,events[i].callback);
 			}
 			events = [];	
 		}
@@ -402,18 +437,18 @@
 		if($('script.jqMVCctrl').length > 0){
 			$('script.jqMVCctrl').remove();	
 		}
+		emit('on.clean');
 		return app;
 	};
 	
 	app.controller = function(ctrl){
-		if(controller !== null){
-			app.clean();
-		}
+		app.clean();
 		var s = document.createElement('script');
 		s.setAttribute('src', settings.ctrl_path+ctrl);
 		s.className = 'jqMVCctrl';
 		var z = null;
 		s.onload = function(){
+			emit('on.controller');
 			z = $ctrl;
 			z.initialize();
 		};
@@ -425,7 +460,6 @@
 	
 	
 	app.addSvc = function(name,callback){
-		console.log('app.service :: '+name);
 		var obj = {}
 		obj[name] = callback;
 		$.extend(true,services,obj);
@@ -434,11 +468,10 @@
 	
 	
 	app.svc = function(name){
-		
 		if(typeof services[name] === "function"){
 			var svc = Array.prototype.shift.apply(arguments);
-			console.log('jqMVC :: services :: run -> ('+ svc +')');
-			return services[svc].apply(this, arguments);
+			services[svc].apply(this, arguments);
+			emit('on.service');
 		}
 		return app;
 	};
