@@ -1,14 +1,15 @@
 /*!
- * jqMVC.js (C) 2015 jQMVC.js Developers, MIT license http://github.com/r3wt/jqMVC.git
+ * jqMVC.js (C) 2015 jqMVC.js Developers, MIT license http://github.com/r3wt/jqMVC.git
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
  * @version 0.1
  */
+
 ;!(function($,n,twig,window){
 	
 	if (!window.location.origin) {
-	  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+		window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
 	}
 	
 	var emittable = [
@@ -22,6 +23,7 @@
 		'on.service',
 		'on.module',
 		'on.clean',
+		'notFound'
 	]; // a list of emittable events
 	
 	//controller events are managed here
@@ -30,9 +32,10 @@
 	var settings = {
 		debug: false,
 		api_path : '',
-		element : '',
+		element : $('body'),
 		view_path : '',
-		ctrl_path : ''
+		ctrl_path : '',
+		cache: true,
 	};
 	
 	//services are managed here.
@@ -137,7 +140,7 @@
        
     }
     
-    bindStateEvents();
+    //bindStateEvents();
 	
 	app.router.checkRoute = function(url) {
 		if(location.pathname == '/'){
@@ -352,7 +355,7 @@
 	function bind_href()
 	{
 		emit('on.bindhref');
-		$(document).on('click','a[data-href]',function(e){
+		app.on('click','a[data-href]',function(e){
 			e.preventDefault();
 			emit('before.go');
 			app.go( $(this).data('href'),'Loading');
@@ -362,7 +365,6 @@
 	
 	
 	app.listen = function(event,callback){
-		debugmsg
 		$(app).bind(event,callback);
 	};
 	
@@ -381,8 +383,8 @@
 	
 	app.done = function(){
 		emit('on.done');
-		bind_href();
 		n.done();
+		bind_href();
 		return app;
 	};
 	
@@ -393,14 +395,9 @@
 			app.go(location.href);
 		}
 		return app;
-	}
-	
-	app.notFound = function(){
-		console.warn('jqMVC :: 404 Not Found');
 	};
-
 	
-	app.render = function(file,args,callback){
+	app.render = function(file,args,callback,el){
 		emit('before.render');
 		var self = app;
 		twig({
@@ -408,11 +405,13 @@
 			load: function(template) { 
 				var html = template.render(args);
 				emit('on.render');
-				settings.element.html(html);
+				var target = (el === undefined) ? settings.element : el;
+				target.html(html);
 				if(typeof callback === "function"){
 					callback.call(self);
 				}
-			}
+			},
+			cache: settings.cache
 		});
 		return app;
 	};
@@ -456,8 +455,7 @@
 		document.body.appendChild( s );
 		return app;
 	};
-	
-	
+
 	
 	app.addSvc = function(name,callback){
 		var obj = {}
@@ -502,6 +500,13 @@
 		return app;
 	};
 	
+	bindStateEvents();
+	
 	$.jqMVC = app;
+	
+	//add fn.render
+	$.fn.render = function(template,args,callback){
+		return $.jqMVC.render(template,args,callback,this);
+	};
 	
 })(jQuery,NProgress,twig,window);
