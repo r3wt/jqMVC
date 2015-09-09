@@ -2,8 +2,8 @@
 
 jqMVC.js is a javascript framework aimed at jQuery developers. its simple design brings fun to a tedious MVC landscape.
 
-  - `$.jqMVC` rocks!
-
+  - `$.jqMVC` is an MVC framework for usage with jQuery. It offers the ability to handle routing and rendering of Twig templates in the browser.
+  - *DEMO* (Work In Progress) http://2fleek.com/
 
 ---
 ### Dependencies
