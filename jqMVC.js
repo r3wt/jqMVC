@@ -15,7 +15,8 @@
     }
 
     var emittable = [
-        'on.config',
+        'on.before',
+        'firstRun',
         'before.go',
         'on.go',
         'before.render',
@@ -27,6 +28,7 @@
         'on.clean',
         'notFound'
     ]; // a list of emittable events
+    
     var events = [];
     var settings = {
         debug: false,
@@ -45,7 +47,9 @@
     var currentUsedUrl = location.href;
     var firstRoute = true;
     var app = {};
+    var firstRun = false;
     
+    app.data = {}; // a storage thingy
     
     app.router = {};
     app.router.currentId = "";
@@ -54,6 +58,11 @@
         hash: hasHashState,
         pushState: hasPushState,
         timer: !hasHashState && !hasPushState
+    };
+    
+    
+    app.trigger = function(event,eventData){
+        emit(event,eventData);
     };
 
     app.path = function(route,callback)
@@ -113,7 +122,6 @@
 
     };
 
-
     app.router.checkRoute = function(url) 
     {
         if(location.pathname == '/'){
@@ -138,6 +146,23 @@
             location.hash = hash;
         }
     };
+    
+    //dont push the state, just change the route
+    app.redirect = function(url)
+    {   
+        if (hasPushState) {
+            checkRoutes();
+        } else {
+            // remove part of url that we dont use
+            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
+            var hash = url.replace(location.pathname, "");
+            if (hash.indexOf("!") < 0)
+            {
+                hash = "!/" + hash;
+            }
+            location.hash = hash;
+        }
+    }
 
     // parse and wash the url to process
     function parseUrl(url)
@@ -238,10 +263,15 @@
         var currentUrl = parseUrl(location.pathname);
         // check if something is cached
         var actionList = getParameters(currentUrl);
-        for(var i = 0; i < actionList.length; i++)
-        {
-            actionList[i].route.callback(actionList[i].data);
+        if(actionList.length === 0){
+            emit('notFound');
+        }else{
+            for(var i = 0; i < actionList.length; i++)
+            {
+                actionList[i].route.callback(actionList[i].data);
+            }   
         }
+       
     };
 
     function handleRoutes(e)
@@ -264,10 +294,10 @@
         }
     };
 
-    function emit(event)
+    function emit(event,eventData)
     {
         debugmsg('emit -> `'+event+'`');
-        $(app).trigger(event);
+        $(app).trigger(event,eventData);
     };
 
     function bind_href()
@@ -289,7 +319,9 @@
     app.config = function(args)
     {
         $.extend(true,settings,args);
-        emit('on.config');
+        for(var prop in args){
+            window[prop] = args[prop];
+        }
         return app;
     };
 
@@ -309,11 +341,12 @@
 
     app.run = function()
     {
-        if(app.router.checkRoute(location.href) == false) {
-         app.go('/404'); //todo: emit notFound event.
-        } else {
-         app.go(location.href);
+        if(!firstRun){
+            emit('firstRun');
+            firstRun = true;
         }
+        
+        app.go(location.href);
         return app;
     };
 
@@ -397,6 +430,8 @@
         }
         return app;
     };
+    
+    //bind events directly to $.jqMVC
 
     app.on = function(event,target,callback)
     {
@@ -424,12 +459,30 @@
     };
 
     bindStateEvents();
+    
+    //merge 2 arrays. in future should be infinite number
+    app.merge = function(a1,a2){
+        if(!'unique' in Array.prototype){
+            Array.prototype.unique = function() {
+                var a = this.concat();
+                for(var i=0; i<a.length; ++i) {
+                    for(var j=i+1; j<a.length; ++j) {
+                        if(a[i] === a[j])
+                            a.splice(j--, 1);
+                    }
+                }
 
-    $.jqMVC = app;
-
+                return a;
+            };
+        }
+        
+        return a1.concat(a2).unique(); 
+    };
+    
     $.fn.render = function(template,args,callback)
     {
         return $.jqMVC.render(template,args,callback,this);
     };
-
+    
+    $.jqMVC = app;
 })(jQuery,NProgress,twig,window);
