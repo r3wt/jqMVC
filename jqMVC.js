@@ -15,8 +15,8 @@
     }
 
     var emittable = [
-        'on.before',
-        'firstRun',
+		'on.before',
+		'firstRun',
         'before.go',
         'on.go',
         'before.render',
@@ -28,16 +28,8 @@
         'on.clean',
         'notFound'
     ]; // a list of emittable events
-    
+	
     var events = [];
-    var settings = {
-        debug: false,
-        api_path : '',
-        element : $('body'),
-        view_path : '',
-        ctrl_path : '',
-        cache: true,
-    };
     var services = {};
     var controller = null;
     var hasPushState = (history && history.pushState);    
@@ -47,10 +39,18 @@
     var currentUsedUrl = location.href;
     var firstRoute = true;
     var app = {};
-    var firstRun = false;
+	var firstRun = false;
+	
+	var stack = {};
+	
+	stack.items = [];
+	
+	stack.next = function(){
+		stack.items.shift().call($,stack);
+	};
     
-    app.data = {}; // a storage thingy
-    
+	
+	
     app.router = {};
     app.router.currentId = "";
     app.router.currentParameters = {};
@@ -59,11 +59,17 @@
         pushState: hasPushState,
         timer: !hasHashState && !hasPushState
     };
-    
-    
-    app.trigger = function(event,eventData){
-        emit(event,eventData);
-    };
+	
+	
+	app.add = function(callable){
+		stack.items.push(callable);
+		return app;
+	};
+	
+	app.trigger = function(event,eventData){
+		emit(event,eventData);
+		return app;
+	};
 
     app.path = function(route,callback)
     {
@@ -90,6 +96,15 @@
         }
         return app;
     };
+	
+	app.loadModule = function(path){
+		var path = window.location.origin +'/'+ module_path + path;
+		var s = document.createElement('script');
+        s.setAttribute('src', path);
+        s.className = 'jqMVCmodule';
+        document.body.appendChild( s );
+		return app;
+	};
 
     function bindStateEvents()
     {
@@ -124,9 +139,6 @@
 
     app.router.checkRoute = function(url) 
     {
-        if(location.pathname == '/'){
-            return true;
-        }
         return getParameters(parseUrl(url)).length > 0;
     };
 
@@ -145,24 +157,8 @@
             }
             location.hash = hash;
         }
+		return app;
     };
-    
-    //dont push the state, just change the route
-    app.redirect = function(url)
-    {   
-        if (hasPushState) {
-            checkRoutes();
-        } else {
-            // remove part of url that we dont use
-            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-            var hash = url.replace(location.pathname, "");
-            if (hash.indexOf("!") < 0)
-            {
-                hash = "!/" + hash;
-            }
-            location.hash = hash;
-        }
-    }
 
     // parse and wash the url to process
     function parseUrl(url)
@@ -181,7 +177,10 @@
         }
 
         // and if the last character is a slash, we just remove it
-        currentUrl = currentUrl.replace(/\/$/, "");
+		
+		if(currentUrl.slice(-1) == '/'){
+			currentUrl = currentUrl.substring(0, currentUrl.length-1);
+		}
 
         return currentUrl;
     };
@@ -263,14 +262,14 @@
         var currentUrl = parseUrl(location.pathname);
         // check if something is cached
         var actionList = getParameters(currentUrl);
-        if(actionList.length === 0){
-            emit('notFound');
-        }else{
-            for(var i = 0; i < actionList.length; i++)
-            {
-                actionList[i].route.callback(actionList[i].data);
-            }   
-        }
+		if(actionList.length === 0){
+			emit('notFound');
+		}else{
+			for(var i = 0; i < actionList.length; i++)
+			{
+				actionList[i].route.callback(actionList[i].data);
+			}	
+		}
        
     };
 
@@ -289,7 +288,7 @@
 
     function debugmsg(msg)
     {
-        if (settings.debug) {
+        if (debug) {
             window.console && console.log('$.jqMVC :: ' + msg);
         }
     };
@@ -314,16 +313,16 @@
     app.listen = function(event,callback)
     {
         $(app).bind(event,callback);
+		return app;
     };
-
-    app.config = function(args)
-    {
-        $.extend(true,settings,args);
-        for(var prop in args){
-            window[prop] = args[prop];
-        }
-        return app;
-    };
+	
+	app.data = function(args)
+	{
+		for(var prop in args){
+			window[prop] = args[prop];
+		}
+		return app;
+	};
 
     app.before = function()
     {
@@ -341,31 +340,34 @@
 
     app.run = function()
     {
-        if(!firstRun){
-            emit('firstRun');
-            firstRun = true;
-        }
-        
-        app.go(location.href);
+		if(!firstRun){
+			bindStateEvents();
+			emit('firstRun');
+			firstRun = true;
+		}
+		app.add(function(){
+			app.go(location.href);
+		});
+		stack.next();
         return app;
     };
 
     app.render = function(file,args,callback,el)
     {
         emit('before.render');
-        var self = app;
+		var self = this;
         twig({
-            href: settings.view_path+file,
+            href: view_path+file,
             load: function(template) { 
                 var html = template.render(args);
                 emit('on.render');
-                var target = (el === undefined) ? settings.element : el;
+                var target = (el === undefined) ? element : el;
                 target.html(html);
                 if (typeof callback === "function") {
                     callback.call(self);
                 }
             },
-            cache: settings.cache
+            cache: tpl_cache
         });
         return app;
     };
@@ -395,11 +397,12 @@
         return app;
     };
 
-    app.controller = function(ctrl)
+    app.controller = function(path)
     {
+		var path = window.location.origin +'/'+ ctrl_path + path;
         app.clean();
         var s = document.createElement('script');
-        s.setAttribute('src', settings.ctrl_path+ctrl);
+        s.setAttribute('src', path);
         s.className = 'jqMVCctrl';
         var z = null;
         s.onload = function(){
@@ -430,8 +433,8 @@
         }
         return app;
     };
-    
-    //bind events directly to $.jqMVC
+	
+	//bind events directly to $.jqMVC
 
     app.on = function(event,target,callback)
     {
@@ -457,32 +460,29 @@
         }
         return app;
     };
+	
+	//merge 2 arrays. in future should be infinite number
+	app.merge = function(a1,a2){
+		if(!'unique' in Array.prototype){
+			Array.prototype.unique = function() {
+				var a = this.concat();
+				for(var i=0; i<a.length; ++i) {
+					for(var j=i+1; j<a.length; ++j) {
+						if(a[i] === a[j])
+							a.splice(j--, 1);
+					}
+				}
 
-    bindStateEvents();
-    
-    //merge 2 arrays. in future should be infinite number
-    app.merge = function(a1,a2){
-        if(!'unique' in Array.prototype){
-            Array.prototype.unique = function() {
-                var a = this.concat();
-                for(var i=0; i<a.length; ++i) {
-                    for(var j=i+1; j<a.length; ++j) {
-                        if(a[i] === a[j])
-                            a.splice(j--, 1);
-                    }
-                }
-
-                return a;
-            };
-        }
-        
-        return a1.concat(a2).unique(); 
-    };
-    
-    $.fn.render = function(template,args,callback)
+				return a;
+			};
+		}
+		return a1.concat(a2).unique(); 
+	};
+	
+	$.fn.render = function(template,args,callback)
     {
         return $.jqMVC.render(template,args,callback,this);
     };
-    
-    $.jqMVC = app;
-})(jQuery,NProgress,twig,window);
+	
+	$.jqMVC = app;
+}(jQuery,NProgress,twig,window));
