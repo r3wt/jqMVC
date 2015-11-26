@@ -3,11 +3,11 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.1.1
+ * @version 0.1.2
  * contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 
-;!(function($,n,twig){
+;!(function($){
 
     //fix for browsers that dont have location.origin
     if (!window.location.origin) {
@@ -15,8 +15,8 @@
     }
 
     var emittable = [
-		'on.before',
-		'firstRun',
+        'on.before',
+        'firstRun',
         'before.go',
         'on.go',
         'before.render',
@@ -28,7 +28,7 @@
         'on.clean',
         'notFound'
     ]; // a list of emittable events
-	
+    
     var events = [];
     var services = {};
     var controller = null;
@@ -39,18 +39,18 @@
     var currentUsedUrl = location.href;
     var firstRoute = true;
     var app = {};
-	var firstRun = false;
-	
-	var stack = {};
-	
-	stack.items = [];
-	
-	stack.next = function(){
-		stack.items.shift().call($,stack);
-	};
+    var firstRun = false;
     
-	
-	
+    var stack = {};
+    
+    stack.items = [];
+    
+    stack.next = function(){
+        stack.items.shift().call($,stack);
+    };
+    
+    
+    
     app.router = {};
     app.router.currentId = "";
     app.router.currentParameters = {};
@@ -59,17 +59,17 @@
         pushState: hasPushState,
         timer: !hasHashState && !hasPushState
     };
-	
-	
-	app.add = function(callable){
-		stack.items.push(callable);
-		return app;
-	};
-	
-	app.trigger = function(event,eventData){
-		emit(event,eventData);
-		return app;
-	};
+    
+    
+    app.add = function(callable){
+        stack.items.push(callable);
+        return app;
+    };
+    
+    app.trigger = function(event,eventData){
+        emit(event,eventData);
+        return app;
+    };
 
     app.path = function(route,callback)
     {
@@ -96,15 +96,15 @@
         }
         return app;
     };
-	
-	app.loadModule = function(path){
-		var path = window.location.origin +'/'+ module_path + path;
-		var s = document.createElement('script');
+    
+    app.loadModule = function(path){
+        var path = window.location.origin +'/'+ module_path + path;
+        var s = document.createElement('script');
         s.setAttribute('src', path);
         s.className = 'jqMVCmodule';
         document.body.appendChild( s );
-		return app;
-	};
+        return app;
+    };
 
     function bindStateEvents()
     {
@@ -157,7 +157,7 @@
             }
             location.hash = hash;
         }
-		return app;
+        return app;
     };
 
     // parse and wash the url to process
@@ -177,10 +177,10 @@
         }
 
         // and if the last character is a slash, we just remove it
-		
-		if(currentUrl.slice(-1) == '/'){
-			currentUrl = currentUrl.substring(0, currentUrl.length-1);
-		}
+        
+        if(currentUrl.slice(-1) == '/'){
+            currentUrl = currentUrl.substring(0, currentUrl.length-1);
+        }
 
         return currentUrl;
     };
@@ -262,14 +262,14 @@
         var currentUrl = parseUrl(location.pathname);
         // check if something is cached
         var actionList = getParameters(currentUrl);
-		if(actionList.length === 0){
-			emit('notFound');
-		}else{
-			for(var i = 0; i < actionList.length; i++)
-			{
-				actionList[i].route.callback(actionList[i].data);
-			}	
-		}
+        if(actionList.length === 0){
+            emit('notFound');
+        }else{
+            for(var i = 0; i < actionList.length; i++)
+            {
+                actionList[i].route.callback(actionList[i].data);
+            }   
+        }
        
     };
 
@@ -313,42 +313,28 @@
     app.listen = function(event,callback)
     {
         $(app).bind(event,callback);
-		return app;
-    };
-	
-	app.data = function(args)
-	{
-		for(var prop in args){
-			window[prop] = args[prop];
-		}
-		return app;
-	};
-
-    app.before = function()
-    {
-        n.start();
         return app;
     };
-
-    app.done = function()
+    
+    app.data = function(args)
     {
-        emit('on.done');
-        n.done();
-        bind_href();
+        for(var prop in args){
+            window[prop] = args[prop];
+        }
         return app;
     };
 
     app.run = function()
     {
-		if(!firstRun){
-			bindStateEvents();
-			emit('firstRun');
-			firstRun = true;
-		}
-		app.add(function(){
-			app.go(location.href);
-		});
-		stack.next();
+        if(!firstRun){
+            bindStateEvents();
+            emit('firstRun');
+            firstRun = true;
+        }
+        app.add(function(){
+            app.go(location.href);
+        });
+        stack.next();
         return app;
     };
 
@@ -379,7 +365,7 @@
 
     app.controller = function(path)
     {
-		var path = window.location.origin +'/'+ ctrl_path + path;
+        var path = window.location.origin +'/'+ ctrl_path + path;
         app.clean();
         var s = document.createElement('script');
         s.setAttribute('src', path);
@@ -388,7 +374,7 @@
         s.onload = function(){
             emit('on.controller');
             z = $ctrl;
-            z.initialize();
+            z.invoke();
         };
         controller = z;
         document.body.appendChild( s );
@@ -412,8 +398,8 @@
         }
         return app;
     };
-	
-	//bind events directly to $.jqMVC
+    
+    //bind events directly to $.jqMVC
 
     app.on = function(event,target,callback)
     {
@@ -439,49 +425,77 @@
         }
         return app;
     };
-	
-	//merge 2 arrays. in future should be infinite number
-	app.merge = function(a1,a2){
-		if(!'unique' in Array.prototype){
-			Array.prototype.unique = function() {
-				var a = this.concat();
-				for(var i=0; i<a.length; ++i) {
-					for(var j=i+1; j<a.length; ++j) {
-						if(a[i] === a[j])
-							a.splice(j--, 1);
-					}
-				}
+    
+    //merge 2 arrays. in future should be infinite number
+    app.merge = function(a1,a2){
+        if(!'unique' in Array.prototype){
+            Array.prototype.unique = function() {
+                var a = this.concat();
+                for(var i=0; i<a.length; ++i) {
+                    for(var j=i+1; j<a.length; ++j) {
+                        if(a[i] === a[j])
+                            a.splice(j--, 1);
+                    }
+                }
 
-				return a;
-			};
+                return a;
+            };
+        }
+        return a1.concat(a2).unique(); 
+    };
+	
+	//progress related
+	var progress = {
+		start: function(){
+			
+		},
+		stop: function(){
 		}
-		return a1.concat(a2).unique(); 
 	};
 	
-	//all view related functions here
-	var view = {
-		render: function(){
-			app.done();
-			throw 'You must implement a view with `setView()` before you can render templates';
-		}
-	};
-	
-	app.setView = function(obj){
-		view = obj;
+	app.setProgress = function(obj){
+		progress = obj;
 		return app;
-	};
+	}
 	
-	app.render = function()
+	app.before = function()
+    {
+		progress.start();
+        return app;
+    };
+
+    app.done = function()
+    {
+        emit('on.done');
+        progress.stop();
+        bind_href();
+        return app;
+    };
+    
+    //all view related functions here
+    var view = {
+        render: function(){
+            app.done();
+            throw 'You must implement a view with `setView()` before you can render templates';
+        }
+    };
+    
+    app.setView = function(obj){
+        view = obj;
+        return app;
+    };
+    
+    app.render = function()
     {
         view.render.apply(this,arguments);
     };
-	
-	$.fn.render = function()
+    
+    $.fn.render = function()
     {
         return $.jqMVC.render.apply(this,arguments);
     };
-	
-	//stack functions
-	
-	$.jqMVC = app;
-}(jQuery,NProgress,twig));
+    
+    //stack functions
+    
+    $.jqMVC = app;
+}(jQuery));
