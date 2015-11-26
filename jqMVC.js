@@ -51,10 +51,10 @@
     
     
     
-    app.router = {};
-    app.router.currentId = "";
-    app.router.currentParameters = {};
-    app.router.capabilities = {
+    var router = {};
+    router.currentId = "";
+    router.currentParameters = {};
+    router.capabilities = {
         hash: hasHashState,
         pushState: hasPushState,
         timer: !hasHashState && !hasPushState
@@ -111,14 +111,14 @@
         eventAdded = true;
 
         // default value telling router that we havent replaced the url from a hash. yet.
-        app.router.fromHash = false;
+        router.fromHash = false;
 
         if (hasPushState) {
             if (location.hash.indexOf("#!/") === 0) {
                 // replace the state
                 var url = location.pathname + location.hash.replace(/^#!\//gi, "");
                 history.replaceState({}, "", url);
-                app.router.fromHash = true;
+                router.fromHash = true;
             }
 
             $(window).bind("popstate", handleRoutes);
@@ -137,7 +137,7 @@
 
     };
 
-    app.router.checkRoute = function(url) 
+    router.checkRoute = function(url) 
     {
         return getParameters(parseUrl(url)).length > 0;
     };
@@ -186,7 +186,7 @@
     };
 
     // get the current parameters for either a specified url or the current one if parameters is ommited
-    app.router.parameters = function(url)
+    router.parameters = function(url)
     {
         // parse the url so that we handle a unified url
         var currentUrl = parseUrl(url);
@@ -196,12 +196,12 @@
 
         // if the list is empty, return an empty object
         if (list.length == 0) {
-            app.router.currentParameters = {};
+            router.currentParameters = {};
         } else {
-            app.router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
+            router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
         }
 
-        return app.router.currentParameters;
+        return router.currentParameters;
     };
 
     function getParameters(url)
@@ -247,7 +247,7 @@
                             route: route,
                             data: data
                         });
-                        app.router.currentParameters = data;
+                        router.currentParameters = data;
                         break; 
                     }
                 }
