@@ -3,11 +3,11 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.1
+ * @version 0.1.1
  * contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 
-;!(function($,n,twig,window){
+;!(function($,n,twig){
 
     //fix for browsers that dont have location.origin
     if (!window.location.origin) {
@@ -352,26 +352,6 @@
         return app;
     };
 
-    app.render = function(file,args,callback,el)
-    {
-        emit('before.render');
-		var self = this;
-        twig({
-            href: view_path+file,
-            load: function(template) { 
-                var html = template.render(args);
-                emit('on.render');
-                var target = (el === undefined) ? element : el;
-                target.html(html);
-                if (typeof callback === "function") {
-                    callback.call(self);
-                }
-            },
-            cache: tpl_cache
-        });
-        return app;
-    };
-
     app.clean = function()
     {
         if (events.length > 0) {
@@ -422,7 +402,6 @@
         $.extend(true,services,obj);
         return app;
     };
-
 
     app.svc = function(name)
     {
@@ -479,10 +458,30 @@
 		return a1.concat(a2).unique(); 
 	};
 	
-	$.fn.render = function(template,args,callback)
+	//all view related functions here
+	var view = {
+		render: function(){
+			app.done();
+			throw 'You must implement a view with `setView()` before you can render templates';
+		}
+	};
+	
+	app.setView = function(obj){
+		view = obj;
+		return app;
+	};
+	
+	app.render = function()
     {
-        return $.jqMVC.render(template,args,callback,this);
+        view.render.apply(this,arguments);
     };
 	
+	$.fn.render = function()
+    {
+        return $.jqMVC.render.apply(this,arguments);
+    };
+	
+	//stack functions
+	
 	$.jqMVC = app;
-}(jQuery,NProgress,twig,window));
+}(jQuery,NProgress,twig));
