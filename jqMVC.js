@@ -152,10 +152,10 @@
         return getParameters(parseUrl(url)).length > 0;
     };
 
-    app.go = function(url, title)
+    app.go = function(url)
     {   
         if (hasPushState) {
-            history.pushState({}, title, url);
+            history.pushState({}, null, url);
             checkRoutes();
         } else {
             // remove part of url that we dont use
