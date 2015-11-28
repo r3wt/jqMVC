@@ -13,6 +13,15 @@
     if (!window.location.origin) {
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
     }
+	
+	
+	function getPath()
+	{
+		if(window.hasOwnProperty('app_path')){
+			return app_path.replace(/\/+/g, '/');
+		}
+		return '/';
+	}
 
     var emittable = [
         'on.before',
@@ -73,6 +82,7 @@
 
     app.path = function(route,callback)
     {
+		route = getPath().replace(/\/+$/, '') + route;
         var isRegExp = typeof route == "object";
 
         if (!isRegExp) {
@@ -98,7 +108,7 @@
     };
     
     app.loadModule = function(path){
-        var path = window.location.origin +'/'+ module_path + path;
+        var path = window.location.origin + getPath() +  module_path + path;
         var s = document.createElement('script');
         s.setAttribute('src', path);
         s.className = 'jqMVCmodule';
@@ -305,7 +315,7 @@
         app.on('click','a[data-href]',function(e){
             e.preventDefault();
             emit('before.go');
-            app.go( $(this).data('href') ,'Loading');
+            app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
             return false;
         }); 
     };
@@ -365,7 +375,7 @@
 
     app.controller = function(path)
     {
-        var path = window.location.origin +'/'+ ctrl_path + path;
+        var path = window.location.origin + getPath() + ctrl_path + path;
         app.clean();
         var s = document.createElement('script');
         s.setAttribute('src', path);
