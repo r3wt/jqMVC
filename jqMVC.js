@@ -99,11 +99,6 @@
             callback: callback,
             type: isRegExp ? "regexp" : "string",
         });
-
-        // we add the event listener after the first route is added so that we dont need to listen to events in vain
-        if (!eventAdded) {
-            bindStateEvents();
-        }
         return app;
     };
     
@@ -112,6 +107,8 @@
         var s = document.createElement('script');
         s.setAttribute('src', path);
         s.className = 'jqMVCmodule';
+		s.async = true;
+		s.onload = function(){};
         document.body.appendChild( s );
         return app;
     };
@@ -158,6 +155,9 @@
             history.pushState({}, null, url);
             checkRoutes();
         } else {
+			if(!eventAdded){
+				bindStateEvents();
+			}
             // remove part of url that we dont use
             url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
             var hash = url.replace(location.pathname, "");
@@ -272,12 +272,17 @@
         var currentUrl = parseUrl(location.pathname);
         // check if something is cached
         var actionList = getParameters(currentUrl);
+		console.log(actionList);
         if(actionList.length === 0){
             emit('notFound');
         }else{
             for(var i = 0; i < actionList.length; i++)
             {
-                actionList[i].route.callback(actionList[i].data);
+				var args = [];
+				for(var prop in actionList[i].data){
+					args.push(actionList[i].data[prop]);
+				}
+                actionList[i].route.callback.apply(this,args);
             }   
         }
        
@@ -337,14 +342,14 @@
     app.run = function()
     {
         if(!firstRun){
-            bindStateEvents();
             emit('firstRun');
             firstRun = true;
+			app.add(function(){
+				app.go(location.href);
+			});
+			stack.next();
         }
-        app.add(function(){
-            app.go(location.href);
-        });
-        stack.next();
+        app.run = function(){};
         return app;
     };
 
@@ -466,7 +471,7 @@
 		}
 	};
 	
-	app.setNotifications(obj){
+	app.setNotifications = function(obj){
 		notify = obj;
 		return app;
 	};
