@@ -454,6 +454,36 @@
         return a1.concat(a2).unique(); 
     };
 	
+	//notificatins related
+	var notify = {
+		alert:function(message){
+			alert(message);
+		},
+		confirm:function(message,callback){
+			if(confirm(message)){
+				callback.apply(this);
+			}
+		}
+	};
+	
+	app.setNotifications(obj){
+		notify = obj;
+		return app;
+	};
+	
+	app.alert = function()
+	{
+		notify.alert.apply(this,arguments);
+		return app;
+	};
+	
+	app.confirm = function()
+	{
+		notify.confirm.apply(this,arguments);
+		return app;
+	};
+	
+	
 	//progress related
 	var progress = {
 		start: function(){
@@ -498,11 +528,6 @@
     app.render = function()
     {
         view.render.apply(this,arguments);
-    };
-    
-    $.fn.render = function()
-    {
-        return $.jqMVC.render.apply(this,arguments);
     };
     
     //stack functions
