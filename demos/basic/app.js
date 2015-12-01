@@ -125,8 +125,9 @@ $(function(){
 	})
 	
 	// when user submits name we say hello
-	.path('/hello/:name',function(data){
-		var args = {name:data.name};
+	.path('/hello/:name',function(name){
+		console.log(name);
+		var args = {name:name};
 		$('title').html('Hello '+args.name);
 		$.jqMVC.render('hello.twig',args,function(){
 			$.jqMVC.done();

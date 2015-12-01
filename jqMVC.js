@@ -9,110 +9,29 @@
 
 ;!(function($){
 
-    //fix for browsers that dont have location.origin
+    // you no touchy
+    var app = {};
+    
+    // fix for browsers that dont have location.origin
     if (!window.location.origin) {
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
     }
-	
-	
-	function getPath()
-	{
-		if(window.hasOwnProperty('app_path')){
-			return app_path.replace(/\/+/g, '/');
-		}
-		return '/';
-	}
-
-    var emittable = [
-        'on.before',
-        'firstRun',
-        'before.go',
-        'on.go',
-        'before.render',
-        'on.render',
-        'on.done',
-        'on.controller',
-        'on.service',
-        'on.module',
-        'on.clean',
-        'notFound'
-    ]; // a list of emittable events
     
+    // random shit, probably deprecated eventually
     var events = [];
     var services = {};
     var controller = null;
-    var hasPushState = (history && history.pushState);    
-    var hasHashState = !hasPushState && ("onhashchange" in window) && false;
-    var routeList = [];
-    var eventAdded = false;
-    var currentUsedUrl = location.href;
-    var firstRoute = true;
-    var app = {};
-    var firstRun = false;
     
-    var stack = {};
+    //internal utilities
     
-    stack.items = [];
-    
-    stack.next = function(){
-        stack.items.shift().call($,stack);
-    };
-    
-    
-    
-    var router = {};
-    router.currentId = "";
-    router.currentParameters = {};
-    router.capabilities = {
-        hash: hasHashState,
-        pushState: hasPushState,
-        timer: !hasHashState && !hasPushState
-    };
-    
-    
-    app.add = function(callable){
-        stack.items.push(callable);
-        return app;
-    };
-    
-    app.trigger = function(event,eventData){
-        emit(event,eventData);
-        return app;
-    };
-
-    app.path = function(route,callback)
+    function getPath()
     {
-		route = getPath().replace(/\/+$/, '') + route;
-        var isRegExp = typeof route == "object";
-
-        if (!isRegExp) {
-            // remove the last slash to unifiy all routes
-            if (route.lastIndexOf("/") == route.length - 1) {
-            route = route.substring(0, route.length - 1);
-            }
-            // if the routes where created with an absolute url ,we have to remove the absolut part anyway, since we cant change that much
-            route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+        if(window.hasOwnProperty('app_path')){
+            return app_path.replace(/\/+/g, '/');//possibly unsafe.
         }
-
-        routeList.push({
-            route: route,
-            callback: callback,
-            type: isRegExp ? "regexp" : "string",
-        });
-        return app;
-    };
+        return '/';
+    }
     
-    app.loadModule = function(path){
-        var path = window.location.origin + getPath() +  module_path + path;
-        var s = document.createElement('script');
-        s.setAttribute('src', path);
-        s.className = 'jqMVCmodule';
-		s.async = true;
-		s.onload = function(){};
-        document.body.appendChild( s );
-        return app;
-    };
-
     function bindStateEvents()
     {
         eventAdded = true;
@@ -143,34 +62,46 @@
         }
 
     };
-
-    router.checkRoute = function(url) 
+    
+    function checkRoutes()
     {
-        return getParameters(parseUrl(url)).length > 0;
-    };
-
-    app.go = function(url)
-    {   
-        if (hasPushState) {
-            history.pushState({}, null, url);
-            checkRoutes();
-        } else {
-			if(!eventAdded){
-				bindStateEvents();
-			}
-            // remove part of url that we dont use
-            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-            var hash = url.replace(location.pathname, "");
-            if (hash.indexOf("!") < 0)
+        var currentUrl = parseUrl(location.pathname);
+        // check if a route exists.
+        var actionList = getParameters(currentUrl);
+        console.log(actionList);
+        if(actionList.length === 0){
+            emit('notFound');
+        }else{
+            for(var i = 0; i < actionList.length; i++)
             {
-                hash = "!/" + hash;
-            }
-            location.hash = hash;
+                var route = actionList[i].route;
+                var args = [];
+                for(var prop in actionList[i].data){
+                    args.push(actionList[i].data[prop]);
+                }
+                if(typeof route.callback !== 'function' && route.callback.isArray()){
+                    for(var j=0;j<route.callback.length;j++){
+                        if(j==route.callback.length - 1){
+                            //last callback is always the route function
+                            route.callback[j].apply(this,args);
+                        }else{
+                            //just a middleware.
+                            var result = route.callback[j].apply(this);
+							if(typeof result !== "undefined"){
+								break;//halt execution
+								// reasonable to assume that the middleware has 
+								// already continued executing some new path.
+								
+							}
+                        }
+                    }
+                }else{
+                    route.callback.apply(this,args);
+                }
+            }   
         }
-        return app;
     };
-
-    // parse and wash the url to process
+    
     function parseUrl(url)
     {
         var currentUrl = url ? url : location.pathname;
@@ -194,26 +125,7 @@
 
         return currentUrl;
     };
-
-    // get the current parameters for either a specified url or the current one if parameters is ommited
-    router.parameters = function(url)
-    {
-        // parse the url so that we handle a unified url
-        var currentUrl = parseUrl(url);
-
-        // get the list of actions for the current url
-        var list = getParameters(currentUrl);
-
-        // if the list is empty, return an empty object
-        if (list.length == 0) {
-            router.currentParameters = {};
-        } else {
-            router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
-        }
-
-        return router.currentParameters;
-    };
-
+    
     function getParameters(url)
     {
         var dataList = [];
@@ -267,27 +179,6 @@
         return dataList;
     };
 
-    function checkRoutes()
-    {
-        var currentUrl = parseUrl(location.pathname);
-        // check if something is cached
-        var actionList = getParameters(currentUrl);
-		console.log(actionList);
-        if(actionList.length === 0){
-            emit('notFound');
-        }else{
-            for(var i = 0; i < actionList.length; i++)
-            {
-				var args = [];
-				for(var prop in actionList[i].data){
-					args.push(actionList[i].data[prop]);
-				}
-                actionList[i].route.callback.apply(this,args);
-            }   
-        }
-       
-    };
-
     function handleRoutes(e)
     {
         if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
@@ -324,10 +215,191 @@
             return false;
         }); 
     };
+    
+    //end internal utilities
+    
+    //router
+    var hasPushState = (history && history.pushState);    
+    var hasHashState = !hasPushState && ("onhashchange" in window) && false;
+    var routeList = [];
+    var eventAdded = false;
+    var currentUsedUrl = location.href;
+    var firstRoute = true;
+    var firstRun = false;
+    var router = {};
+    
+    router.currentId = "";
+    router.currentParameters = {};
+    
+    router.capabilities = {
+        hash: hasHashState,
+        pushState: hasPushState,
+        timer: !hasHashState && !hasPushState
+    };
+    
+    router.checkRoute = function(url) 
+    {
+        return getParameters(parseUrl(url)).length > 0;
+    };
+    
+    // get the current parameters for either a specified url or the current one if parameters is ommited
+    router.parameters = function(url)
+    {
+        // parse the url so that we handle a unified url
+        var currentUrl = parseUrl(url);
 
+        // get the list of actions for the current url
+        var list = getParameters(currentUrl);
+
+        // if the list is empty, return an empty object
+        if (list.length == 0) {
+            router.currentParameters = {};
+        } else {
+            router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
+        }
+
+        return router.currentParameters;
+    };
+    
+    app.path = function()
+    {
+        var args = [];
+        Array.prototype.push.apply( args, arguments );
+        var route = args.shift(); //first arg is always the path
+        var callback = args.pop(); //last arg is the callback
+        var middleware = args; //safe to assume remaining arguments are middleware
+        
+        route = getPath().replace(/\/+$/, '') + route;
+        var isRegExp = typeof route == "object";
+
+        if (!isRegExp) {
+            // remove the last slash to unifiy all routes
+            if (route.lastIndexOf("/") == route.length - 1) {
+            route = route.substring(0, route.length - 1);
+            }
+            // if the routes where created with an absolute url ,we have to remove the absolut part anyway, since we cant change that much
+            route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+        }
+        
+        
+        var obj = {};
+        
+        if(middleware.length > 0){
+            obj.callback = middleware;
+            obj.callback.push(callback);
+        }
+
+        routeList.push({
+            route: route,
+            callback: callback,
+            type: isRegExp ? "regexp" : "string",
+        });
+        return app;
+    };
+    //endrouter
+    
+    //middleware stack
+    var stack = {};
+    
+    stack.items = [];
+    
+    stack.next = function(){
+        stack.items.shift().call($,stack);
+    };
+    
+    app.add = function(callable){
+        stack.items.push(callable);
+        return app;
+    };
+    
+    app.run = function()
+    {
+        if(!firstRun){
+            emit('firstRun');
+            firstRun = true;
+            app.add(function(){
+                app.go(location.href);
+            });
+            stack.next();
+        }
+        app.run = function(){};
+        return app;
+    };
+    //end middleware stack
+    
+    
+    //event related
+    
+    app.trigger = function(event,eventData){
+        emit(event,eventData);
+        return app;
+    };
+    
     app.listen = function(event,callback)
     {
         $(app).bind(event,callback);
+        return app;
+    };
+    
+    app.on = function(event,target,callback)
+    {
+        if ($.isWindow(target)) {
+            $(window).on(event,callback);
+        } else {
+            $(document).on(event,target,callback);
+        }
+        events.push({
+            event:event,
+            target:target,
+            callback:callback
+        });
+        return app;
+    };
+
+    app.off = function(event,target,callback)
+    {
+        if ($.isWindow(target)) {
+            $(window).unbind(event,callback);
+        } else {
+            $(document).off(event,target,callback);
+        }
+        return app;
+    };
+    
+    //end event related
+    
+    app.loadModule = function(path){
+        var path = window.location.origin + getPath() +  module_path + path;
+        var s = document.createElement('script');
+        s.setAttribute('src', path);
+        s.className = 'jqMVCmodule';
+        s.async = true;
+        s.onload = function(){};
+        document.body.appendChild( s );
+        return app;
+    };
+
+    app.go = function(url)
+    {   
+        if (hasPushState) {
+            history.pushState({}, null, url);
+            checkRoutes();
+            if(!eventAdded){
+                bindStateEvents();
+            }
+        } else {
+            if(!eventAdded){
+                bindStateEvents();
+            }
+            // remove part of url that we dont use
+            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
+            var hash = url.replace(location.pathname, "");
+            if (hash.indexOf("!") < 0)
+            {
+                hash = "!/" + hash;
+            }
+            location.hash = hash;
+        }
         return app;
     };
     
@@ -336,20 +408,6 @@
         for(var prop in args){
             window[prop] = args[prop];
         }
-        return app;
-    };
-
-    app.run = function()
-    {
-        if(!firstRun){
-            emit('firstRun');
-            firstRun = true;
-			app.add(function(){
-				app.go(location.href);
-			});
-			stack.next();
-        }
-        app.run = function(){};
         return app;
     };
 
@@ -414,98 +472,74 @@
         return app;
     };
     
-    //bind events directly to $.jqMVC
-
-    app.on = function(event,target,callback)
-    {
-        if ($.isWindow(target)) {
-            $(window).on(event,callback);
-        } else {
-            $(document).on(event,target,callback);
+    //merge infinite number of arrays.
+    app.merge = function(){
+        var args = [],
+        result = [],
+        unique = function(a,b) {
+            var a = a.concat(b);
+            for(var i=0; i<a.length; ++i) {
+                for(var j=i+1; j<a.length; ++j) {
+                    if(a[i] === a[j])
+                        a.splice(j--, 1);
+                }
+            }
+            return a;
+        };
+        Array.prototype.push.apply(args,arguments);
+        for(k=0;k<args.length;k++){
+            result = unique(result,args[k]);
         }
-        events.push({
-            event:event,
-            target:target,
-            callback:callback
-        });
-        return app;
+        return result; 
     };
-
-    app.off = function(event,target,callback)
-    {
-        if ($.isWindow(target)) {
-            $(window).unbind(event,callback);
-        } else {
-            $(document).off(event,target,callback);
+    
+    //notificatins related
+    var notify = {
+        alert:function(message){
+            alert(message);
+        },
+        confirm:function(message,callback){
+            if(confirm(message)){
+                callback.apply(this);
+            }
         }
+    };
+    
+    app.setNotifications = function(obj){
+        notify = obj;
         return app;
     };
     
-    //merge 2 arrays. in future should be infinite number
-    app.merge = function(a1,a2){
-        if(!'unique' in Array.prototype){
-            Array.prototype.unique = function() {
-                var a = this.concat();
-                for(var i=0; i<a.length; ++i) {
-                    for(var j=i+1; j<a.length; ++j) {
-                        if(a[i] === a[j])
-                            a.splice(j--, 1);
-                    }
-                }
-
-                return a;
-            };
-        }
-        return a1.concat(a2).unique(); 
-    };
-	
-	//notificatins related
-	var notify = {
-		alert:function(message){
-			alert(message);
-		},
-		confirm:function(message,callback){
-			if(confirm(message)){
-				callback.apply(this);
-			}
-		}
-	};
-	
-	app.setNotifications = function(obj){
-		notify = obj;
-		return app;
-	};
-	
-	app.alert = function()
-	{
-		notify.alert.apply(this,arguments);
-		return app;
-	};
-	
-	app.confirm = function()
-	{
-		notify.confirm.apply(this,arguments);
-		return app;
-	};
-	
-	
-	//progress related
-	var progress = {
-		start: function(){
-			
-		},
-		stop: function(){
-		}
-	};
-	
-	app.setProgress = function(obj){
-		progress = obj;
-		return app;
-	}
-	
-	app.before = function()
+    app.alert = function()
     {
-		progress.start();
+        notify.alert.apply(this,arguments);
+        return app;
+    };
+    
+    app.confirm = function()
+    {
+        notify.confirm.apply(this,arguments);
+        return app;
+    };
+    
+    
+    //progress related
+    var progress = {
+        start: function(){
+            
+        },
+        stop: function(){
+        }
+    };
+    
+    app.setProgress = function(obj){
+        progress = obj;
+        return app;
+    }
+    
+    app.before = function()
+    {
+        progress.start();
         return app;
     };
 
@@ -534,8 +568,6 @@
     {
         view.render.apply(this,arguments);
     };
-    
-    //stack functions
     
     $.jqMVC = app;
 }(jQuery));
