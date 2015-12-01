@@ -87,12 +87,12 @@
                         }else{
                             //just a middleware.
                             var result = route.callback[j].apply(this);
-							if(typeof result !== "undefined"){
-								break;//halt execution
-								// reasonable to assume that the middleware has 
-								// already continued executing some new path.
-								
-							}
+                            if(typeof result !== "undefined"){
+                                break;//halt execution
+                                // reasonable to assume that the middleware has 
+                                // already continued executing some new path.
+                                
+                            }
                         }
                     }
                 }else{
