@@ -124,7 +124,17 @@ $(function(){
 		svc.foo();
 		$('title').html('Hello World');
 		$.jqMVC.render('hello.twig',{},function(){
-			$.jqMVC.controller('hello.js?v=1');
+			
+			$.jqMVC.data({
+				helloSubmit: function(e){
+					e.preventDefault();
+					var name = $('#hello-name').find('input').val();
+					$.jqMVC.go(app_path+'hello/'+name);
+					return false;
+				}
+			});
+			$(document).on('submit','#hello-name',helloSubmit);
+		
 			$.jqMVC.done();
 		});
 	})

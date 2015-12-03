@@ -17,9 +17,6 @@
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
     }
     
-    // random shit, probably deprecated eventually
-	var controller = null;
-    
     //internal utilities
     
     function getPath()
@@ -72,8 +69,11 @@
         }else{
             for(var i = 0; i < actionList.length; i++)
             {
-                var route = actionList[i].route;
+                var route = actionList[i];
                 var args = [];
+				if(typeof controllers[route.route] !== 'undefined'){
+					window.ctrl = controllers[route.route];
+				}
                 for(var prop in actionList[i].data){
                     args.push(actionList[i].data[prop]);
                 }
@@ -132,11 +132,9 @@
             if (route.type == "regexp") {
                 var result = url.match(route.route);
                 if (result) {
-                    dataList.push({
-                        route: route,
-                        data: {matches: result}
-                    });
-
+					var obj = (function(){ return route; }());
+					obj.data = {matches: result};
+                    dataList.push(obj);
                     // break after first hit
                     break;
                 }
@@ -163,10 +161,9 @@
 
                     // we've an exact match. break
                     if (routeParts.length == matchCounter) {
-                        dataList.push({
-                            route: route,
-                            data: data
-                        });
+						var obj = (function(){ return route; }());
+						obj.data = data;
+						dataList.push(obj);
                         router.currentParameters = data;
                         break; 
                     }
@@ -382,43 +379,20 @@
         }
         return app;
     };
+	
+	//controllers
+	var controllers = {};
+	
+	window.ctrl = {};
 
-    app.clean = function()
+    app.ctrl = function(path,object)
     {
-
-        if(controller !== null){
-            if(controller.hasOwnProperty('destroy')){
-                if(typeof controller.destroy === "function"){
-                    controller.destroy();
-                }
-            }
-            controller = null;  
-        }
-
-        if($('script.jqMVCctrl').length > 0){
-            $('script.jqMVCctrl').remove(); 
-        }
-        emit('on.clean');
+		controllers[path] = object;
         return app;
     };
-
-    app.controller = function(path)
-    {
-        var path = window.location.origin + getPath() + ctrl_path + path;
-        app.clean();
-        var s = document.createElement('script');
-        s.setAttribute('src', path);
-        s.className = 'jqMVCctrl';
-        var z = null;
-        s.onload = function(){
-            emit('on.controller');
-            z = $ctrl;
-            z.invoke();
-        };
-        controller = z;
-        document.body.appendChild( s );
-        return app;
-    };
+	
+	
+	//end controllers
 	
 	// services
 	window.svc = {};
