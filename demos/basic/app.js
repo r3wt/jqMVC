@@ -78,6 +78,10 @@ $(function(){
 				stack.next(); //finally were done here, so we can continue on to the next stack.
 			});
 		});
+		
+		$.jqMVC.addSvc('foo',function(){
+			console.log('foo service was called');
+		});
 	})
 	
 	// lets set up a listener for api errors
@@ -117,6 +121,7 @@ $(function(){
 	
 	// lets define some routing for our app
 	.path('/',function(){
+		svc.foo();
 		$('title').html('Hello World');
 		$.jqMVC.render('hello.twig',{},function(){
 			$.jqMVC.controller('hello.js?v=1');

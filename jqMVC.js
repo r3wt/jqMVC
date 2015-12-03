@@ -18,7 +18,6 @@
     }
     
     // random shit, probably deprecated eventually
-    var services = {};
 	var controller = null;
     
     //internal utilities
@@ -420,26 +419,18 @@
         document.body.appendChild( s );
         return app;
     };
+	
+	// services
+	window.svc = {};
 
-    app.addSvc = function(name,callback)
+    app.addSvc = function(name,mixedvar)
     {
-        var obj = {};
-        obj[name] = callback;
-        $.extend(true,services,obj);
+        window.svc[name] = mixedvar;//services are flexible types.
         return app;
     };
-
-    app.svc = function(name)
-    {
-        if (typeof services[name] === "function") {
-            var svc = Array.prototype.shift.apply(arguments);
-            services[svc].apply(this, arguments);
-            emit('on.service');
-        }
-        return app;
-    };
+	// end services
     
-    //merge infinite number of arrays.
+    // merge infinite number of arrays.
     app.merge = function(){
         var args = [],
         result = [],
