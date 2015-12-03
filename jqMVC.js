@@ -18,9 +18,8 @@
     }
     
     // random shit, probably deprecated eventually
-    var events = [];
     var services = {};
-    var controller = null;
+	var controller = null;
     
     //internal utilities
     
@@ -208,7 +207,7 @@
     function bind_href()
     {
         emit('on.bindhref');
-        app.on('click','a[data-href]',function(e){
+		$(document).on('click','a[data-href]',function(e){
             e.preventDefault();
             emit('before.go');
             app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
@@ -281,7 +280,6 @@
             route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
         }
         
-        
         var obj = {};
         
         if(middleware.length > 0){
@@ -341,31 +339,6 @@
         return app;
     };
     
-    app.on = function(event,target,callback)
-    {
-        if ($.isWindow(target)) {
-            $(window).on(event,callback);
-        } else {
-            $(document).on(event,target,callback);
-        }
-        events.push({
-            event:event,
-            target:target,
-            callback:callback
-        });
-        return app;
-    };
-
-    app.off = function(event,target,callback)
-    {
-        if ($.isWindow(target)) {
-            $(window).unbind(event,callback);
-        } else {
-            $(document).off(event,target,callback);
-        }
-        return app;
-    };
-    
     //end event related
     
     app.loadModule = function(path){
@@ -413,12 +386,6 @@
 
     app.clean = function()
     {
-        if (events.length > 0) {
-            for (var i=0; i<events.length;i++) {
-                app.off(events[i].event,events[i].target,events[i].callback);
-            }
-            events.length = 0;//truncate array.
-        }
 
         if(controller !== null){
             if(controller.hasOwnProperty('destroy')){
