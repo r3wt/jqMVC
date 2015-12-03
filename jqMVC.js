@@ -275,9 +275,9 @@
         if (!isRegExp) {
             // remove the last slash to unifiy all routes
             if (route.lastIndexOf("/") == route.length - 1) {
-            route = route.substring(0, route.length - 1);
+				route = route.substring(0, route.length - 1);
             }
-            // if the routes where created with an absolute url ,we have to remove the absolut part anyway, since we cant change that much
+            // if the routes were created with an absolute url ,we have to remove the absolute part
             route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
         }
         
