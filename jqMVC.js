@@ -3,7 +3,7 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.2.0
+ * @version 0.2.1
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 
@@ -58,7 +58,7 @@
         if(trackSelector){
             jQbound = app.merge(jQbound,[selector]);//to prevent dupes in jqBound
         }
-        console.log(jQbound);
+
         return jQinstance;
     };
     
@@ -93,7 +93,6 @@
     
     evt.bindHref = function()
     {
-        emit('on.bindhref');
         $(document).on('click','a[data-href]',function(e){
             e.preventDefault();
             emit('before.go');
@@ -139,20 +138,27 @@
         });
     };
     
-    evt.unbind = function()
+    function unbindEvents()
     {
         for(var i=0;i<jQbound.length;i++){
             $(jQbound[i]).find("*").addBack().off();
         }
         clearInterval(router.interval);//if router is using an interval it must be destroyed.
-    };
+    }
     
-    evt.bindDefaults = function()
+    function bindEvents()
     {
-        evt.unbind();
-        evt.bindRouter();
-        evt.bindHref();
-        evt.bindForm();
+        for(var c in evt){
+            evt[c].apply(this);
+        }
+    }
+    
+    app.addBinding = function(name,callback)
+    {
+        if(binding_override || !evt.hasOwnProperty(name)){
+            evt[name] = callback;
+        }
+        return app;
     };
 
     app.trigger = function(event,eventData){
@@ -204,7 +210,6 @@
         var currentUrl = parseUrl(location.pathname);
         // check if a route exists.
         var actionList = getParameters(currentUrl);
-        console.log(actionList);
         if(actionList.length === 0){
             emit('notFound');
         }else{
@@ -579,7 +584,8 @@
     {
         emit('on.done');
         progress.stop();
-        evt.bindDefaults();
+        unbindEvents();
+        bindEvents();
         return app;
     };
     
@@ -591,7 +597,8 @@
         }
     };
     
-    app.setView = function(obj){
+    app.setView = function(obj)
+    {
         view = obj;
         return app;
     };
@@ -602,17 +609,15 @@
     };
     
     //set app defaults  
-    (function(){
-        var defaults = {
-            app_path  : window.location.origin,
-            api_path  : '',//api path to datasrc
-            view_path : '/', //it should be noted that twig only accepts a relative path at the moment.
-            module_path : '/', //where to look for modules.
-            element : $('body'), //main view element where views are rendered.
-            debug : false,//whether or not to display debugging info. doesnt do much currently other than show emitted events.
-        };
-        app.data(defaults);
-    }());
+    app.data({
+        app_path  : window.location.origin,
+        api_path  : '',//api path to datasrc
+        view_path : '/', //it should be noted that twig only accepts a relative path at the moment.
+        module_path : '/', //where to look for modules.
+        element : $('body'), //main view element where views are rendered.
+        debug : false,//whether or not to display debugging info. doesnt do much currently other than show emitted events.
+        binding_override: false, //whether or not to allow automatic event bindings to be overwritten
+    });
     
     $.jqMVC = app;
 }(jQuery));
