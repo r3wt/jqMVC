@@ -1,42 +1,76 @@
 /*!
- * jqMVC.js (C) 2015 jqMVC.js Developers, MIT license http://github.com/r3wt/jqMVC.git
+ * jqMVC.js (C) 2015 Garrett R Morris, MIT license http://github.com/r3wt/jqMVC.git
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.1.2
- * contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
+ * @version 0.2.0
+ * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 
 ;!(function($){
-
+    
+    //some browsers fail to set this. 
+    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+    
+    
     // you no touchy
     var app = {};
     
-    // fix for browsers that dont have location.origin
-    if (!window.location.origin) {
-        window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-    }
     
-    //internal utilities
-    
-    function getPath()
-    {
-        if(window.hasOwnProperty('app_path')){
-            return app_path.replace(/\/+/g, '/');//possibly unsafe.
+    //require jQuery 2.1.3 or greater
+    (function($){
+        var version = $.fn.jquery.split('.');
+        var n = version.map(parseInt);
+        switch(true){
+            case(n[0] < 2):
+            case(n[1] < 1):
+            case(n[2] < 3):
+                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+            break;
         }
-        return '/';
-    }
+        console.log(n);
+    }($));
     
-    function bindStateEvents()
-    {
-        eventAdded = true;
+    
+    //provide serialize object method for easy form processing
+    $.fn.serializeObject = function(){ 
+        var b = this.serializeArray();
+        var a = {};
+        for(var i=0;i<b.length;i++){
+            a[b[i].name] = b[i].value;
+        }
+        return a;
+    };
+    
+    //events
+    var jQselector = $.fn.init,
+    jQbound = [];
 
-        // default value telling router that we havent replaced the url from a hash. yet.
+    $.fn.init = function(selector){
+        
+        var trackSelector =  isDefined(selector) && !isApp(selector) && (( isString(selector) || isWindow(selector) || isDocument(selector) ) !== false);
+        
+        var jQinstance = new jQselector(selector,window.document,$);
+        
+        // we only track events bound on element(s), document, and window. 
+        // events bound on plain objects, such as those that are internally 
+        // bound with public methods $.jqMVC.listen and $.jqMVC.listenOnce
+        if(trackSelector){
+            jQbound = app.merge(jQbound,[selector]);//to prevent dupes in jqBound
+        }
+        console.log(jQbound);
+        return jQinstance;
+    };
+    
+    
+    var evt={};
+    
+    evt.bindRouter = function(){
+        eventAdded = true;
         router.fromHash = false;
 
         if (hasPushState) {
             if (location.hash.indexOf("#!/") === 0) {
-                // replace the state
                 var url = location.pathname + location.hash.replace(/^#!\//gi, "");
                 history.replaceState({}, "", url);
                 router.fromHash = true;
@@ -48,15 +82,122 @@
             $(window).bind("hashchange.router", handleRoutes);
         } else {
             // if no events are available we use a timer to check periodically for changes in the url
-            setInterval(function(){
+            router.interval = setInterval(function(){
                 if (location.href != currentUsedUrl) {
                     handleRoutes();
                     currentUsedUrl = location.href;
                 }
             }, 500);
         }
-
     };
+    
+    evt.bindHref = function()
+    {
+        emit('on.bindhref');
+        $(document).on('click','a[data-href]',function(e){
+            e.preventDefault();
+            emit('before.go');
+            app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
+            return false;
+        });
+    };
+    
+    evt.bindForm = function()
+    {
+        $(document).on('submit','form[ctrl][action][callback]',function(event){
+            event.preventDefault();
+            var _this         = $(this),
+            before_function   = _this.attr('before'),
+            callback_function = _this.attr('callback'),
+            endpoint          = api_path+_this.attr('action'),
+            controller        = window.ctrl[_this.attr('ctrl')],
+            query_string      = _this.serializeObject();
+            console.log(query_string);
+            $.jqMVC.before();
+            _this.find('button[type="submit"]').prop('disabled',true);
+            if(typeof before_function !== "undefined" && before_function !== false){
+                var before_error = controller[before_function].call(_this);
+                if(before_error !== false){
+                    $.jqMVC.alert(before_error,'error');
+                    return;
+                }
+            }
+            if(typeof callback_function === "undefined" || callback_function === false){
+                $.jqMVC.alert('FORM DOES NOT SPECIFY CALLBACK. UNABLE TO CONTINUE.','error');
+                return;
+            }
+            $.post(endpoint,query_string,function(data){
+                var data = JSON.parse(data);
+                controller[callback_function].call( _this, data );
+            }).fail(function( jqXHR, textStatus, errorThrown ){
+                controller[callback_function].call(_this,{'error':1,'message': 'An Unknown Error Occured: '+jqXHR.status +' '+ jqXHR.responseText});
+            }).always(function(){
+                $.jqMVC.done();
+                _this.find('button[type="submit"]').prop('disabled',false);
+            });
+            return false;
+        });
+    };
+    
+    evt.unbind = function()
+    {
+        for(var i=0;i<jQbound.length;i++){
+            $(jQbound[i]).find("*").addBack().off();
+        }
+        clearInterval(router.interval);//if router is using an interval it must be destroyed.
+    };
+    
+    evt.bindDefaults = function()
+    {
+        evt.unbind();
+        evt.bindRouter();
+        evt.bindHref();
+        evt.bindForm();
+    };
+
+    app.trigger = function(event,eventData){
+        emit(event,eventData);
+        return app;
+    };
+    
+    app.listen = function(event,callback)
+    {
+        $(app).bind(event,callback);
+        return app;
+    };
+    
+    app.listenOnce = function(event,callback)
+    {
+        $(app).one(event,callback);
+        return app;
+    };
+    //end events
+    
+    //internal utilities
+    function isDefined(t){
+        return typeof t !== 'undefined';
+    }
+    function isString(t){
+        return typeof t === 'string';
+    }
+    function isWindow(t){
+        return t && t.document && t.location && t.alert && t.setInterval;
+    }
+    function isDocument(t){
+        return window.document === t;
+    }
+    function isApp(t){
+        return t === app;
+    }
+    
+    function getPath()
+    {
+        var path = app_path.replace(window.location.origin,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
+        if(path.length === 0){
+            path +='/';
+        }
+        return path;
+    }
     
     function checkRoutes()
     {
@@ -71,9 +212,6 @@
             {
                 var route = actionList[i];
                 var args = [];
-				if(typeof controllers[route.route] !== 'undefined'){
-					window.ctrl = controllers[route.route];
-				}
                 for(var prop in actionList[i].data){
                     args.push(actionList[i].data[prop]);
                 }
@@ -132,8 +270,8 @@
             if (route.type == "regexp") {
                 var result = url.match(route.route);
                 if (result) {
-					var obj = (function(){ return route; }());
-					obj.data = {matches: result};
+                    var obj = (function(){ return route; }());
+                    obj.data = {matches: result};
                     dataList.push(obj);
                     // break after first hit
                     break;
@@ -161,9 +299,9 @@
 
                     // we've an exact match. break
                     if (routeParts.length == matchCounter) {
-						var obj = (function(){ return route; }());
-						obj.data = data;
-						dataList.push(obj);
+                        var obj = (function(){ return route; }());
+                        obj.data = data;
+                        dataList.push(obj);
                         router.currentParameters = data;
                         break; 
                     }
@@ -199,17 +337,6 @@
         debugmsg('emit -> `'+event+'`');
         $(app).trigger(event,eventData);
     };
-
-    function bind_href()
-    {
-        emit('on.bindhref');
-		$(document).on('click','a[data-href]',function(e){
-            e.preventDefault();
-            emit('before.go');
-            app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
-            return false;
-        }); 
-    };
     
     //end internal utilities
     
@@ -223,6 +350,8 @@
     var firstRun = false;
     var router = {};
     
+    
+    router.interval = null;
     router.currentId = "";
     router.currentParameters = {};
     
@@ -270,7 +399,7 @@
         if (!isRegExp) {
             // remove the last slash to unifiy all routes
             if (route.lastIndexOf("/") == route.length - 1) {
-				route = route.substring(0, route.length - 1);
+                route = route.substring(0, route.length - 1);
             }
             // if the routes were created with an absolute url ,we have to remove the absolute part
             route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
@@ -321,44 +450,17 @@
     };
     //end middleware stack
     
-    
-    //event related
-    
-    app.trigger = function(event,eventData){
-        emit(event,eventData);
-        return app;
-    };
-    
-    app.listen = function(event,callback)
-    {
-        $(app).bind(event,callback);
-        return app;
-    };
-    
-    //end event related
-    
-    app.loadModule = function(path){
-        var path = window.location.origin + getPath() +  module_path + path;
-        var s = document.createElement('script');
-        s.setAttribute('src', path);
-        s.className = 'jqMVCmodule';
-        s.async = true;
-        s.onload = function(){};
-        document.body.appendChild( s );
-        return app;
-    };
-
     app.go = function(url)
     {   
         if (hasPushState) {
             history.pushState({}, null, url);
             checkRoutes();
             if(!eventAdded){
-                bindStateEvents();
+                evt.bindRouter();
             }
         } else {
             if(!eventAdded){
-                bindStateEvents();
+                evt.bindRouter();
             }
             // remove part of url that we dont use
             url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
@@ -379,30 +481,28 @@
         }
         return app;
     };
-	
-	//controllers
-	var controllers = {};
-	
-	window.ctrl = {};
+    
+    //controllers
+    window.ctrl = {};
 
-    app.ctrl = function(path,object)
+    app.ctrl = function(name,object)
     {
-		controllers[path] = object;
+        window.ctrl[name] = object;
         return app;
     };
-	
-	
-	//end controllers
-	
-	// services
-	window.svc = {};
+    
+    
+    //end controllers
+    
+    // services
+    window.svc = {};
 
     app.addSvc = function(name,mixedvar)
     {
         window.svc[name] = mixedvar;//services are flexible types.
         return app;
     };
-	// end services
+    // end services
     
     // merge infinite number of arrays.
     app.merge = function(){
@@ -479,7 +579,7 @@
     {
         emit('on.done');
         progress.stop();
-        bind_href();
+        evt.bindDefaults();
         return app;
     };
     
@@ -500,6 +600,19 @@
     {
         view.render.apply(this,arguments);
     };
+    
+    //set app defaults  
+    (function(){
+        var defaults = {
+            app_path  : window.location.origin,
+            api_path  : '',//api path to datasrc
+            view_path : '/', //it should be noted that twig only accepts a relative path at the moment.
+            module_path : '/', //where to look for modules.
+            element : $('body'), //main view element where views are rendered.
+            debug : false,//whether or not to display debugging info. doesnt do much currently other than show emitted events.
+        };
+        app.data(defaults);
+    }());
     
     $.jqMVC = app;
 }(jQuery));
