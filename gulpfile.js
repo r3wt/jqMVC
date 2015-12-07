@@ -17,7 +17,18 @@ gulp.task('default', function() {
 	var code = '',
 	copyright = fs.readFileSync('./src/copyright.txt','utf8') + '\r\n';
 	for(var i=0;i<order.length;i++){
-		code +=fs.readFileSync('./src/'+order[i],'utf8')+'\r\n';
+		var file = fs.readFileSync('./src/'+order[i],'utf8');
+		if(i==0){
+			file+='\r\n';
+		}
+		if(i !== order.length - 1 && i !== 0){
+			var tmp = file.split('\r\n');
+			for(var j=0;j<tmp.length;j++){
+				tmp[j] = '    '+tmp[j]+'\r\n';
+			}
+			file = tmp.join('');
+		}
+		code +=file.replace(/\t/g,'    ');
 	}
 	fs.writeFile('./jqMVC.js',copyright+code, 'utf8',function(){
 		//now minify
