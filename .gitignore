@@ -1,4 +1,1 @@
-builder/*
-src/*
-build/*
-docs/*
+node_modules/*
