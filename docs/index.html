@@ -146,7 +146,7 @@
   <h2 id='add' class='mt0'>
     add<span class='gray'>(middleware)</span>
   </h2>
-  <p>Add a middleware function to the middleware stack. IF called after .run() it does nothing.</p>
+  <p>Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -170,7 +170,7 @@
   <h2 id='addBinding' class='mt0'>
     addBinding<span class='gray'>(name, callback)</span>
   </h2>
-  <p>Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app <code>runs</code></p>
+  <p>Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app <code>runs</code>.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -201,7 +201,7 @@
   <h2 id='addSvc' class='mt0'>
     addSvc<span class='gray'>(name, mixedvar)</span>
   </h2>
-  <p>Add a service to the global svc object.</p>
+  <p>Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -274,7 +274,7 @@
   <h2 id='ctrl' class='mt0'>
     ctrl<span class='gray'>(name, obj)</span>
   </h2>
-  <p>Add a controller object to global controller object. controllers can be referenced in html by <code>data-ctrl=&quot;ctrlname&quot;</code> semantics.</p>
+  <p>Add a controller object to global controller object. controllers are primarily to be used with html bindings, using <code>ctrl=&quot;ctrlname&quot;</code> semantics. eg <code>&lt;form ctrl=&quot;login&quot; before=&quot;loginRequiredParams&quot; callback=&quot;loginResult&quot; action=&quot;login&quot;&gt;</code> this functionality is not complete and the api will change over time.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -541,7 +541,7 @@
   <h2 id='path' class='mt0'>
     path<span class='gray'>(path, callback)</span>
   </h2>
-  <p>define a route object path Note: Any arguments between first and last argument of the function are treated as middleware. eg &grave; $.jqMVC.path(path,middleware1,middleware2,callback); Middleware is currently unsafe but is being reworked to use ES6 promises.</p>
+  <p>define a route object path Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -568,7 +568,7 @@
 
       </div>
     <h4>Examples</h4>
-<pre class='overflow-auto'>$.jqMVC.path(<span class="hljs-string">'/posts/:title/:id'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">title,id</span>)</span>{ <span class="hljs-comment">//your code here });</span></pre>
+<pre class='overflow-auto'>$.jqMVC.path(<span class="hljs-string">'/posts/:title/:id'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">title,id</span>)</span>{ <span class="hljs-comment">//your code here });</span></pre><pre class='overflow-auto'>$.jqMVC.path(path,middleware1,middleware2,callback);</pre>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='render' class='mt0'>

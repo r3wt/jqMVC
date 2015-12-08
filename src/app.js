@@ -1,7 +1,7 @@
 var app = {};
 
 /**
- * Add a middleware function to the middleware stack. IF called after .run() it does nothing.
+ * Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()
  * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
  * @returns {object} $.jqMVC
  */
@@ -12,7 +12,7 @@ app.add = function(middleware)
 };
 
 /**
- * Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app `runs`
+ * Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app `runs`.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.
  * @param {string} name - name of the function
  * @param {function} callback - the callback function to execute when the binding is invoked. 
  * @returns {object} $.jqMVC
@@ -26,7 +26,7 @@ app.addBinding = function(name,callback)
 };
 
 /**
- * Add a service to the global svc object.
+ * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
  * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
  * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
  * @returns {object} $.jqMVC
@@ -69,7 +69,7 @@ app.confirm = function()
 };
 
 /**
- * Add a controller object to global controller object. controllers can be referenced in html by `data-ctrl="ctrlname"` semantics.
+ * Add a controller object to global controller object. controllers are primarily to be used with html bindings, using `ctrl="ctrlname"` semantics. eg `<form ctrl="login" before="loginRequiredParams" callback="loginResult" action="login">` this functionality is not complete and the api will change over time.
  * @param {string} name - the name for the controller eg 'blogPosts' = ctrl.blogPosts
  * @param {object} obj - Controller object
  * @returns {object} $.jqMVC
@@ -257,10 +257,11 @@ app.model = function(name,obj){
 };
 
 /**
- * define a route object path Note: Any arguments between first and last argument of the function are treated as middleware. eg ` $.jqMVC.path(path,middleware1,middleware2,callback); Middleware is currently unsafe but is being reworked to use ES6 promises.
+ * define a route object path Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.
  * @param {string} path - use `:name` for placeholders
  * @param {function} callback - the route closure.
  * @example $.jqMVC.path('/posts/:title/:id',function(title,id){ //your code here });
+ * @example $.jqMVC.path(path,middleware1,middleware2,callback);
  * @returns {object} $.jqMVC
  */
 app.path = function()
