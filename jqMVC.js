@@ -613,6 +613,55 @@
         emit(event,eventData);
         return app;
     };
+    
+    app.loadModules = function(modules){
+        if(modules.length > 0){
+            app.add(function(stack){
+                function loadScript(url) {
+                    var scriptPromise = new Promise(function(resolve, reject) {
+                        var script = document.createElement('script');
+                        script.src = url;
+                        script.addEventListener('load', function() {
+                            resolve(url);
+                        }, false);
+                        
+                        script.addEventListener('error', function() {
+                            reject(url);
+                        }, false);
+                        document.body.appendChild(script);
+                    });
+                    return scriptPromise;
+                }
+    
+                new Promise(function(resolve, reject) {
+                    //load All scripts
+                    var returned = 0,
+                    state={};
+                    for(var i=0;i<modules.length;i++){
+                        loadScript(getPath() + module_path + modules[i]) 
+                        .then(
+                            function(){
+                                returned++;
+                                $(state).trigger('check');
+                            },
+                            function(){
+                                returned++;
+                                $(state).trigger('check');
+                            }
+                        );
+                    }
+                    $(state).on('check',function(){
+                        if(returned >= modules.length){
+                            resolve();
+                        }
+                    });
+                    //todo add safeguard polling to reject promise after certain time?
+                    //or find a better way.
+                }).then(stack.next,stack.next);
+            });
+        }
+        return app;
+    };
     //set default app settings
     app.data({
         app_path    : window.location.origin,
