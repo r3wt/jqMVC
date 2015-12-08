@@ -3,7 +3,7 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.3.0
+ * @version 0.3.2
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 ;!(function($,window,document){
@@ -75,7 +75,7 @@
     
     //model
     var model = {
-        
+    
     };
     //internal utilities
     function isDefined(t)

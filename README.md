@@ -33,7 +33,8 @@ jqMVC.js is a SPA framework designed for usage with jQuery.
 1. `cd /path/to/jqMVC`
 2. install gulp to project directory `npm install --save-dev gulp`
 3. install gulp-documentation `npm install --save-dev gulp-documentation`
-4. run gulp `gulp`. builds in project directory following files:
+4. install uglify 1x `npm install uglify-js@1`
+5. run gulp `gulp`. builds in project directory following files:
 	- jqMVC.js
 	- jqMVC.min.js
 	- docs.html

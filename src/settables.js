@@ -29,5 +29,5 @@ var view = {
 
 //model
 var model = {
-	
+
 };
