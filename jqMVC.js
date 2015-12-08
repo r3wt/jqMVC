@@ -3,7 +3,7 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.3.3
+ * @version 0.3.4
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 ;!(function($,window,document){
@@ -129,41 +129,26 @@
             for(var i = 0; i < actionList.length; i++)
             {
                 var route = actionList[i];
+                console.log(route);
                 var args = [];
                 for(var prop in actionList[i].data){
                     args.push(actionList[i].data[prop]);
                 }
-                if(route.middleware.length > 0){
-                    new Promise(function(topResolve,topReject){
-                        var returned = 0,
-                        state={};
-                        for(var j=0;j<route.middleware.length;j++){
-                            new Promise(route.middleware[j])
-                            .then(
-                                function(){
-                                    returned++;
-                                    $(state).trigger('next');
-                                },
-                                function(){
-                                    topReject.apply(this,arguments);//refers to the outer promise
-                                    //any middleware rejection is enough to halt the program.
-                                }
-                            );
-                        }
-                        $(state).on('next',function(){
-                            if(returned >= route.middleware.length){
-                                topResolve();
-                            }
-                        });
-                    })
-                    .then(function(){
-                        route.callback.apply(this,args);
-                    },function(args){
+                var mwStack = {
+                    items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
+                    halt : function(callback){
                         emit('mwReject',args);
-                    });
-                }else{
-                    route.callback.apply(this,args);
-                }
+                        callback.apply(this);
+                    },
+                    next : function(){
+                        if(mwStack.items.length > 0){
+                            mwStack.items.shift().call(this,mwStack);
+                        }else{
+                            route.callback.apply(this,args);
+                        }
+                    }
+                };
+                mwStack.next();
             }   
         }
     };
