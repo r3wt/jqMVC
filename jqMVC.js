@@ -18,18 +18,18 @@
     
     //require jQuery 2.1.3 or greater
     (function($){
-      var v = $.fn.jquery.split('.'),
-          n = [];
-      for(var i=0;i<v.length;i++){
-        n.push(parseInt(v[i]));
-      }
-      switch(true){
-        case(n[0] < 2):
-        case(n[1] < 1):
-        case(n[2] < 3):
-          throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-        break;
-      }
+        var v = $.fn.jquery.split('.'),
+            n = [];
+        for(var i=0;i<v.length;i++){
+            n.push(parseInt(v[i]));
+        }
+        switch(true){
+            case(n[0] < 2):
+            case(n[1] < 1):
+            case(n[2] < 3):
+                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+            break;
+        }
     }($));
     
     //provide serialize object method for easy form processing
@@ -615,11 +615,13 @@
     };
     //set default app settings
     app.data({
-        app_path  : window.location.origin,
-        api_path  : '',
-        view_path : '/', 
-        element : $('body'),
-        debug : false,
+        app_path    : window.location.origin,
+        api_path    : '/api/',
+        view_path   : '/views',
+        module_path :'/modules',
+        model_path  : '/models',
+        element     : $('body'),
+        debug       : false,
         binding_override: false,
     });
     

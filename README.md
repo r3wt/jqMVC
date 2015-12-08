@@ -1,16 +1,31 @@
 # jqMVC.js
 
-jqMVC.js is a RMVC or SPA framework designed for usage with jQuery. It's based on the pattern popularized many moons ago by Ruby On Rails
+jqMVC.js is a SPA framework designed for usage with jQuery.
+
 
 ---
-### DEMOS
-* Coming Soon
+### Discuss
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3wt/jqMVC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+---
+### Features
+
+* Routing
+* Module Loading
+* Controllers
+* Models
+* Views
+* Services
+* Global Middleware
+* Route Middleware
+* Event Bindings
 
 ---
 ### Get it
 
 1. change directory to desired install path, ex: `cd /var/www/static/js/`
-2. `git clone https://github.com/r3wt/jqMVC.git`
+2. clone `git clone https://github.com/r3wt/jqMVC.git`
 3. include jQuery and jqMVC.min.js or jqMVC.js in your project.
 
 ---
