@@ -2,7 +2,8 @@
 var jQselector = $.fn.init,
 jQbound = [],
 evt={};
-$.fn.init = function(selector){
+$.fn.init = function(selector)
+{
 	
 	var trackSelector =  isDefined(selector) && !isApp(selector) && (( isString(selector) || isWindow(selector) || isDocument(selector) ) !== false);
 	
@@ -57,6 +58,7 @@ evt.bindHref = function()
 evt.bindForm = function()
 {
 	$(document).on('submit','form[ctrl][action][callback]',function(event){
+		//refactor to support file uploads.
 		event.preventDefault();
 		var _this         = $(this),
 		before_function   = _this.attr('before'),
@@ -89,6 +91,11 @@ evt.bindForm = function()
 		});
 		return false;
 	});
+};
+
+evt.bindModel = function()
+{
+
 };
 
 function unbindEvents()

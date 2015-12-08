@@ -93,6 +93,11 @@
                 merge
               </a>
               <a
+                href='#model'
+                class='block bold'>
+                model
+              </a>
+              <a
                 href='#path'
                 class='block bold'>
                 path
@@ -106,6 +111,11 @@
                 href='#run'
                 class='block bold'>
                 run
+              </a>
+              <a
+                href='#setModel'
+                class='block bold'>
+                setModel
               </a>
               <a
                 href='#setNotification'
@@ -497,6 +507,37 @@
       </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='model' class='mt0'>
+    model<span class='gray'>(name, obj)</span>
+  </h2>
+  <p>define a model object</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name of the model</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>the model</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
   <h2 id='path' class='mt0'>
     path<span class='gray'>(path, callback)</span>
   </h2>
@@ -549,6 +590,30 @@
   </h2>
   <p>runs the app for the first time, then overwrites run so it cant be called again. executes all middleware, including the app itself. no params and no return value.</p>
 
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='setModel' class='mt0'>
+    setModel<span class='gray'>(obj)</span>
+  </h2>
+  <p>set the internal model Object.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>model object for the app to use.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='setNotification' class='mt0'>

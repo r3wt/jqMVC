@@ -20,16 +20,6 @@ function isApp(t)
 	return t === app;
 }
 
-function setter(obj,prop,ret){
-  	if(!obj.hasOwnProperty(prop)){
-      obj[prop] = {};
-    }
-	return function(name,mixedvar){
-	  obj[prop][name] = mixedvar;
-	  return ret;
-	};
-}
-
 function getPath()
 {
 	var path = app_path.replace(window.location.origin,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.

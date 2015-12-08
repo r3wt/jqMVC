@@ -246,6 +246,17 @@ app.merge = function(){
 };
 
 /**
+ * define a model object
+ * @param {string} name - the name of the model
+ * @param {object} obj - the model
+ * @returns {object} $.jqMVC
+ */
+app.model = function(name,obj){
+	model[name] = obj;
+	return app;
+};
+
+/**
  * define a route object path Note: Any arguments between first and last argument of the function are treated as middleware. eg ` $.jqMVC.path(path,middleware1,middleware2,callback); Middleware is currently unsafe but is being reworked to use ES6 promises.
  * @param {string} path - use `:name` for placeholders
  * @param {function} callback - the route closure.
@@ -305,6 +316,16 @@ app.run = function()
 		stack.next();
 	}
 	app.run = function(){};
+};
+
+/**
+ * set the internal model Object.
+ * @param {object} obj - model object for the app to use.
+ * @returns {object} $.jqMVC
+ */
+app.setModel = function(obj){
+	model = obj;
+	return app;
 };
 
 /**

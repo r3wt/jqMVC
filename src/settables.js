@@ -12,22 +12,17 @@ var notify = {
 
 //progress
 var progress = {
-	start: function(){
-		
-	},
-	stop: function(){
-	}
+	start: function(){},
+	stop: function(){}
 };
 	
 //view
 var view = {
 	render: function(){
 		app.done();
-		throw 'You must implement a view with `setView()` before you can render templates';
+		throw 'You must implement a view library to use this feature.';
 	}
 };
 
 //model
-var model = {
-
-};
+var model = {};

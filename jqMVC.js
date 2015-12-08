@@ -58,25 +58,20 @@
     
     //progress
     var progress = {
-        start: function(){
-            
-        },
-        stop: function(){
-        }
+        start: function(){},
+        stop: function(){}
     };
         
     //view
     var view = {
         render: function(){
             app.done();
-            throw 'You must implement a view with `setView()` before you can render templates';
+            throw 'You must implement a view library to use this feature.';
         }
     };
     
     //model
-    var model = {
-    
-    };
+    var model = {};
     //internal utilities
     function isDefined(t)
     {
@@ -97,16 +92,6 @@
     function isApp(t)
     {
         return t === app;
-    }
-    
-    function setter(obj,prop,ret){
-          if(!obj.hasOwnProperty(prop)){
-          obj[prop] = {};
-        }
-        return function(name,mixedvar){
-          obj[prop][name] = mixedvar;
-          return ret;
-        };
     }
     
     function getPath()
@@ -258,7 +243,8 @@
     var jQselector = $.fn.init,
     jQbound = [],
     evt={};
-    $.fn.init = function(selector){
+    $.fn.init = function(selector)
+    {
         
         var trackSelector =  isDefined(selector) && !isApp(selector) && (( isString(selector) || isWindow(selector) || isDocument(selector) ) !== false);
         
@@ -313,6 +299,7 @@
     evt.bindForm = function()
     {
         $(document).on('submit','form[ctrl][action][callback]',function(event){
+            //refactor to support file uploads.
             event.preventDefault();
             var _this         = $(this),
             before_function   = _this.attr('before'),
@@ -345,6 +332,11 @@
             });
             return false;
         });
+    };
+    
+    evt.bindModel = function()
+    {
+    
     };
     
     function unbindEvents()
@@ -664,6 +656,17 @@
     };
     
     /**
+     * define a model object
+     * @param {string} name - the name of the model
+     * @param {object} obj - the model
+     * @returns {object} $.jqMVC
+     */
+    app.model = function(name,obj){
+        model[name] = obj;
+        return app;
+    };
+    
+    /**
      * define a route object path Note: Any arguments between first and last argument of the function are treated as middleware. eg ` $.jqMVC.path(path,middleware1,middleware2,callback); Middleware is currently unsafe but is being reworked to use ES6 promises.
      * @param {string} path - use `:name` for placeholders
      * @param {function} callback - the route closure.
@@ -723,6 +726,16 @@
             stack.next();
         }
         app.run = function(){};
+    };
+    
+    /**
+     * set the internal model Object.
+     * @param {object} obj - model object for the app to use.
+     * @returns {object} $.jqMVC
+     */
+    app.setModel = function(obj){
+        model = obj;
+        return app;
     };
     
     /**
