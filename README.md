@@ -1,5 +1,7 @@
 # jqMVC.js
 
+[![Join the chat at https://gitter.im/r3wt/jqMVC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3wt/jqMVC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 jqMVC.js is a RMVC or SPA framework designed for usage with jQuery. It's based on the pattern popularized many moons ago by Ruby On Rails
 
 ---
