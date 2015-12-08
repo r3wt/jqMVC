@@ -54,22 +54,34 @@ function checkRoutes()
 			for(var prop in actionList[i].data){
 				args.push(actionList[i].data[prop]);
 			}
-			if(typeof route.callback !== 'function' && route.callback.isArray()){
-				for(var j=0;j<route.callback.length;j++){
-					if(j==route.callback.length - 1){
-						//last callback is always the route function
-						route.callback[j].apply(this,args);
-					}else{
-						//just a middleware.
-						var result = route.callback[j].apply(this);
-						if(typeof result !== "undefined"){
-							break;//halt execution
-							// reasonable to assume that the middleware has 
-							// already continued executing some new path.
-							
-						}
+			if(route.middleware.length > 0){
+				new Promise(function(topResolve,topReject){
+					var returned = 0,
+					state={};
+					for(var j=0;j<route.middleware.length;j++){
+						new Promise(route.middleware[j])
+						.then(
+							function(){
+								returned++;
+								$(state).trigger('next');
+							},
+							function(){
+								topReject.apply(this,arguments);//refers to the outer promise
+								//any middleware rejection is enough to halt the program.
+							}
+						);
 					}
-				}
+					$(state).on('next',function(){
+						if(returned >= route.middleware.length){
+							topResolve();
+						}
+					});
+				})
+				.then(function(){
+					route.callback.apply(this,args);
+				},function(args){
+					emit('mwReject',args);
+				});
 			}else{
 				route.callback.apply(this,args);
 			}

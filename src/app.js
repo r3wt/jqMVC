@@ -1,13 +1,13 @@
 var app = {};
 
 /**
- * Add a callback function to the middleware stack. IF called after .run() it does nothing.
- * @param {function} callback - a valid callable accepting the middleware stack object as argument.
+ * Add a middleware function to the middleware stack. IF called after .run() it does nothing.
+ * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
  * @returns {object} $.jqMVC
  */
-app.add = function(callable)
+app.add = function(middleware)
 {
-	stack.items.push(callable);
+	stack.items.push(middleware);
 	return app;
 };
 
@@ -33,12 +33,12 @@ app.addBinding = function(name,callback)
  */
 app.addSvc = function(name,mixedvar)
 {
-	window.svc[name] = mixedvar;//services are flexible types.
+	svc[name] = mixedvar;//services are flexible types.
 	return app;
 };
 
 /**
- * Call the internal notify.alert() method, which is set by by setAlert(object)
+ * Call the internal notify.alert() method, which is set by by setNotification(object)
  * @returns {object} $.jqMVC
  */
 app.alert = function()
@@ -76,7 +76,7 @@ app.confirm = function()
  */
 app.ctrl = function(name,obj)
 {
-	window.ctrl[name] = obj;
+	ctrl[name] = obj;
 	return app;
 };
 
@@ -271,16 +271,10 @@ app.path = function()
 		// if the routes were created with an absolute url ,we have to remove the absolute part
 		route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
 	}
-	
-	var obj = {};
-	
-	if(middleware.length > 0){
-		obj.callback = middleware;
-		obj.callback.push(callback);
-	}
 
 	routeList.push({
 		route: route,
+		middleware: middleware,
 		callback: callback,
 		type: isRegExp ? "regexp" : "string",
 	});
@@ -318,7 +312,7 @@ app.run = function()
  * @param {object} obj - the notification object for the app to use. default object just calls alert() and confirm() builtins with arguments.
  * @returns {object} $.jqMVC
  */
-app.setNotifications = function(obj){
+app.setNotification = function(obj){
 	notify = obj;
 	return app;
 };

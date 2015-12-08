@@ -108,9 +108,9 @@
                 run
               </a>
               <a
-                href='#setNotifications'
+                href='#setNotification'
                 class='block bold'>
-                setNotifications
+                setNotification
               </a>
               <a
                 href='#setProgress'
@@ -134,23 +134,17 @@
         <div class='px2'>
 <div class='py1'><section class='py2 clearfix'>
   <h2 id='add' class='mt0'>
-    add<span class='gray'>(callback, callable)</span>
+    add<span class='gray'>(middleware)</span>
   </h2>
-  <p>Add a callback function to the middleware stack. IF called after .run() it does nothing.</p>
+  <p>Add a middleware function to the middleware stack. IF called after .run() it does nothing.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
-        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>middleware</strong>
           :
           <div class='force-inline'>
             <p>a valid callable accepting the middleware stack object as argument.</p>
 
-          </div>
-        </li>
-        <li> <strong>callable</strong>
-          :
-          <div class='force-inline'>
-            
           </div>
         </li>
     </ul>
@@ -228,7 +222,7 @@
   <h2 id='alert' class='mt0'>
     alert<span class='gray'></span>
   </h2>
-  <p>Call the internal notify.alert() method, which is set by by setAlert(object)</p>
+  <p>Call the internal notify.alert() method, which is set by by setNotification(object)</p>
 
       <h4>Returns</h4>
       <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
@@ -557,8 +551,8 @@
 
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
-  <h2 id='setNotifications' class='mt0'>
-    setNotifications<span class='gray'>(obj)</span>
+  <h2 id='setNotification' class='mt0'>
+    setNotification<span class='gray'>(obj)</span>
   </h2>
   <p>set the internal notification Object.</p>
 

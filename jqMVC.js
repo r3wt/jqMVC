@@ -3,7 +3,7 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.3.2
+ * @version 0.3.3
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 ;!(function($,window,document){
@@ -133,22 +133,34 @@
                 for(var prop in actionList[i].data){
                     args.push(actionList[i].data[prop]);
                 }
-                if(typeof route.callback !== 'function' && route.callback.isArray()){
-                    for(var j=0;j<route.callback.length;j++){
-                        if(j==route.callback.length - 1){
-                            //last callback is always the route function
-                            route.callback[j].apply(this,args);
-                        }else{
-                            //just a middleware.
-                            var result = route.callback[j].apply(this);
-                            if(typeof result !== "undefined"){
-                                break;//halt execution
-                                // reasonable to assume that the middleware has 
-                                // already continued executing some new path.
-                                
-                            }
+                if(route.middleware.length > 0){
+                    new Promise(function(topResolve,topReject){
+                        var returned = 0,
+                        state={};
+                        for(var j=0;j<route.middleware.length;j++){
+                            new Promise(route.middleware[j])
+                            .then(
+                                function(){
+                                    returned++;
+                                    $(state).trigger('next');
+                                },
+                                function(){
+                                    topReject.apply(this,arguments);//refers to the outer promise
+                                    //any middleware rejection is enough to halt the program.
+                                }
+                            );
                         }
-                    }
+                        $(state).on('next',function(){
+                            if(returned >= route.middleware.length){
+                                topResolve();
+                            }
+                        });
+                    })
+                    .then(function(){
+                        route.callback.apply(this,args);
+                    },function(args){
+                        emit('mwReject',args);
+                    });
                 }else{
                     route.callback.apply(this,args);
                 }
@@ -422,13 +434,13 @@
     var app = {};
     
     /**
-     * Add a callback function to the middleware stack. IF called after .run() it does nothing.
-     * @param {function} callback - a valid callable accepting the middleware stack object as argument.
+     * Add a middleware function to the middleware stack. IF called after .run() it does nothing.
+     * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
      * @returns {object} $.jqMVC
      */
-    app.add = function(callable)
+    app.add = function(middleware)
     {
-        stack.items.push(callable);
+        stack.items.push(middleware);
         return app;
     };
     
@@ -454,12 +466,12 @@
      */
     app.addSvc = function(name,mixedvar)
     {
-        window.svc[name] = mixedvar;//services are flexible types.
+        svc[name] = mixedvar;//services are flexible types.
         return app;
     };
     
     /**
-     * Call the internal notify.alert() method, which is set by by setAlert(object)
+     * Call the internal notify.alert() method, which is set by by setNotification(object)
      * @returns {object} $.jqMVC
      */
     app.alert = function()
@@ -497,7 +509,7 @@
      */
     app.ctrl = function(name,obj)
     {
-        window.ctrl[name] = obj;
+        ctrl[name] = obj;
         return app;
     };
     
@@ -692,16 +704,10 @@
             // if the routes were created with an absolute url ,we have to remove the absolute part
             route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
         }
-        
-        var obj = {};
-        
-        if(middleware.length > 0){
-            obj.callback = middleware;
-            obj.callback.push(callback);
-        }
     
         routeList.push({
             route: route,
+            middleware: middleware,
             callback: callback,
             type: isRegExp ? "regexp" : "string",
         });
@@ -739,7 +745,7 @@
      * @param {object} obj - the notification object for the app to use. default object just calls alert() and confirm() builtins with arguments.
      * @returns {object} $.jqMVC
      */
-    app.setNotifications = function(obj){
+    app.setNotification = function(obj){
         notify = obj;
         return app;
     };
