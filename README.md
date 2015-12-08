@@ -37,7 +37,7 @@ jqMVC.js is a SPA framework designed for usage with jQuery.
 5. run gulp `gulp`. builds in project directory following files:
 	- jqMVC.js
 	- jqMVC.min.js
-	- docs.html
+	- docs/ (folder)
 
 ---
 ### Dependencies
@@ -46,7 +46,7 @@ jqMVC.js is a SPA framework designed for usage with jQuery.
 
 ---
 ### Docs 
-* Coming Soon
+* http://jqmvc.openex.info/docs/index.html
 
 ---
 ### License

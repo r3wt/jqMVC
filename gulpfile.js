@@ -42,4 +42,8 @@ gulp.task('default', function() {
 		var final_code = pro.gen_code(ast); // compressed code here
 		fs.writeFile('./jqMVC.min.js',copyright+final_code,'utf8');
 	});
+	
+	gulp.src('./src/app.js')
+    .pipe(doc({ format: 'html' }))
+    .pipe(gulp.dest('docs'));
 });

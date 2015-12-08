@@ -1,0 +1,669 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>  | Documentation</title>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro:400,500,700' rel='stylesheet' type='text/css'>
+  <link href='assets/bass.css' type='text/css' rel='stylesheet' />
+  <link href='assets/style.css' type='text/css' rel='stylesheet' />
+  <link href='assets/github.css' type='text/css' rel='stylesheet' />
+</head>
+<body class='documentation'>
+  <div class='container'>
+    <div class='clearfix md-mxn2'>
+      <div class='fixed md-show fix-3 overflow-auto max-height-100'>
+        <div class='py1 px2'>
+          <h3 class='mb0 no-anchor'></h3>
+          <div class='mb1'><code></code></div>
+          <input
+            placeholder='Filter'
+            id='filter-input'
+            class='col12 block field'
+            type='text' />
+          <div id='toc'>
+              <a
+                href='#add'
+                class='block bold'>
+                add
+              </a>
+              <a
+                href='#addBinding'
+                class='block bold'>
+                addBinding
+              </a>
+              <a
+                href='#addSvc'
+                class='block bold'>
+                addSvc
+              </a>
+              <a
+                href='#alert'
+                class='block bold'>
+                alert
+              </a>
+              <a
+                href='#before'
+                class='block bold'>
+                before
+              </a>
+              <a
+                href='#confirm'
+                class='block bold'>
+                confirm
+              </a>
+              <a
+                href='#ctrl'
+                class='block bold'>
+                ctrl
+              </a>
+              <a
+                href='#data'
+                class='block bold'>
+                data
+              </a>
+              <a
+                href='#done'
+                class='block bold'>
+                done
+              </a>
+              <a
+                href='#go'
+                class='block bold'>
+                go
+              </a>
+              <a
+                href='#listen'
+                class='block bold'>
+                listen
+              </a>
+              <a
+                href='#listenOnce'
+                class='block bold'>
+                listenOnce
+              </a>
+              <a
+                href='#loadModules'
+                class='block bold'>
+                loadModules
+              </a>
+              <a
+                href='#merge'
+                class='block bold'>
+                merge
+              </a>
+              <a
+                href='#path'
+                class='block bold'>
+                path
+              </a>
+              <a
+                href='#render'
+                class='block bold'>
+                render
+              </a>
+              <a
+                href='#run'
+                class='block bold'>
+                run
+              </a>
+              <a
+                href='#setNotifications'
+                class='block bold'>
+                setNotifications
+              </a>
+              <a
+                href='#setProgress'
+                class='block bold'>
+                setProgress
+              </a>
+              <a
+                href='#setView'
+                class='block bold'>
+                setView
+              </a>
+              <a
+                href='#trigger'
+                class='block bold'>
+                trigger
+              </a>
+          </div>
+        </div>
+      </div>
+      <div class='fix-margin-3'>
+        <div class='px2'>
+<div class='py1'><section class='py2 clearfix'>
+  <h2 id='add' class='mt0'>
+    add<span class='gray'>(callback, callable)</span>
+  </h2>
+  <p>Add a callback function to the middleware stack. IF called after .run() it does nothing.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>a valid callable accepting the middleware stack object as argument.</p>
+
+          </div>
+        </li>
+        <li> <strong>callable</strong>
+          :
+          <div class='force-inline'>
+            
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='addBinding' class='mt0'>
+    addBinding<span class='gray'>(name, callback)</span>
+  </h2>
+  <p>Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app <code>runs</code></p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>name of the function</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the callback function to execute when the binding is invoked.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='addSvc' class='mt0'>
+    addSvc<span class='gray'>(name, mixedvar)</span>
+  </h2>
+  <p>Add a service to the global svc object.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name for the service eg &apos;foobar&apos; would be accessed svc.foobar()</p>
+
+          </div>
+        </li>
+        <li>Any <strong>mixedvar</strong>
+          :
+          <div class='force-inline'>
+            <p>an object or callable function are recommended, but a service can be anything.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='alert' class='mt0'>
+    alert<span class='gray'></span>
+  </h2>
+  <p>Call the internal notify.alert() method, which is set by by setAlert(object)</p>
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='before' class='mt0'>
+    before<span class='gray'></span>
+  </h2>
+  <p>Calls the internal progress.start() method, which is settable by setProgress(object)</p>
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='confirm' class='mt0'>
+    confirm<span class='gray'></span>
+  </h2>
+  <p>Call the internal notify.confirm() method, which is set by by setAlert(object)</p>
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='ctrl' class='mt0'>
+    ctrl<span class='gray'>(name, obj)</span>
+  </h2>
+  <p>Add a controller object to global controller object. controllers can be referenced in html by <code>data-ctrl=&quot;ctrlname&quot;</code> semantics.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name for the controller eg &apos;blogPosts&apos; = ctrl.blogPosts</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>Controller object</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='data' class='mt0'>
+    data<span class='gray'>(args)</span>
+  </h2>
+  <p>merge an array of data into the window object. use to define global variables.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>args</strong>
+          :
+          <div class='force-inline'>
+            <p>properties to create on window object.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='done' class='mt0'>
+    done<span class='gray'>([callback])</span>
+  </h2>
+  <p>emits <code>on.done</code> event, calls internal progress.start() unbinds all bound events then invokes all bindings.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code>[<code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>]</code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='go' class='mt0'>
+    go<span class='gray'>(url)</span>
+  </h2>
+  <p>Navigates to a given route in the application.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>url</strong>
+          :
+          <div class='force-inline'>
+            <p>the url to navigate to.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+    <h4>Examples</h4>
+<pre class='overflow-auto'>$.jqMVC.go(<span class="hljs-string">'/user/logout'</span>);</pre>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='listen' class='mt0'>
+    listen<span class='gray'>(event, callback)</span>
+  </h2>
+  <p>binds an event listener to $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>event</strong>
+          :
+          <div class='force-inline'>
+            <p>name of event to listen for</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the callback to bind for this event.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='listenOnce' class='mt0'>
+    listenOnce<span class='gray'>(name, event, callback)</span>
+  </h2>
+  <p>Add a one time event listener to $.jqMVC. recommended use case is inside of route closures, listening for <code>on.before.go</code> and destroying things the framework cant destroy, like plugin instances.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name for the service eg &apos;foobar&apos; would be accessed svc.foobar()</p>
+
+          </div>
+        </li>
+        <li> <strong>event</strong>
+          :
+          <div class='force-inline'>
+            
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the callback to bind for this event.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='loadModules' class='mt0'>
+    loadModules<span class='gray'>(modules)</span>
+  </h2>
+  <p>creates a dependency loading middleware to run at startup. accepts an array of scripts to load. to configure the directory to load from set module_path to your desired location. relative paths only. uses ES6 promises.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></code> <strong>modules</strong>
+          :
+          <div class='force-inline'>
+            <p>the array of scripts to load</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+    <h4>Examples</h4>
+<pre class='overflow-auto'>$.jqMVC.loadModules([<span class="hljs-string">'routes.js'</span>,<span class="hljs-string">'controllers.js'</span>,<span class="hljs-string">'models.js'</span>]);</pre>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='merge' class='mt0'>
+    merge<span class='gray'>(array1, array2, [array3])</span>
+  </h2>
+  <p>Merge 2 or more arrays and return the value. currently used by internal utilities, and maybe deprecated.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></code> <strong>array1</strong>
+          :
+          <div class='force-inline'>
+            <p>an array</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></code> <strong>array2</strong>
+          :
+          <div class='force-inline'>
+            <p>an array</p>
+
+          </div>
+        </li>
+        <li><code>[<code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></code>]</code> <strong>array3</strong>
+          :
+          <div class='force-inline'>
+            <p>and so on and so forth.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>result of merging the arrays.</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='path' class='mt0'>
+    path<span class='gray'>(path, callback)</span>
+  </h2>
+  <p>define a route object path Note: Any arguments between first and last argument of the function are treated as middleware. eg &grave; $.jqMVC.path(path,middleware1,middleware2,callback); Middleware is currently unsafe but is being reworked to use ES6 promises.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>path</strong>
+          :
+          <div class='force-inline'>
+            <p>use <code>:name</code> for placeholders</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the route closure.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+    <h4>Examples</h4>
+<pre class='overflow-auto'>$.jqMVC.path(<span class="hljs-string">'/posts/:title/:id'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">title,id</span>)</span>{ <span class="hljs-comment">//your code here });</span></pre>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='render' class='mt0'>
+    render<span class='gray'></span>
+  </h2>
+  <p>calls internal view.render method with all arguments passed. view is set via setView</p>
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='run' class='mt0'>
+    run<span class='gray'></span>
+  </h2>
+  <p>runs the app for the first time, then overwrites run so it cant be called again. executes all middleware, including the app itself. no params and no return value.</p>
+
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='setNotifications' class='mt0'>
+    setNotifications<span class='gray'>(obj)</span>
+  </h2>
+  <p>set the internal notification Object.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>the notification object for the app to use. default object just calls alert() and confirm() builtins with arguments.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='setProgress' class='mt0'>
+    setProgress<span class='gray'>(obj)</span>
+  </h2>
+  <p>set the internal progress Object.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>the progress object for the app to use. default object does nothing in either start() or stop() functions.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='setView' class='mt0'>
+    setView<span class='gray'>(obj)</span>
+  </h2>
+  <p>set the internal view Object.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code> <strong>obj</strong>
+          :
+          <div class='force-inline'>
+            <p>the view object for the app to use only builtin method is render() and the default method throws and emits <code>viewError</code> event.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='trigger' class='mt0'>
+    trigger<span class='gray'>(event, [eventData])</span>
+  </h2>
+  <p>trigger an event on $.jqMVC</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li> <strong>event</strong>
+          :
+          <div class='force-inline'>
+            
+          </div>
+        </li>
+        <li><code>[<code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code>]</code> <strong>eventData</strong>
+          :
+          <div class='force-inline'>
+            <p>optional event data to pass to event.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src='assets/anchor.js'></script>
+  <script src='assets/site.js'></script>
+</body>
+</html>
