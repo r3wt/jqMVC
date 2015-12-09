@@ -324,7 +324,8 @@ app.run = function()
  * @param {object} obj - model object for the app to use.
  * @returns {object} $.jqMVC
  */
-app.setModel = function(obj){
+app.setModel = function(obj)
+{
 	model = obj;
 	return app;
 };
@@ -334,7 +335,8 @@ app.setModel = function(obj){
  * @param {object} obj - the notification object for the app to use. default object just calls alert() and confirm() builtins with arguments.
  * @returns {object} $.jqMVC
  */
-app.setNotification = function(obj){
+app.setNotification = function(obj)
+{
 	notify = obj;
 	return app;
 };
@@ -344,7 +346,8 @@ app.setNotification = function(obj){
  * @param {object} obj - the progress object for the app to use. default object does nothing in either start() or stop() functions.
  * @returns {object} $.jqMVC
  */
-app.setProgress = function(obj){
+app.setProgress = function(obj)
+{
 	progress = obj;
 	return app;
 };
@@ -366,7 +369,8 @@ app.setView = function(obj)
  * @param {object} [eventData] - optional event data to pass to event.
  * @returns {object} $.jqMVC
  */
-app.trigger = function(event,eventData){
+app.trigger = function(event,eventData)
+{
 	emit(event,eventData);
 	return app;
 };

@@ -3,7 +3,7 @@
  * @author Garrett R Morris (https://github.com/r3wt)
  * @package jqMVC.js
  * @license MIT
- * @version 0.3.4
+ * @version 0.3.5
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 ;!(function($,window,document){
@@ -30,6 +30,7 @@
                 throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
             break;
         }
+        log('using jQuery version '+n.join('.'));
     }($));
     
     //provide serialize object method for easy form processing
@@ -114,7 +115,7 @@
             for(var i = 0; i < actionList.length; i++)
             {
                 var route = actionList[i];
-                console.log(route);
+                log(route);
                 var args = [];
                 for(var prop in actionList[i].data){
                     args.push(actionList[i].data[prop]);
@@ -122,10 +123,11 @@
                 var mwStack = {
                     items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
                     halt : function(callback){
-                        emit('mwReject',args);
+                        emit('router.mw.reject');
                         callback.apply(this);
                     },
                     next : function(){
+                        emit('router.mw.next');
                         if(mwStack.items.length > 0){
                             mwStack.items.shift().call(this,mwStack);
                         }else{
@@ -225,16 +227,16 @@
         }
     };
     
-    function debugmsg(msg)
+    function log()
     {
         if (debug) {
-            window.console && console.log('$.jqMVC :: ' + msg);
+            window.console && console.log.apply(this,arguments);
         }
     };
     
     function emit(event,eventData)
     {
-        debugmsg('emit -> `'+event+'`');
+        log('jQmv -> emit -> `'+event+'`');
         $(app).trigger(event,eventData);
     };
     
@@ -298,38 +300,64 @@
     
     evt.bindForm = function()
     {
-        $(document).on('submit','form[ctrl][action][callback]',function(event){
+        $(document).on('submit','form[method][ctrl][action][callback]',function(event){
             //refactor to support file uploads.
             event.preventDefault();
-            var _this         = $(this),
-            before_function   = _this.attr('before'),
-            callback_function = _this.attr('callback'),
-            endpoint          = api_path+_this.attr('action'),
-            controller        = window.ctrl[_this.attr('ctrl')],
-            query_string      = _this.serializeObject();
-            console.log(query_string);
-            $.jqMVC.before();
-            _this.find('button[type="submit"]').prop('disabled',true);
-            if(typeof before_function !== "undefined" && before_function !== false){
-                var before_error = controller[before_function].call(_this);
-                if(before_error !== false){
-                    $.jqMVC.alert(before_error,'error');
-                    return;
-                }
+            
+            var $this = {};
+            $this.el     = $(this);
+            $this.method = $this.el.attr('method');
+            $this.action = $this.el.attr('action');
+            $this.ctrl   = $this.el.attr('ctrl');
+            $this.bf     = $this.el.attr('before');
+            $this.cb     = $this.el.attr('callback');
+            $this.isFile = !!$this.el.find(':input[type="file"]').length;
+            
+            if($this.isFile){
+                $this.data  = new FormData(this);
+                $this.type  = false;
+                $this.processData = false;
+            }else{
+                $this.data  = $this.el.serializeObject();
+                $this.type  = 'application/x-www-form-urlencoded; charset=UTF-8';
+                $this.processData = true;
             }
-            if(typeof callback_function === "undefined" || callback_function === false){
-                $.jqMVC.alert('FORM DOES NOT SPECIFY CALLBACK. UNABLE TO CONTINUE.','error');
-                return;
+            
+            if(typeof $this.bf === 'function'){
+                new Promise(window.ctrl[$this.ctrl][$this.bf])
+                .then(function(){
+                    formSubmit();
+                },function(){
+                    //do we do anything else here or just let the before function handle the errors
+                });
+            }else{
+                formSubmit();
             }
-            $.post(endpoint,query_string,function(data){
-                var data = JSON.parse(data);
-                controller[callback_function].call( _this, data );
-            }).fail(function( jqXHR, textStatus, errorThrown ){
-                controller[callback_function].call(_this,{'error':1,'message': 'An Unknown Error Occured: '+jqXHR.status +' '+ jqXHR.responseText});
-            }).always(function(){
-                $.jqMVC.done();
-                _this.find('button[type="submit"]').prop('disabled',false);
-            });
+            
+            log(window,$this);
+            
+            function formSubmit()
+            {
+                $this.el.find('button[type="submit"]').prop('disabled',true);
+                $.ajax({
+                    url: api_path + $this.action,
+                    type: ''+$this.method.toUpperCase(),
+                    data:  $this.data,
+                    contentType: $this.type,
+                    cache: false,
+                    processData:$this.processData,
+                    success: function(data){
+                        var data = JSON.parse(data);
+                        window.ctrl[$this.ctrl][$this.cb].call( $this.el , data );
+                    },
+                    error: function(jqXHR, textStatus, errorThrown ){
+                        window.ctrl[$this.ctrl][$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
+                    }           
+                }).always(function(){
+                    $this.el.find('button[type="submit"]').prop('disabled',false);
+                });
+            
+            }
             return false;
         });
     };
@@ -341,6 +369,7 @@
     
     function unbindEvents()
     {
+        log('jqMVC -> unbindEvents',jQbound.length + 'events to be removed');
         for(var i=0;i<jQbound.length;i++){
             $(jQbound[i]).find("*").addBack().off();
         }
@@ -350,6 +379,7 @@
     
     function bindEvents()
     {
+        log('jqMVC -> bindEvents',evt);
         for(var c in evt){
             evt[c].apply(this);
         }
@@ -361,6 +391,7 @@
     stack.items = [];
     
     stack.next = function(){
+        log('jqMVC -> middleware -> stack.next()')
         stack.items.shift().call($,stack);
     };
     //end middleware stack
@@ -734,7 +765,8 @@
      * @param {object} obj - model object for the app to use.
      * @returns {object} $.jqMVC
      */
-    app.setModel = function(obj){
+    app.setModel = function(obj)
+    {
         model = obj;
         return app;
     };
@@ -744,7 +776,8 @@
      * @param {object} obj - the notification object for the app to use. default object just calls alert() and confirm() builtins with arguments.
      * @returns {object} $.jqMVC
      */
-    app.setNotification = function(obj){
+    app.setNotification = function(obj)
+    {
         notify = obj;
         return app;
     };
@@ -754,7 +787,8 @@
      * @param {object} obj - the progress object for the app to use. default object does nothing in either start() or stop() functions.
      * @returns {object} $.jqMVC
      */
-    app.setProgress = function(obj){
+    app.setProgress = function(obj)
+    {
         progress = obj;
         return app;
     };
@@ -776,7 +810,8 @@
      * @param {object} [eventData] - optional event data to pass to event.
      * @returns {object} $.jqMVC
      */
-    app.trigger = function(event,eventData){
+    app.trigger = function(event,eventData)
+    {
         emit(event,eventData);
         return app;
     };

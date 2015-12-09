@@ -21,6 +21,7 @@ window.svc = {};
 			throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
 		break;
 	}
+	log('using jQuery version '+n.join('.'));
 }($));
 
 //provide serialize object method for easy form processing

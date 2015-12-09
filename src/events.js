@@ -57,38 +57,64 @@ evt.bindHref = function()
 
 evt.bindForm = function()
 {
-	$(document).on('submit','form[ctrl][action][callback]',function(event){
+	$(document).on('submit','form[method][ctrl][action][callback]',function(event){
 		//refactor to support file uploads.
 		event.preventDefault();
-		var _this         = $(this),
-		before_function   = _this.attr('before'),
-		callback_function = _this.attr('callback'),
-		endpoint          = api_path+_this.attr('action'),
-		controller        = window.ctrl[_this.attr('ctrl')],
-		query_string      = _this.serializeObject();
-		console.log(query_string);
-		$.jqMVC.before();
-		_this.find('button[type="submit"]').prop('disabled',true);
-		if(typeof before_function !== "undefined" && before_function !== false){
-			var before_error = controller[before_function].call(_this);
-			if(before_error !== false){
-				$.jqMVC.alert(before_error,'error');
-				return;
-			}
+		
+		var $this = {};
+		$this.el     = $(this);
+		$this.method = $this.el.attr('method');
+		$this.action = $this.el.attr('action');
+		$this.ctrl   = $this.el.attr('ctrl');
+		$this.bf     = $this.el.attr('before');
+		$this.cb     = $this.el.attr('callback');
+		$this.isFile = !!$this.el.find(':input[type="file"]').length;
+		
+		if($this.isFile){
+			$this.data  = new FormData(this);
+			$this.type  = false;
+			$this.processData = false;
+		}else{
+			$this.data  = $this.el.serializeObject();
+			$this.type  = 'application/x-www-form-urlencoded; charset=UTF-8';
+			$this.processData = true;
 		}
-		if(typeof callback_function === "undefined" || callback_function === false){
-			$.jqMVC.alert('FORM DOES NOT SPECIFY CALLBACK. UNABLE TO CONTINUE.','error');
-			return;
+		
+		if(typeof $this.bf === 'function'){
+			new Promise(window.ctrl[$this.ctrl][$this.bf])
+			.then(function(){
+				formSubmit();
+			},function(){
+				//do we do anything else here or just let the before function handle the errors
+			});
+		}else{
+			formSubmit();
 		}
-		$.post(endpoint,query_string,function(data){
-			var data = JSON.parse(data);
-			controller[callback_function].call( _this, data );
-		}).fail(function( jqXHR, textStatus, errorThrown ){
-			controller[callback_function].call(_this,{'error':1,'message': 'An Unknown Error Occured: '+jqXHR.status +' '+ jqXHR.responseText});
-		}).always(function(){
-			$.jqMVC.done();
-			_this.find('button[type="submit"]').prop('disabled',false);
-		});
+		
+		log(window,$this);
+		
+		function formSubmit()
+		{
+			$this.el.find('button[type="submit"]').prop('disabled',true);
+			$.ajax({
+				url: api_path + $this.action,
+				type: ''+$this.method.toUpperCase(),
+				data:  $this.data,
+				contentType: $this.type,
+				cache: false,
+				processData:$this.processData,
+				success: function(data){
+					var data = JSON.parse(data);
+					window.ctrl[$this.ctrl][$this.cb].call( $this.el , data );
+				},
+				error: function(jqXHR, textStatus, errorThrown ){
+					window.ctrl[$this.ctrl][$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
+				}           
+			}).always(function(){
+				$this.el.find('button[type="submit"]').prop('disabled',false);
+			});
+		
+		}
 		return false;
 	});
 };
@@ -100,6 +126,7 @@ evt.bindModel = function()
 
 function unbindEvents()
 {
+	log('jqMVC -> unbindEvents',jQbound.length + 'events to be removed');
 	for(var i=0;i<jQbound.length;i++){
 		$(jQbound[i]).find("*").addBack().off();
 	}
@@ -109,6 +136,7 @@ function unbindEvents()
 
 function bindEvents()
 {
+	log('jqMVC -> bindEvents',evt);
 	for(var c in evt){
 		evt[c].apply(this);
 	}

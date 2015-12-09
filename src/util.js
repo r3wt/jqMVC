@@ -40,7 +40,7 @@ function checkRoutes()
 		for(var i = 0; i < actionList.length; i++)
 		{
 			var route = actionList[i];
-			console.log(route);
+			log(route);
 			var args = [];
 			for(var prop in actionList[i].data){
 				args.push(actionList[i].data[prop]);
@@ -48,10 +48,11 @@ function checkRoutes()
 			var mwStack = {
 				items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
 				halt : function(callback){
-					emit('mwReject',args);
+					emit('router.mw.reject');
 					callback.apply(this);
 				},
 				next : function(){
+					emit('router.mw.next');
 					if(mwStack.items.length > 0){
 						mwStack.items.shift().call(this,mwStack);
 					}else{
@@ -151,16 +152,16 @@ function handleRoutes(e)
 	}
 };
 
-function debugmsg(msg)
+function log()
 {
 	if (debug) {
-		window.console && console.log('$.jqMVC :: ' + msg);
+		window.console && console.log.apply(this,arguments);
 	}
 };
 
 function emit(event,eventData)
 {
-	debugmsg('emit -> `'+event+'`');
+	log('jQmv -> emit -> `'+event+'`');
 	$(app).trigger(event,eventData);
 };
 
