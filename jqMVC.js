@@ -82,6 +82,20 @@
         return path;
     }
     
+    function getQueryString() 
+    {
+        var str = (window.location.search || '?').substr(1);
+        if(str.length===0){
+            return {};
+        }else{
+            return str.trim().split('&').reduce(function (ret, param) {
+                var parts = param.replace(/\+/g, ' ').split('=');
+                ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+                return ret;
+            }, {});    
+        }
+    }
+    
     function checkRoutes()
     {
         var currentUrl = parseUrl(location.pathname);
@@ -101,14 +115,16 @@
                 var mwStack = {
                     items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
                     halt : function(callback){
-                        log('jqMVC -> router -> mw -> reject');
+                        log('jqMVC -> router -> route -> mw -> reject');
                         callback.apply(this);
                     },
                     next : function(){
-                        log('jqMVC -> router -> mw -> next');
                         if(mwStack.items.length > 0){
+                            log('jqMVC -> router -> route -> mw -> next');
                             mwStack.items.shift().call(this,mwStack);
                         }else{
+                            window.location.query = getQueryString();
+                            log('jqMVC -> router -> route -> callback')
                             route.callback.apply(this,args);
                         }
                     }
@@ -116,7 +132,7 @@
                 mwStack.next();
             }   
         }
-    };
+    }
     
     function parseUrl(url)
     {
@@ -140,7 +156,7 @@
         }
     
         return currentUrl;
-    };
+    }
     
     function getParameters(url)
     {
@@ -190,7 +206,7 @@
         }
     
         return dataList;
-    };
+    }
     
     function handleRoutes(e)
     {
@@ -203,20 +219,20 @@
         else if (!hasHashState && !hasPushState) {
             checkRoutes();
         }
-    };
+    }
     
     function log()
     {
         if (debug) {
             window.console && console.log.apply(console,arguments);
         }
-    };
+    }
     
     function emit(event,eventData)
     {
-        log('jqMVC -> emit -> `'+event+'`');
+        log('jqMVC -> emit -> '+event);
         $(app).trigger(event,eventData);
-    };
+    }
     
     //end internal utilities
     
