@@ -1,13 +1,4 @@
 //router
-var hasPushState = (history && history.pushState);    
-var hasHashState = !hasPushState && ("onhashchange" in window) && false;
-var routeList = [];
-var eventAdded = false;
-var currentUsedUrl = location.href;
-var firstRoute = true;
-var firstRun = false;
-var router = {};
-
 router.interval = null;
 router.currentId = "";
 router.currentParameters = {};

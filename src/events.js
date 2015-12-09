@@ -1,7 +1,4 @@
 //everything event related
-var jQselector = $.fn.init,
-jQbound = [],
-evt={};
 $.fn.init = function(selector)
 {
 	
@@ -126,7 +123,7 @@ evt.bindModel = function()
 
 function unbindEvents()
 {
-	log('jqMVC -> unbindEvents',jQbound.length + 'events to be removed');
+	log('jqMVC -> unbindEvents');
 	for(var i=0;i<jQbound.length;i++){
 		$(jQbound[i]).find("*").addBack().off();
 	}
@@ -136,7 +133,7 @@ function unbindEvents()
 
 function bindEvents()
 {
-	log('jqMVC -> bindEvents',evt);
+	log('jqMVC -> bindEvents');
 	for(var c in evt){
 		evt[c].apply(this);
 	}

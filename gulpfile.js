@@ -6,8 +6,7 @@ var doc   =  require('gulp-documentation'),
 	order = [
 		'header.js',//check
 		'env.js',//check
-		'settables.js',//check
-		'util.js',//check
+		'funcs.js',//check
 		'events.js',//check
 		'stack.js',//check
 		'router.js',//check

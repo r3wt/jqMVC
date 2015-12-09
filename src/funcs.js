@@ -48,11 +48,11 @@ function checkRoutes()
 			var mwStack = {
 				items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
 				halt : function(callback){
-					emit('router.mw.reject');
+					log('jqMVC -> router -> mw -> reject');
 					callback.apply(this);
 				},
 				next : function(){
-					emit('router.mw.next');
+					log('jqMVC -> router -> mw -> next');
 					if(mwStack.items.length > 0){
 						mwStack.items.shift().call(this,mwStack);
 					}else{
@@ -155,14 +155,25 @@ function handleRoutes(e)
 function log()
 {
 	if (debug) {
-		window.console && console.log.apply(this,arguments);
+		window.console && console.log.apply(console,arguments);
 	}
 };
 
 function emit(event,eventData)
 {
-	log('jQmv -> emit -> `'+event+'`');
+	log('jqMVC -> emit -> `'+event+'`');
 	$(app).trigger(event,eventData);
 };
 
 //end internal utilities
+
+//public utils
+$.fn.serializeObject = function(){ 
+	var b = this.serializeArray();
+	var a = {};
+	for(var i=0;i<b.length;i++){
+		a[b[i].name] = b[i].value;
+	}
+	return a;
+};
+//end public utils

@@ -7,72 +7,50 @@
  * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
  */
 ;!(function($,window,document){
-    //some browsers fail to set this. 
-    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-    
-    //controllers
-    window.ctrl = {};
-    
-    // services
-    window.svc = {};
-    
-    //require jQuery 2.1.3 or greater
-    (function($){
-        var v = $.fn.jquery.split('.'),
-            n = [];
-        for(var i=0;i<v.length;i++){
-            n.push(parseInt(v[i]));
-        }
-        switch(true){
-            case(n[0] < 2):
-            case(n[1] < 1):
-            case(n[2] < 3):
-                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-            break;
-        }
-        log('using jQuery version '+n.join('.'));
-    }($));
-    
-    //provide serialize object method for easy form processing
-    $.fn.serializeObject = function(){ 
-        var b = this.serializeArray();
-        var a = {};
-        for(var i=0;i<b.length;i++){
-            a[b[i].name] = b[i].value;
-        }
-        return a;
-    };
-    
-    
-    
-    //notifications
-    var notify = {
-        alert:function(message){
-            alert(message);
-        },
-        confirm:function(message,callback){
-            if(confirm(message)){
-                callback.apply(this);
+    var app = {},
+        hasPushState = (history && history.pushState),
+        hasHashState = !hasPushState && ("onhashchange" in window) && false,
+        routeList = [],
+        eventAdded = false,
+        currentUsedUrl = location.href,
+        firstRoute = true,
+        firstRun = false,
+        router = {},
+        notify = {
+            alert:function(message)
+            {
+                alert(message);
+            },
+            confirm:function(message,callback)
+            {
+                if(confirm(message)){
+                    callback.apply(this);
+                }
             }
-        }
-    };
+        },
+        progress = {
+            start: function(){},
+            stop: function(){}
+        },
+        view = {
+            render: function()
+            {
+                app.done();
+                throw 'You must implement a view library to use this feature.';
+            }
+        },
+        model = {},
+        stack = {},
+        jQselector = $.fn.init,
+        jQbound = [],
+        evt={};
     
-    //progress
-    var progress = {
-        start: function(){},
-        stop: function(){}
-    };
-        
-    //view
-    var view = {
-        render: function(){
-            app.done();
-            throw 'You must implement a view library to use this feature.';
-        }
-    };
+    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+    window.ctrl = {};
+    window.svc = {};
+    window.models = {};
     
-    //model
-    var model = {};
+    
     //internal utilities
     function isDefined(t)
     {
@@ -123,11 +101,11 @@
                 var mwStack = {
                     items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
                     halt : function(callback){
-                        emit('router.mw.reject');
+                        log('jqMVC -> router -> mw -> reject');
                         callback.apply(this);
                     },
                     next : function(){
-                        emit('router.mw.next');
+                        log('jqMVC -> router -> mw -> next');
                         if(mwStack.items.length > 0){
                             mwStack.items.shift().call(this,mwStack);
                         }else{
@@ -230,21 +208,29 @@
     function log()
     {
         if (debug) {
-            window.console && console.log.apply(this,arguments);
+            window.console && console.log.apply(console,arguments);
         }
     };
     
     function emit(event,eventData)
     {
-        log('jQmv -> emit -> `'+event+'`');
+        log('jqMVC -> emit -> `'+event+'`');
         $(app).trigger(event,eventData);
     };
     
     //end internal utilities
+    
+    //public utils
+    $.fn.serializeObject = function(){ 
+        var b = this.serializeArray();
+        var a = {};
+        for(var i=0;i<b.length;i++){
+            a[b[i].name] = b[i].value;
+        }
+        return a;
+    };
+    //end public utils
     //everything event related
-    var jQselector = $.fn.init,
-    jQbound = [],
-    evt={};
     $.fn.init = function(selector)
     {
         
@@ -369,7 +355,7 @@
     
     function unbindEvents()
     {
-        log('jqMVC -> unbindEvents',jQbound.length + 'events to be removed');
+        log('jqMVC -> unbindEvents');
         for(var i=0;i<jQbound.length;i++){
             $(jQbound[i]).find("*").addBack().off();
         }
@@ -379,32 +365,20 @@
     
     function bindEvents()
     {
-        log('jqMVC -> bindEvents',evt);
+        log('jqMVC -> bindEvents');
         for(var c in evt){
             evt[c].apply(this);
         }
     }
     //end events
     //middleware stack
-    var stack = {};
-    
     stack.items = [];
-    
     stack.next = function(){
-        log('jqMVC -> middleware -> stack.next()')
+        log('jqMVC -> middleware -> next()');
         stack.items.shift().call($,stack);
     };
     //end middleware stack
     //router
-    var hasPushState = (history && history.pushState);    
-    var hasHashState = !hasPushState && ("onhashchange" in window) && false;
-    var routeList = [];
-    var eventAdded = false;
-    var currentUsedUrl = location.href;
-    var firstRoute = true;
-    var firstRun = false;
-    var router = {};
-    
     router.interval = null;
     router.currentId = "";
     router.currentParameters = {};
@@ -496,6 +470,28 @@
     app.before = function()
     {
         progress.start();
+        return app;
+    };
+    
+    /**
+     * check whether the framework can run in this environment
+     * @returns {object} $.jqMVC
+     */
+    app.checkCompatibility = function()
+    {
+        var v = $.fn.jquery.split('.'),
+            n = [];
+        for(var i=0;i<v.length;i++){
+            n.push(parseInt(v[i]));
+        }
+        switch(true){
+            case(n[0] < 2):
+            case(n[1] < 1):
+            case(n[2] < 3):
+                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+            break;
+        }
+        log('using jQuery version '+n.join('.'));
         return app;
     };
     
@@ -749,15 +745,11 @@
      */
     app.run = function()
     {
-        if(!firstRun){
-            emit('firstRun');
-            firstRun = true;
-            app.add(function(){
-                app.go(location.href);
-            });
-            stack.next();
-        }
-        app.run = function(){};
+        app.add(function(){
+            app.go(location.href);
+        }); //add app.go to the middleware stack
+        stack.next();//start the middleware stack.
+        app.run = function(){};//remove app.run
     };
     
     /**
