@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_06:16:47 UTC
+ * @build     2015-11-10_06:25:54 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -344,7 +344,7 @@
                 $this.el.find('button[type="submit"]').prop('disabled',true);
                 $.ajax({
                     url: api_path + $this.action,
-                    type: ''+$this.method.toUpperCase(),
+                    type: $this.method.toUpperCase(),
                     data:  $this.data,
                     contentType: $this.type,
                     cache: false,

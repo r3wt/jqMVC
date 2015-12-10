@@ -1,8 +1,8 @@
 var doc   =  require('gulp-documentation'),
 	gulp  = require('gulp'),
 	fs    = require('fs'),
-	jsp = require("uglify-js").parser,
-	pro = require("uglify-js").uglify,
+	jsp = require('uglify-js').parser,
+	pro = require('uglify-js').uglify,
 	order = [
 		'header.js',//check
 		'env.js',//check
@@ -77,13 +77,13 @@ function getBuildDate()
 	var min = date2.getMinutes();
 	var sec = date2.getSeconds();
 
-	month = (month < 10 ? "0" : "") + month;
-	day = (day < 10 ? "0" : "") + day;
-	hour = (hour < 10 ? "0" : "") + hour;
-	min = (min < 10 ? "0" : "") + min;
-	sec = (sec < 10 ? "0" : "") + sec;
+	month = (month < 10 ? '0' : '') + month;
+	day = (day < 10 ? '0' : '') + day;
+	hour = (hour < 10 ? '0' : '') + hour;
+	min = (min < 10 ? '0' : '') + min;
+	sec = (sec < 10 ? '0' : '') + sec;
 
-	var str = date.getFullYear() + "-" + month + "-" + day + "_" +  hour + ":" + min + ":" + sec + ' UTC';
+	var str = date.getFullYear() + '-' + month + '-' + day + '_' +  hour + ':' + min + ':' + sec + ' UTC';
 
 	return str;
 }

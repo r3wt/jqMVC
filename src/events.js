@@ -95,7 +95,7 @@ evt.bindForm = function()
 			$this.el.find('button[type="submit"]').prop('disabled',true);
 			$.ajax({
 				url: api_path + $this.action,
-				type: ''+$this.method.toUpperCase(),
+				type: $this.method.toUpperCase(),
 				data:  $this.data,
 				contentType: $this.type,
 				cache: false,
