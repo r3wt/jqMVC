@@ -46,6 +46,16 @@ app.bind = function(name,callback)
 	return app;
 };
 
+/**
+ * Add a onetime event binding. bindOnce's payload doesnt execute until the default bindings have been bound, providing consistent behavior to the app. bindOnce functions are destroyed after payload execution.
+ * @param {function} callback - the callback function to execute when the binding is invoked. 
+ * @returns {object} $.jqMVC
+ */
+app.bindOnce = function(callback)
+{
+	evtOnce.push(callback);
+	return app;
+};
 
 /**
  * check whether the framework can run in this environment
@@ -53,19 +63,27 @@ app.bind = function(name,callback)
  */
 app.checkCompatibility = function()
 {
-	var v = $.fn.jquery.split('.'),
-		n = [];
-	for(var i=0;i<v.length;i++){
-		n.push(parseInt(v[i]));
+	try{
+		
+		var v = $.fn.jquery.split('.'),
+			n = [];
+		for(var i=0;i<v.length;i++){
+			n.push(parseInt(v[i]));
+		}
+		switch(true){
+			case(n[0] < 2):
+			case(n[1] < 1):
+			case(n[2] < 3):
+				throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+			break;
+		}
+		log('using jQuery version '+n.join('.'));
+		
 	}
-	switch(true){
-		case(n[0] < 2):
-		case(n[1] < 1):
-		case(n[2] < 3):
-			throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-		break;
+	catch(e){
+		emit('incompatible',{reason:e});
+		// todo create a way to prevent further execution of app.
 	}
-	log('using jQuery version '+n.join('.'));
 	return app;
 };
 
@@ -92,6 +110,15 @@ app.ctrl = function(name,obj)
 };
 
 /**
+ * returns an object of debug info to the app
+ * @returns {object} $.jqMVC
+ */
+app.debug = function()
+{
+	return scope;
+};
+
+/**
  * merge an array of data into the window object. use to define global variables.
  * @param {object} args - properties to create on window object.
  * @returns {object} $.jqMVC
@@ -105,7 +132,7 @@ app.data = function(args)
 };
 
 /**
- * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings.
+ * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.
  * @param {function} [callback]
  * @returns {object} $.jqMVC
  */
@@ -115,6 +142,7 @@ app.done = function(callback)
 	progress.stop();
 	unbindEvents();
 	bindEvents();
+	bindOneTimeEvents();
 	if(typeof callback === 'function'){
 		callback.apply(this);
 	}

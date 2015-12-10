@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_07:19:22 UTC
+ * @build     2015-11-10_07:58:58 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -44,23 +44,25 @@
         stack = {},
         jQselector = $.fn.init,
         jQbound = [],
-        evt={};
+        evt={},
+        evtOnce = [],
+        scope = this;
     
-    /* define things are exposed */
-    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-    window.ctrl = {};
-    window.svc = {};
-    window.models = {};
+        /* define things are exposed */
+        window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+        window.ctrl = {};
+        window.svc = {};
+        window.models = {};
     
-    /* define default global settings that the app uses*/
-    window.app_path         = '/',
-    window.api_path         = '/api/';
-    window.view_path        = '/views';
-    window.module_path      ='/modules';
-    window.model_path       = '/models';
-    window.element          = $('body');
-    window.debug            = false;
-    window.binding_override = false;
+        /* define default global settings that the app uses*/
+        window.app_path         = '/',
+        window.api_path         = '/api/';
+        window.view_path        = '/views';
+        window.module_path      ='/modules';
+        window.model_path       = '/models';
+        window.element          = $('body');
+        window.debug            = false;
+        window.binding_override = false;
     
     
     //internal utilities
@@ -396,9 +398,24 @@
     function bindEvents()
     {
         log('jqMVC -> bindEvents');
-        for(var c in evt){
-            evt[c].apply(this);
+        for(var ev in evt){
+            var c = evt[ev];
+            if(typeof c === 'function'){
+                c.apply(this);
+            }
         }
+    }
+    
+    function bindOneTimeEvents()
+    {
+        log('jqMVC -> bindOneTimeEvents');
+        for(var i=0;i<evtOnce.length;i++){
+            var c = evtOnce[i];
+            if(typeof c === 'function'){
+                c.apply(this);
+            }
+        }
+        evtOnce.length = 0;
     }
     //end events
     //middleware stack
@@ -491,6 +508,16 @@
         return app;
     };
     
+    /**
+     * Add a onetime event binding. bindOnce's payload doesnt execute until the default bindings have been bound, providing consistent behavior to the app. bindOnce functions are destroyed after payload execution.
+     * @param {function} callback - the callback function to execute when the binding is invoked. 
+     * @returns {object} $.jqMVC
+     */
+    app.bindOnce = function(callback)
+    {
+        evtOnce.push(callback);
+        return app;
+    };
     
     /**
      * check whether the framework can run in this environment
@@ -498,19 +525,27 @@
      */
     app.checkCompatibility = function()
     {
-        var v = $.fn.jquery.split('.'),
-            n = [];
-        for(var i=0;i<v.length;i++){
-            n.push(parseInt(v[i]));
+        try{
+            
+            var v = $.fn.jquery.split('.'),
+                n = [];
+            for(var i=0;i<v.length;i++){
+                n.push(parseInt(v[i]));
+            }
+            switch(true){
+                case(n[0] < 2):
+                case(n[1] < 1):
+                case(n[2] < 3):
+                    throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+                break;
+            }
+            log('using jQuery version '+n.join('.'));
+            
         }
-        switch(true){
-            case(n[0] < 2):
-            case(n[1] < 1):
-            case(n[2] < 3):
-                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-            break;
+        catch(e){
+            emit('incompatible',{reason:e});
+            // todo create a way to prevent further execution of app.
         }
-        log('using jQuery version '+n.join('.'));
         return app;
     };
     
@@ -537,6 +572,15 @@
     };
     
     /**
+     * returns an object of debug info to the app
+     * @returns {object} $.jqMVC
+     */
+    app.debug = function()
+    {
+        return scope;
+    };
+    
+    /**
      * merge an array of data into the window object. use to define global variables.
      * @param {object} args - properties to create on window object.
      * @returns {object} $.jqMVC
@@ -550,7 +594,7 @@
     };
     
     /**
-     * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings.
+     * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.
      * @param {function} [callback]
      * @returns {object} $.jqMVC
      */
@@ -560,6 +604,7 @@
         progress.stop();
         unbindEvents();
         bindEvents();
+        bindOneTimeEvents();
         if(typeof callback === 'function'){
             callback.apply(this);
         }

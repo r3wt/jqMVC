@@ -43,6 +43,11 @@
                 bind
               </a>
               <a
+                href='#bindOnce'
+                class='block bold'>
+                bindOnce
+              </a>
+              <a
                 href='#checkCompatibility'
                 class='block bold'>
                 checkCompatibility
@@ -61,6 +66,11 @@
                 href='#data'
                 class='block bold'>
                 data
+              </a>
+              <a
+                href='#debug'
+                class='block bold'>
+                debug
               </a>
               <a
                 href='#done'
@@ -231,6 +241,30 @@
       </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='bindOnce' class='mt0'>
+    bindOnce<span class='gray'>(callback)</span>
+  </h2>
+  <p>Add a onetime event binding. bindOnce&apos;s payload doesnt execute until the default bindings have been bound, providing consistent behavior to the app. bindOnce functions are destroyed after payload execution.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the callback function to execute when the binding is invoked.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
   <h2 id='checkCompatibility' class='mt0'>
     checkCompatibility<span class='gray'></span>
   </h2>
@@ -314,10 +348,24 @@
       </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='debug' class='mt0'>
+    debug<span class='gray'></span>
+  </h2>
+  <p>returns an object of debug info to the app</p>
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
   <h2 id='done' class='mt0'>
     done<span class='gray'>([callback])</span>
   </h2>
-  <p>emits <code>on.done</code> event, calls internal progress.start() unbinds all bound events then invokes all bindings.</p>
+  <p>emits <code>on.done</code> event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>

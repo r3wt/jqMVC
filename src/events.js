@@ -134,8 +134,23 @@ function unbindEvents()
 function bindEvents()
 {
 	log('jqMVC -> bindEvents');
-	for(var c in evt){
-		evt[c].apply(this);
+	for(var ev in evt){
+		var c = evt[ev];
+		if(typeof c === 'function'){
+			c.apply(this);
+		}
 	}
+}
+
+function bindOneTimeEvents()
+{
+	log('jqMVC -> bindOneTimeEvents');
+	for(var i=0;i<evtOnce.length;i++){
+		var c = evtOnce[i];
+		if(typeof c === 'function'){
+			c.apply(this);
+		}
+	}
+	evtOnce.length = 0;
 }
 //end events
