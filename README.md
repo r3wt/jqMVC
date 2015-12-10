@@ -1,6 +1,6 @@
 # jqMVC.js
 
-jqMVC.js is a SPA framework designed for usage with jQuery.
+jqMVC.js is a MVC/SPA framework designed for usage with jQuery.
 
 
 ---
@@ -34,9 +34,9 @@ jqMVC.js is a SPA framework designed for usage with jQuery.
 2. install gulp to project directory `npm install --save-dev gulp`
 3. install gulp-documentation `npm install --save-dev gulp-documentation`
 4. install uglify 1x `npm install uglify-js@1`
-5. run gulp `gulp`. builds in project directory following files:
-	- jqMVC.js
-	- jqMVC.min.js
+5. run gulp `gulp`. builds in `build` directory:
+	- jqmvc-x.x.x.js
+	- jqmvc-x.x.x.min.js
 	- docs/ (folder)
 
 ---
@@ -46,9 +46,9 @@ jqMVC.js is a SPA framework designed for usage with jQuery.
 
 ---
 ### Docs 
-* http://jqmvc.openex.info/docs/index.html
+* [view documentation](http://jqmvc.openex.info/build/docs/index.html)
 
 ---
 ### License
 
-https://github.com/r3wt/jqMVC/blob/master/LICENSE
+* [view license](https://github.com/r3wt/jqMVC/blob/master/LICENSE)

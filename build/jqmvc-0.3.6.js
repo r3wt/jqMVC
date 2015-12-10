@@ -1,10 +1,11 @@
-/*!
- * jqMVC.js (C) 2015 Garrett R Morris, MIT license http://github.com/r3wt/jqMVC.git
- * @author Garrett R Morris (https://github.com/r3wt)
- * @package jqMVC.js
- * @license MIT
- * @version 0.3.5
- * router contains heavily modified code originally written by camilo tapia https://github.com/camme/jquery-router-plugin
+/**
+ * jqMVC - The jQuery MVC Framework
+ *
+ * @version   0.3.6
+ * @link      https://github.com/r3wt/jqMVC
+ * @copyright (c) 2015 Garrett R. Morris
+ * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
+ * @build     2015-11-10_06:16:47 UTC
  */
 ;!(function($,window,document){
     var app = {},
