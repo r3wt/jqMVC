@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_07:15:37 UTC
+ * @build     2015-11-10_07:19:22 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -714,14 +714,36 @@
     };
     
     /**
-     * define a route object path Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.
+     * calls internal view.render method with all arguments passed. view is set via setView
+     * @returns {object} $.jqMVC
+     */
+    app.render = function()
+    {
+        view.render.apply(this,arguments);
+        return app;
+    };
+    
+    /**
+     * runs the app for the first time, then overwrites run so it cant be called again. executes all middleware, including the app itself. no params and no return value.
+     */
+    app.run = function()
+    {
+        app.add(function(){
+            app.go(location.href);
+        }); //add app.go to the middleware stack
+        stack.next();//start the middleware stack.
+        app.run = function(){};//remove app.run
+    };
+    
+    /**
+     * create a route object and add it to the router. Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.
      * @param {string} path - use `:name` for placeholders
      * @param {function} callback - the route closure.
      * @example $.jqMVC.path('/posts/:title/:id',function(title,id){ //your code here });
      * @example $.jqMVC.path(path,middleware1,middleware2,callback);
      * @returns {object} $.jqMVC
      */
-    app.path = function()
+    app.route = function()
     {
         var args = [];
         Array.prototype.push.apply( args, arguments );
@@ -748,28 +770,6 @@
             type: isRegExp ? "regexp" : "string",
         });
         return app;
-    };
-    
-    /**
-     * calls internal view.render method with all arguments passed. view is set via setView
-     * @returns {object} $.jqMVC
-     */
-    app.render = function()
-    {
-        view.render.apply(this,arguments);
-        return app;
-    };
-    
-    /**
-     * runs the app for the first time, then overwrites run so it cant be called again. executes all middleware, including the app itself. no params and no return value.
-     */
-    app.run = function()
-    {
-        app.add(function(){
-            app.go(location.href);
-        }); //add app.go to the middleware stack
-        stack.next();//start the middleware stack.
-        app.run = function(){};//remove app.run
     };
     
     /**
