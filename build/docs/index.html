@@ -28,16 +28,6 @@
                 add
               </a>
               <a
-                href='#addBinding'
-                class='block bold'>
-                addBinding
-              </a>
-              <a
-                href='#addSvc'
-                class='block bold'>
-                addSvc
-              </a>
-              <a
                 href='#alert'
                 class='block bold'>
                 alert
@@ -46,6 +36,11 @@
                 href='#before'
                 class='block bold'>
                 before
+              </a>
+              <a
+                href='#bind'
+                class='block bold'>
+                bind
               </a>
               <a
                 href='#checkCompatibility'
@@ -138,6 +133,11 @@
                 setView
               </a>
               <a
+                href='#svc'
+                class='block bold'>
+                svc
+              </a>
+              <a
                 href='#trigger'
                 class='block bold'>
                 trigger
@@ -159,68 +159,6 @@
           :
           <div class='force-inline'>
             <p>a valid callable accepting the middleware stack object as argument.</p>
-
-          </div>
-        </li>
-    </ul>
-      <h4>Returns</h4>
-      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
-      :
-      <div class='force-inline'>
-        <p>$.jqMVC</p>
-
-      </div>
-</section>
-</div><div class='py1'><section class='py2 clearfix'>
-  <h2 id='addBinding' class='mt0'>
-    addBinding<span class='gray'>(name, callback)</span>
-  </h2>
-  <p>Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app <code>runs</code>.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.</p>
-
-    <h4>Parameters</h4>
-    <ul class='suppress-p-margin'>
-        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
-          :
-          <div class='force-inline'>
-            <p>name of the function</p>
-
-          </div>
-        </li>
-        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
-          :
-          <div class='force-inline'>
-            <p>the callback function to execute when the binding is invoked.</p>
-
-          </div>
-        </li>
-    </ul>
-      <h4>Returns</h4>
-      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
-      :
-      <div class='force-inline'>
-        <p>$.jqMVC</p>
-
-      </div>
-</section>
-</div><div class='py1'><section class='py2 clearfix'>
-  <h2 id='addSvc' class='mt0'>
-    addSvc<span class='gray'>(name, mixedvar)</span>
-  </h2>
-  <p>Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.</p>
-
-    <h4>Parameters</h4>
-    <ul class='suppress-p-margin'>
-        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
-          :
-          <div class='force-inline'>
-            <p>the name for the service eg &apos;foobar&apos; would be accessed svc.foobar()</p>
-
-          </div>
-        </li>
-        <li>Any <strong>mixedvar</strong>
-          :
-          <div class='force-inline'>
-            <p>an object or callable function are recommended, but a service can be anything.</p>
 
           </div>
         </li>
@@ -262,6 +200,37 @@
       </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='bind' class='mt0'>
+    bind<span class='gray'>(name, callback)</span>
+  </h2>
+  <p>Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app <code>runs</code>.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>name of the function</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the callback function to execute when the binding is invoked.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
   <h2 id='checkCompatibility' class='mt0'>
     checkCompatibility<span class='gray'></span>
   </h2>
@@ -279,7 +248,7 @@
   <h2 id='confirm' class='mt0'>
     confirm<span class='gray'></span>
   </h2>
-  <p>Call the internal notify.confirm() method, which is set by by setAlert(object)</p>
+  <p>Call the internal notify.confirm() method, which is set by by setNotification(object)</p>
 
       <h4>Returns</h4>
       <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
@@ -397,7 +366,7 @@
   <h2 id='listen' class='mt0'>
     listen<span class='gray'>(event, callback)</span>
   </h2>
-  <p>binds an event listener to $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures.</p>
+  <p>allows user to set event listeners on $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures, where listenOnce() should be bound instead.</p>
 
     <h4>Parameters</h4>
     <ul class='suppress-p-margin'>
@@ -694,6 +663,37 @@
           :
           <div class='force-inline'>
             <p>the view object for the app to use only builtin method is render() and the default method throws and emits <code>viewError</code> event.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='svc' class='mt0'>
+    svc<span class='gray'>(name, mixedvar)</span>
+  </h2>
+  <p>Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name for the service eg &apos;foobar&apos; would be accessed svc.foobar()</p>
+
+          </div>
+        </li>
+        <li>Any <strong>mixedvar</strong>
+          :
+          <div class='force-inline'>
+            <p>an object or callable function are recommended, but a service can be anything.</p>
 
           </div>
         </li>

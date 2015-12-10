@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_06:43:00 UTC
+ * @build     2015-11-10_07:15:37 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -457,32 +457,6 @@
     };
     
     /**
-     * Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app `runs`.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.
-     * @param {string} name - name of the function
-     * @param {function} callback - the callback function to execute when the binding is invoked. 
-     * @returns {object} $.jqMVC
-     */
-    app.addBinding = function(name,callback)
-    {
-        if(binding_override || !evt.hasOwnProperty(name)){
-            evt[name] = callback;
-        }
-        return app;
-    };
-    
-    /**
-     * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
-     * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
-     * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
-     * @returns {object} $.jqMVC
-     */
-    app.addSvc = function(name,mixedvar)
-    {
-        svc[name] = mixedvar;//services are flexible types.
-        return app;
-    };
-    
-    /**
      * Call the internal notify.alert() method, which is set by by setNotification(object)
      * @returns {object} $.jqMVC
      */
@@ -502,6 +476,21 @@
         progress.start();
         return app;
     };
+    
+    /**
+     * Add a global persistent event binding to the event loop. think of it as the SPA equivalent of $(document).ready, as any bindings you add will be executed everytime the app `runs`.the reason for this functionality is that many changes to the document can leave dangling events and delegated events can break etc, so jqMVC keeps track of all bound events and destroys and rebinds them every time that done() is called.
+     * @param {string} name - name of the function
+     * @param {function} callback - the callback function to execute when the binding is invoked. 
+     * @returns {object} $.jqMVC
+     */
+    app.bind = function(name,callback)
+    {
+        if(binding_override || !evt.hasOwnProperty(name)){
+            evt[name] = callback;
+        }
+        return app;
+    };
+    
     
     /**
      * check whether the framework can run in this environment
@@ -526,7 +515,7 @@
     };
     
     /**
-     * Call the internal notify.confirm() method, which is set by by setAlert(object)
+     * Call the internal notify.confirm() method, which is set by by setNotification(object)
      * @returns {object} $.jqMVC
      */
     app.confirm = function()
@@ -662,7 +651,7 @@
     };
     
     /**
-     * binds an event listener to $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures.
+     * allows user to set event listeners on $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures, where listenOnce() should be bound instead.
      * @param {string} event - name of event to listen for
      * @param {function} callback - the callback to bind for this event.
      * @returns {object} $.jqMVC
@@ -681,6 +670,7 @@
      */
     app.listenOnce = function(event,callback)
     {
+        $(app).off(event,callback);
         $(app).one(event,callback);
         return app;
     };
@@ -823,6 +813,18 @@
     app.setView = function(obj)
     {
         view = obj;
+        return app;
+    };
+    
+    /**
+     * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
+     * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
+     * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
+     * @returns {object} $.jqMVC
+     */
+    app.svc = function(name,mixedvar)
+    {
+        svc[name] = mixedvar;//services are flexible types.
         return app;
     };
     
