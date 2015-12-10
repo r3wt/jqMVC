@@ -63,7 +63,9 @@ function checkRoutes()
 				items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
 				halt : function(callback){
 					log('jqMVC -> router -> route -> mw -> reject');
-					callback.apply(this);
+					if(typeof callback === 'function'){
+						callback.apply(this);
+					}
 				},
 				next : function(){
 					if(mwStack.items.length > 0){

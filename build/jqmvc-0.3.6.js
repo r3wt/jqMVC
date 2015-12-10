@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_06:34:03 UTC
+ * @build     2015-11-10_06:43:00 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -128,7 +128,9 @@
                     items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
                     halt : function(callback){
                         log('jqMVC -> router -> route -> mw -> reject');
-                        callback.apply(this);
+                        if(typeof callback === 'function'){
+                            callback.apply(this);
+                        }
                     },
                     next : function(){
                         if(mwStack.items.length > 0){
