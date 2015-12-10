@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_06:25:54 UTC
+ * @build     2015-11-10_06:34:03 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -46,10 +46,21 @@
         jQbound = [],
         evt={};
     
+    /* define things are exposed */
     window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
     window.ctrl = {};
     window.svc = {};
     window.models = {};
+    
+    /* define default global settings that the app uses*/
+    window.app_path         = '/',
+    window.api_path         = '/api/';
+    window.view_path        = '/views';
+    window.module_path      ='/modules';
+    window.model_path       = '/models';
+    window.element          = $('body');
+    window.debug            = false;
+    window.binding_override = false;
     
     
     //internal utilities
@@ -824,17 +835,5 @@
         emit(event,eventData);
         return app;
     };
-    //set default app settings
-    app.data({
-        app_path    : window.location.origin,
-        api_path    : '/api/',
-        view_path   : '/views',
-        module_path :'/modules',
-        model_path  : '/models',
-        element     : $('body'),
-        debug       : false,
-        binding_override: false,
-    });
-    
     $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));

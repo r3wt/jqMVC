@@ -36,8 +36,19 @@ var app = {},
 	jQbound = [],
 	evt={};
 
+/* define things are exposed */
 window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
 window.ctrl = {};
 window.svc = {};
 window.models = {};
+
+/* define default global settings that the app uses*/
+window.app_path         = '/',
+window.api_path         = '/api/';
+window.view_path        = '/views';
+window.module_path      ='/modules';
+window.model_path       = '/models';
+window.element          = $('body');
+window.debug            = false;
+window.binding_override = false;
 
