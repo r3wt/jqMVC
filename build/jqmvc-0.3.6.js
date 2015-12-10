@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_08:05:41 UTC
+ * @build     2015-11-10_08:06:48 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -45,8 +45,7 @@
         jQselector = $.fn.init,
         jQbound = [],
         evt={},
-        evtOnce = [],
-        scope = this;
+        evtOnce = [];
     
         /* define things are exposed */
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -569,15 +568,6 @@
     {
         ctrl[name] = obj;
         return app;
-    };
-    
-    /**
-     * returns an object of debug info to the app
-     * @returns {object} $.jqMVC
-     */
-    app.debug = function()
-    {
-        return scope;
     };
     
     /**

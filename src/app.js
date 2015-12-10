@@ -110,15 +110,6 @@ app.ctrl = function(name,obj)
 };
 
 /**
- * returns an object of debug info to the app
- * @returns {object} $.jqMVC
- */
-app.debug = function()
-{
-	return scope;
-};
-
-/**
  * merge an array of data into the window object. use to define global variables.
  * @param {object} args - properties to create on window object.
  * @returns {object} $.jqMVC
