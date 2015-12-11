@@ -129,7 +129,7 @@ app.data = function(args)
  */
 app.done = function(callback)
 {
-	emit('on.done');
+    emit('on.done');
 	progress.stop();
 	unbindEvents();
 	bindEvents();
@@ -137,7 +137,7 @@ app.done = function(callback)
 	if(typeof callback === 'function'){
 		callback.apply(this);
 	}
-	return app;
+	throw 'accept';
 };
 
 /**
@@ -167,6 +167,18 @@ app.go = function(url)
 		location.hash = hash;
 	}
 	return app;
+};
+
+/**
+ * Router Control Function - Used to halt the router. accepts a callback function as a parameter. you should continue execution in this callback, ie redirecting to a new route, showing an error, whatever it is.
+ * @returns {object} $.jqMVC
+ */
+app.halt = function(callback){
+    log('jqMVC -> router -> route -> mw -> reject');
+    if(typeof callback === 'function'){
+        callback.apply(this);
+    }
+	throw 'halt';
 };
 
 /**
@@ -285,6 +297,16 @@ app.merge = function(){
 app.model = function(name,obj){
 	model[name] = obj;
 	return app;
+};
+
+/**
+ * Router Control Function - Used to pass on a route, possibly to the next matching route. if no additional match is found, notFound is emitted.
+ * @returns {object} $.jqMVC
+ */
+app.pass = function()
+{
+    throw 'pass';
+    return app;
 };
 
 /**
@@ -412,44 +434,4 @@ app.trigger = function(event,eventData)
 {
 	emit(event,eventData);
 	return app;
-};
-
-/**
- * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.
- * @param {function} [callback]
- * @returns {object} $.jqMVC
- */
-app.done = function(callback)
-{
-    emit('on.done');
-	progress.stop();
-	unbindEvents();
-	bindEvents();
-	bindOneTimeEvents();
-	if(typeof callback === 'function'){
-		callback.apply(this);
-	}
-	throw 'accept';
-};
-
-/**
- * Router Control Function - Used to halt the router. accepts a callback function as a parameter. you should continue execution in this callback, ie redirecting to a new route, showing an error, whatever it is.
- * @returns {object} $.jqMVC
- */
-app.halt = function(callback){
-    log('jqMVC -> router -> route -> mw -> reject');
-    if(typeof callback === 'function'){
-        callback.apply(this);
-    }
-	throw 'halt';
-};
-
-/**
- * Router Control Function - Used to pass on a route, possibly to the next matching route. if no additional match is found, notFound is emitted.
- * @returns {object} $.jqMVC
- */
-app.pass = function()
-{
-    throw 'pass';
-    return app;
 };
