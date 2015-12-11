@@ -45,42 +45,56 @@ function getQueryString()
 
 function checkRoutes()
 {
-	var currentUrl = parseUrl(location.pathname);
-	// check if a route exists.
-	var actionList = getParameters(currentUrl);
-	if(actionList.length === 0){
-		emit('notFound');
-	}else{
-		for(var i = 0; i < actionList.length; i++)
-		{
-			var route = actionList[i];
-			log(route);
-			var args = [];
-			for(var prop in actionList[i].data){
-				args.push(actionList[i].data[prop]);
+    var currentUrl = parseUrl(location.pathname);
+    var actionList = getParameters(currentUrl);
+	var matches = actionList.slice();
+	console.log(matches);
+    tryRoutes(matches);
+}
+
+function tryRoutes(routes) 
+{
+    if(routes.length === 0){
+        emit('notFound');
+    }else{
+        var route = routes.shift();
+        var nextRoutes = routes.slice();
+		try{
+            var args = [];
+            for(var prop in route.data){
+                args.push(route.data[prop]);
+            }
+            var mwStack = {
+                items: route.middleware.slice(),
+                next : function(){
+                    if(mwStack.items.length > 0){
+                        log('jqMVC -> router -> route -> mw -> next');
+                        mwStack.items.shift().call(this,mwStack);
+                    }else{
+                        window.location.query = getQueryString();
+                        log('jqMVC -> router -> route -> callback')
+                        route.callback.apply(this,args);
+
+                    }
+                }
+            };
+            mwStack.next(); 
+		}
+		catch(e){
+			var reason = e.toString();
+			switch(reason){
+				case 'pass':
+					tryRoutes(nextRoutes);//try the next route in the stack.
+				break;
+				case 'halt':
+				case 'accept':
+				default:
+				break;
 			}
-			var mwStack = {
-				items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
-				halt : function(callback){
-					log('jqMVC -> router -> route -> mw -> reject');
-					if(typeof callback === 'function'){
-						callback.apply(this);
-					}
-				},
-				next : function(){
-					if(mwStack.items.length > 0){
-						log('jqMVC -> router -> route -> mw -> next');
-						mwStack.items.shift().call(this,mwStack);
-					}else{
-						window.location.query = getQueryString();
-						log('jqMVC -> router -> route -> callback')
-						route.callback.apply(this,args);
-					}
-				}
-			};
-			mwStack.next();
-		}   
-	}
+			log('jqMVC -> router -> '+reason);
+		}
+    }
+	return false;
 }
 
 function parseUrl(url)
@@ -97,9 +111,8 @@ function parseUrl(url)
 		return '';
 		}
 	}
-
-	// and if the last character is a slash, we just remove it
 	
+	// and if the last character is a slash, we just remove it
 	if(currentUrl.slice(-1) == '/'){
 		currentUrl = currentUrl.substring(0, currentUrl.length-1);
 	}
@@ -118,8 +131,6 @@ function getParameters(url)
 				var obj = (function(){ return route; }());
 				obj.data = {matches: result};
 				dataList.push(obj);
-				// break after first hit
-				break;
 			}
 		} else {
 			var currentUrlParts = url.split("/");
@@ -148,7 +159,6 @@ function getParameters(url)
 					obj.data = data;
 					dataList.push(obj);
 					router.currentParameters = data;
-					break; 
 				}
 			}
 		}

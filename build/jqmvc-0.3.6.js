@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-10_08:06:48 UTC
+ * @build     2015-11-11_14:23:17 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -112,27 +112,26 @@
     function checkRoutes()
     {
         var currentUrl = parseUrl(location.pathname);
-        // check if a route exists.
         var actionList = getParameters(currentUrl);
-        if(actionList.length === 0){
+        var matches = actionList.slice();
+        console.log(matches);
+        tryRoutes(matches);
+    }
+    
+    function tryRoutes(routes) 
+    {
+        if(routes.length === 0){
             emit('notFound');
         }else{
-            for(var i = 0; i < actionList.length; i++)
-            {
-                var route = actionList[i];
-                log(route);
+            var route = routes.shift();
+            var nextRoutes = routes.slice();
+            try{
                 var args = [];
-                for(var prop in actionList[i].data){
-                    args.push(actionList[i].data[prop]);
+                for(var prop in route.data){
+                    args.push(route.data[prop]);
                 }
                 var mwStack = {
-                    items: route.middleware.slice(),//if we dont clone the array, the stored middleware array will get truncated.
-                    halt : function(callback){
-                        log('jqMVC -> router -> route -> mw -> reject');
-                        if(typeof callback === 'function'){
-                            callback.apply(this);
-                        }
-                    },
+                    items: route.middleware.slice(),
                     next : function(){
                         if(mwStack.items.length > 0){
                             log('jqMVC -> router -> route -> mw -> next');
@@ -141,12 +140,27 @@
                             window.location.query = getQueryString();
                             log('jqMVC -> router -> route -> callback')
                             route.callback.apply(this,args);
+    
                         }
                     }
                 };
-                mwStack.next();
-            }   
+                mwStack.next(); 
+            }
+            catch(e){
+                var reason = e.toString();
+                switch(reason){
+                    case 'pass':
+                        tryRoutes(nextRoutes);//try the next route in the stack.
+                    break;
+                    case 'halt':
+                    case 'accept':
+                    default:
+                    break;
+                }
+                log('jqMVC -> router -> '+reason);
+            }
         }
+        return false;
     }
     
     function parseUrl(url)
@@ -184,8 +198,6 @@
                     var obj = (function(){ return route; }());
                     obj.data = {matches: result};
                     dataList.push(obj);
-                    // break after first hit
-                    break;
                 }
             } else {
                 var currentUrlParts = url.split("/");
@@ -214,7 +226,6 @@
                         obj.data = data;
                         dataList.push(obj);
                         router.currentParameters = data;
-                        break; 
                     }
                 }
             }
@@ -872,6 +883,46 @@
     app.trigger = function(event,eventData)
     {
         emit(event,eventData);
+        return app;
+    };
+    
+    /**
+     * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.
+     * @param {function} [callback]
+     * @returns {object} $.jqMVC
+     */
+    app.done = function(callback)
+    {
+        emit('on.done');
+        progress.stop();
+        unbindEvents();
+        bindEvents();
+        bindOneTimeEvents();
+        if(typeof callback === 'function'){
+            callback.apply(this);
+        }
+        throw 'accept';
+    };
+    
+    /**
+     * Router Control Function - Used to halt the router. accepts a callback function as a parameter. you should continue execution in this callback, ie redirecting to a new route, showing an error, whatever it is.
+     * @returns {object} $.jqMVC
+     */
+    app.halt = function(callback){
+        log('jqMVC -> router -> route -> mw -> reject');
+        if(typeof callback === 'function'){
+            callback.apply(this);
+        }
+        throw 'halt';
+    };
+    
+    /**
+     * Router Control Function - Used to pass on a route, possibly to the next matching route. if no additional match is found, notFound is emitted.
+     * @returns {object} $.jqMVC
+     */
+    app.pass = function()
+    {
+        throw 'pass';
         return app;
     };
     $.jqMVC = app;//expose jqMVC
