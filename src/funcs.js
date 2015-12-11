@@ -59,6 +59,12 @@ function tryRoutes(routes)
     }else{
         var route = routes.shift();
         var nextRoutes = routes.slice();
+		var oldOnError = window.onerror;
+		window.onerror = function(message, file, lineNumber) { return true; };
+		function acceptRoute(){
+			window.onerror = oldOnError;
+			log('jqMVC -> router -> accept');
+		}
 		try{
             var args = [];
             for(var prop in route.data){
@@ -78,7 +84,9 @@ function tryRoutes(routes)
                     }
                 }
             };
-            mwStack.next(); 
+            mwStack.next();
+			$(router).off('accept',acceptRoute);
+			$(router).one('accept',acceptRoute);
 		}
 		catch(e){
 			var reason = e.toString();
@@ -87,10 +95,10 @@ function tryRoutes(routes)
 					tryRoutes(nextRoutes);//try the next route in the stack.
 				break;
 				case 'halt':
-				case 'accept':
 				default:
 				break;
 			}
+			window.onerror = oldOnError;
 			log('jqMVC -> router -> '+reason);
 		}
     }

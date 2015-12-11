@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-11_14:48:43 UTC
+ * @build     2015-11-11_18:20:49 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -125,6 +125,12 @@
         }else{
             var route = routes.shift();
             var nextRoutes = routes.slice();
+            var oldOnError = window.onerror;
+            window.onerror = function(message, file, lineNumber) { return true; };
+            function acceptRoute(){
+                window.onerror = oldOnError;
+                log('jqMVC -> router -> accept');
+            }
             try{
                 var args = [];
                 for(var prop in route.data){
@@ -144,7 +150,9 @@
                         }
                     }
                 };
-                mwStack.next(); 
+                mwStack.next();
+                $(router).off('accept',acceptRoute);
+                $(router).one('accept',acceptRoute);
             }
             catch(e){
                 var reason = e.toString();
@@ -153,10 +161,10 @@
                         tryRoutes(nextRoutes);//try the next route in the stack.
                     break;
                     case 'halt':
-                    case 'accept':
                     default:
                     break;
                 }
+                window.onerror = oldOnError;
                 log('jqMVC -> router -> '+reason);
             }
         }
@@ -608,7 +616,8 @@
         if(typeof callback === 'function'){
             callback.apply(this);
         }
-        throw 'accept';
+        $(router).trigger('accept');
+        return false;
     };
     
     /**
@@ -662,46 +671,30 @@
         if(modules.length > 0){
             app.add(function(stack){
                 function loadScript(url) {
-                    var scriptPromise = new Promise(function(resolve, reject) {
-                        var script = document.createElement('script');
-                        script.src = url;
-                        script.addEventListener('load', function() {
-                            resolve(url);
-                        }, false);
-                        
-                        script.addEventListener('error', function() {
-                            reject(url);
-                        }, false);
-                        document.body.appendChild(script);
-                    });
-                    return scriptPromise;
+                    var script = document.createElement('script');
+                    script.src = url;
+                    script.addEventListener('load', function() {
+                        returned++;
+                        $(state).trigger('check');
+                    }, false);
+                    
+                    script.addEventListener('error', function() {
+                        returned++;
+                        $(state).trigger('check');
+                    }, false);
+                    document.body.appendChild(script);
                 }
-    
-                new Promise(function(resolve, reject) {
-                    //load All scripts
-                    var returned = 0,
-                    state={};
-                    for(var i=0;i<modules.length;i++){
-                        loadScript(getPath() + module_path + modules[i]) 
-                        .then(
-                            function(){
-                                returned++;
-                                $(state).trigger('check');
-                            },
-                            function(){
-                                returned++;
-                                $(state).trigger('check');
-                            }
-                        );
+                //load All scripts
+                var returned = 0,
+                state={};
+                for(var i=0;i<modules.length;i++){
+                    loadScript(getPath() + module_path + modules[i]);
+                }
+                $(state).on('check',function(){
+                    if(returned >= modules.length){
+                        stack.next();
                     }
-                    $(state).on('check',function(){
-                        if(returned >= modules.length){
-                            resolve();
-                        }
-                    });
-                    //todo add safeguard polling to reject promise after certain time?
-                    //or find a better way.
-                }).then(stack.next,stack.next);
+                });
             });
         }
         return app;
@@ -817,11 +810,10 @@
         var route = args.shift(); //first arg is always the path
         var callback = args.pop(); //last arg is the callback
         var middleware = args; //safe to assume remaining arguments are middleware
-        
-        route = getPath().replace(/\/+$/, '') + route;
         var isRegExp = typeof route == "object";
     
         if (!isRegExp) {
+            route = getPath().replace(/\/+$/, '') + route;
             // remove the last slash to unifiy all routes
             if (route.lastIndexOf("/") == route.length - 1) {
                 route = route.substring(0, route.length - 1);
@@ -905,6 +897,12 @@
     {
         emit(event,eventData);
         return app;
+    };
+    
+    app.debug = function(){
+        return {
+            routeList:routeList
+        };
     };
     $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));
