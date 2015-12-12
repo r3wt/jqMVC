@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-12_16:53:39 UTC
+ * @build     2015-11-12_16:56:46 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -470,8 +470,6 @@
         return router.currentParameters;
     };
     //endrouter
-    var app = {};
-    
     /**
      * Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()
      * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
@@ -763,7 +761,6 @@
     app.pass = function()
     {
         throw 'pass';
-        return app;
     };
     
     /**
