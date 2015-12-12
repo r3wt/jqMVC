@@ -23,24 +23,17 @@ function isApp(t)
 function getPath()
 {
 	var path = app_path.replace(window.location.origin,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
-	if(path.length === 0){
-		path +='/';
-	}
-	return path;
+	return (!path.length ? '/' : path);
 }
 
 function getQueryString() 
 {
 	var str = (window.location.search || '?').substr(1);
-    if(str.length===0){
-        return {};
-    }else{
-		return str.trim().split('&').reduce(function (ret, param) {
-			var parts = param.replace(/\+/g, ' ').split('=');
-			ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
-			return ret;
-		}, {});	
-	}
+	return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
+		var parts = param.replace(/\+/g, ' ').split('=');
+		ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+		return ret;
+	}, {}));	
 }
 
 function checkRoutes()
