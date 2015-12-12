@@ -1,5 +1,3 @@
-var app = {};
-
 /**
  * Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()
  * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
@@ -291,7 +289,6 @@ app.model = function(name,obj){
 app.pass = function()
 {
     throw 'pass';
-    return app;
 };
 
 /**
