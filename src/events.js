@@ -1,10 +1,10 @@
 //everything event related
-$.fn.init = function(selector)
+$.fn.init = function(selector,context)
 {
 	
 	var trackSelector =  isDefined(selector) && !isApp(selector) && (( isString(selector) || isWindow(selector) || isDocument(selector) ) !== false);
 	
-	var jQinstance = new jQselector(selector,window.document,$);
+	var jQinstance = new jQselector(selector,context||window.document,$);
 	
 	// we only track events bound on element(s), document, and window. 
 	// events bound on plain objects, such as those that are internally 

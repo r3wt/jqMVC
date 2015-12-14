@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.3.7
+ * @version   0.3.8
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-12_16:56:46 UTC
+ * @build     2015-11-14_22:27:16 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -107,7 +107,7 @@
         var currentUrl = parseUrl(location.pathname);
         var actionList = getParameters(currentUrl);
         var matches = actionList.slice();
-        console.log(matches);
+        log(matches);
         tryRoutes(matches);
     }
     
@@ -273,12 +273,12 @@
     };
     //end public utils
     //everything event related
-    $.fn.init = function(selector)
+    $.fn.init = function(selector,context)
     {
         
         var trackSelector =  isDefined(selector) && !isApp(selector) && (( isString(selector) || isWindow(selector) || isDocument(selector) ) !== false);
         
-        var jQinstance = new jQselector(selector,window.document,$);
+        var jQinstance = new jQselector(selector,context||window.document,$);
         
         // we only track events bound on element(s), document, and window. 
         // events bound on plain objects, such as those that are internally 

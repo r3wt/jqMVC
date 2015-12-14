@@ -41,7 +41,7 @@ function checkRoutes()
     var currentUrl = parseUrl(location.pathname);
     var actionList = getParameters(currentUrl);
 	var matches = actionList.slice();
-	console.log(matches);
+	log(matches);
     tryRoutes(matches);
 }
 
