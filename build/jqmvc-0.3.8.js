@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-18_04:05:28 UTC
+ * @build     2015-11-18_04:12:01 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -157,7 +157,9 @@
                         tryRoutes(nextRoutes);//try the next route in the stack.
                     break;
                     case 'halt':
+                    break;
                     default:
+                        throw e; //0.3.8 rethrow if not router control exception.
                     break;
                 }
                 window.onerror = oldOnError;
