@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2015-11-14_22:27:16 UTC
+ * @build     2015-11-18_04:05:28 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -69,18 +69,22 @@
     {
         return typeof t !== 'undefined';
     }
+    
     function isString(t)
     {
         return typeof t === 'string';
     }
+    
     function isWindow(t)
     {
         return t && t.document && t.location && t.alert && t.setInterval;
     }
+    
     function isDocument(t)
     {
         return window.document === t;
     }
+    
     function isApp(t)
     {
         return t === app;
@@ -132,14 +136,13 @@
                 var mwStack = {
                     items: route.middleware.slice(),
                     next : function(){
+                        window.location.query = getQueryString(); // #75
                         if(mwStack.items.length > 0){
                             log('jqMVC -> router -> route -> mw -> next');
                             mwStack.items.shift().call(this,mwStack);
                         }else{
-                            window.location.query = getQueryString();
-                            log('jqMVC -> router -> route -> callback')
+                            log('jqMVC -> router -> route -> callback');
                             route.callback.apply(this,args);
-    
                         }
                     }
                 };
@@ -260,10 +263,8 @@
         $(app).trigger(event,eventData);
     }
     
-    //end internal utilities
-    
-    //public utils
-    $.fn.serializeObject = function(){ 
+    $.fn.serializeObject = function()
+    { 
         var b = this.serializeArray();
         var a = {};
         for(var i=0;i<b.length;i++){
@@ -271,7 +272,6 @@
         }
         return a;
     };
-    //end public utils
     //everything event related
     $.fn.init = function(selector,context)
     {
@@ -428,13 +428,12 @@
         evtOnce.length = 0;
     }
     //end events
-    //middleware stack
     stack.items = [];
+    
     stack.next = function(){
         log('jqMVC -> middleware -> next()');
         stack.items.shift().call($,stack);
     };
-    //end middleware stack
     //router
     router.interval = null;
     router.currentId = "";

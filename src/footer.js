@@ -1,2 +1,2 @@
-	$.jqMVC = app;//expose jqMVC
+    $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));

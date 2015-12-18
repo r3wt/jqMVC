@@ -5,8 +5,8 @@
  */
 app.add = function(middleware)
 {
-	stack.items.push(middleware);
-	return app;
+    stack.items.push(middleware);
+    return app;
 };
 
 /**
@@ -15,8 +15,8 @@ app.add = function(middleware)
  */
 app.alert = function()
 {
-	notify.alert.apply(this,arguments);
-	return app;
+    notify.alert.apply(this,arguments);
+    return app;
 };
 
 
@@ -26,8 +26,8 @@ app.alert = function()
  */
 app.before = function()
 {
-	progress.start();
-	return app;
+    progress.start();
+    return app;
 };
 
 /**
@@ -38,10 +38,10 @@ app.before = function()
  */
 app.bind = function(name,callback)
 {
-	if(binding_override || !evt.hasOwnProperty(name)){
-		evt[name] = callback;
-	}
-	return app;
+    if(binding_override || !evt.hasOwnProperty(name)){
+        evt[name] = callback;
+    }
+    return app;
 };
 
 /**
@@ -51,8 +51,8 @@ app.bind = function(name,callback)
  */
 app.bindOnce = function(callback)
 {
-	evtOnce.push(callback);
-	return app;
+    evtOnce.push(callback);
+    return app;
 };
 
 /**
@@ -61,28 +61,28 @@ app.bindOnce = function(callback)
  */
 app.checkCompatibility = function()
 {
-	try{
-		
-		var v = $.fn.jquery.split('.'),
-			n = [];
-		for(var i=0;i<v.length;i++){
-			n.push(parseInt(v[i]));
-		}
-		switch(true){
-			case(n[0] < 2):
-			case(n[1] < 1):
-			case(n[2] < 3):
-				throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-			break;
-		}
-		log('using jQuery version '+n.join('.'));
-		
-	}
-	catch(e){
-		emit('incompatible',{reason:e});
-		// todo create a way to prevent further execution of app.
-	}
-	return app;
+    try{
+        
+        var v = $.fn.jquery.split('.'),
+            n = [];
+        for(var i=0;i<v.length;i++){
+            n.push(parseInt(v[i]));
+        }
+        switch(true){
+            case(n[0] < 2):
+            case(n[1] < 1):
+            case(n[2] < 3):
+                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
+            break;
+        }
+        log('using jQuery version '+n.join('.'));
+        
+    }
+    catch(e){
+        emit('incompatible',{reason:e});
+        // todo create a way to prevent further execution of app.
+    }
+    return app;
 };
 
 /**
@@ -91,8 +91,8 @@ app.checkCompatibility = function()
  */
 app.confirm = function()
 {
-	notify.confirm.apply(this,arguments);
-	return app;
+    notify.confirm.apply(this,arguments);
+    return app;
 };
 
 /**
@@ -103,8 +103,8 @@ app.confirm = function()
  */
 app.ctrl = function(name,obj)
 {
-	ctrl[name] = obj;
-	return app;
+    ctrl[name] = obj;
+    return app;
 };
 
 /**
@@ -114,10 +114,10 @@ app.ctrl = function(name,obj)
  */
 app.data = function(args)
 {
-	for(var prop in args){
-		window[prop] = args[prop];
-	}
-	return app;
+    for(var prop in args){
+        window[prop] = args[prop];
+    }
+    return app;
 };
 
 /**
@@ -128,15 +128,15 @@ app.data = function(args)
 app.done = function(callback)
 {
     emit('on.done');
-	progress.stop();
-	unbindEvents();
-	bindEvents();
-	bindOneTimeEvents();
-	if(typeof callback === 'function'){
-		callback.apply(this);
-	}
-	$(router).trigger('accept');
-	return false;
+    progress.stop();
+    unbindEvents();
+    bindEvents();
+    bindOneTimeEvents();
+    if(typeof callback === 'function'){
+        callback.apply(this);
+    }
+    $(router).trigger('accept');
+    return false;
 };
 
 /**
@@ -147,25 +147,25 @@ app.done = function(callback)
  */
 app.go = function(url)
 {   
-	if (hasPushState) {
-		history.pushState({}, null, url);
-		checkRoutes();
-		if(!eventAdded){
-			evt.bindRouter();
-		}
-	} else {
-		if(!eventAdded){
-			evt.bindRouter();
-		}
-		url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-		var hash = url.replace(location.pathname, "");
-		if (hash.indexOf("!") < 0)
-		{
-			hash = "!/" + hash;
-		}
-		location.hash = hash;
-	}
-	return app;
+    if (hasPushState) {
+        history.pushState({}, null, url);
+        checkRoutes();
+        if(!eventAdded){
+            evt.bindRouter();
+        }
+    } else {
+        if(!eventAdded){
+            evt.bindRouter();
+        }
+        url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
+        var hash = url.replace(location.pathname, "");
+        if (hash.indexOf("!") < 0)
+        {
+            hash = "!/" + hash;
+        }
+        location.hash = hash;
+    }
+    return app;
 };
 
 /**
@@ -177,7 +177,7 @@ app.halt = function(callback){
     if(typeof callback === 'function'){
         callback.apply(this);
     }
-	throw 'halt';
+    throw 'halt';
 };
 
 /**
@@ -187,36 +187,36 @@ app.halt = function(callback){
  * @example $.jqMVC.loadModules(['routes.js','controllers.js','models.js']);
  */
 app.loadModules = function(modules){
-	if(modules.length > 0){
-		app.add(function(stack){
-			function loadScript(url) {
-				var script = document.createElement('script');
-				script.src = url;
-				script.addEventListener('load', function() {
-					returned++;
-					$(state).trigger('check');
-				}, false);
-				
-				script.addEventListener('error', function() {
-					returned++;
-					$(state).trigger('check');
-				}, false);
-				document.body.appendChild(script);
-			}
-			//load All scripts
-			var returned = 0,
-			state={};
-			for(var i=0;i<modules.length;i++){
-				loadScript(getPath() + module_path + modules[i]);
-			}
-			$(state).on('check',function(){
-				if(returned >= modules.length){
-					stack.next();
-				}
-			});
-		});
-	}
-	return app;
+    if(modules.length > 0){
+        app.add(function(stack){
+            function loadScript(url) {
+                var script = document.createElement('script');
+                script.src = url;
+                script.addEventListener('load', function() {
+                    returned++;
+                    $(state).trigger('check');
+                }, false);
+                
+                script.addEventListener('error', function() {
+                    returned++;
+                    $(state).trigger('check');
+                }, false);
+                document.body.appendChild(script);
+            }
+            //load All scripts
+            var returned = 0,
+            state={};
+            for(var i=0;i<modules.length;i++){
+                loadScript(getPath() + module_path + modules[i]);
+            }
+            $(state).on('check',function(){
+                if(returned >= modules.length){
+                    stack.next();
+                }
+            });
+        });
+    }
+    return app;
 };
 
 /**
@@ -227,8 +227,8 @@ app.loadModules = function(modules){
  */
 app.listen = function(event,callback)
 {
-	$(app).bind(event,callback);
-	return app;
+    $(app).bind(event,callback);
+    return app;
 };
 
 /**
@@ -239,9 +239,9 @@ app.listen = function(event,callback)
  */
 app.listenOnce = function(event,callback)
 {
-	$(app).off(event,callback);
-	$(app).one(event,callback);
-	return app;
+    $(app).off(event,callback);
+    $(app).one(event,callback);
+    return app;
 };
 
 /**
@@ -252,23 +252,23 @@ app.listenOnce = function(event,callback)
  * @returns {array} result of merging the arrays.
  */
 app.merge = function(){
-	var args = [],
-	result = [],
-	unique = function(a,b) {
-		var a = a.concat(b);
-		for(var i=0; i<a.length; ++i) {
-			for(var j=i+1; j<a.length; ++j) {
-				if(a[i] === a[j])
-					a.splice(j--, 1);
-			}
-		}
-		return a;
-	};
-	Array.prototype.push.apply(args,arguments);
-	for(k=0;k<args.length;k++){
-		result = unique(result,args[k]);
-	}
-	return result; 
+    var args = [],
+    result = [],
+    unique = function(a,b) {
+        var a = a.concat(b);
+        for(var i=0; i<a.length; ++i) {
+            for(var j=i+1; j<a.length; ++j) {
+                if(a[i] === a[j])
+                    a.splice(j--, 1);
+            }
+        }
+        return a;
+    };
+    Array.prototype.push.apply(args,arguments);
+    for(k=0;k<args.length;k++){
+        result = unique(result,args[k]);
+    }
+    return result; 
 };
 
 /**
@@ -278,8 +278,8 @@ app.merge = function(){
  * @returns {object} $.jqMVC
  */
 app.model = function(name,obj){
-	model[name] = obj;
-	return app;
+    model[name] = obj;
+    return app;
 };
 
 /**
@@ -297,8 +297,8 @@ app.pass = function()
  */
 app.render = function()
 {
-	view.render.apply(this,arguments);
-	return app;
+    view.render.apply(this,arguments);
+    return app;
 };
 
 /**
@@ -306,11 +306,11 @@ app.render = function()
  */
 app.run = function()
 {
-	app.add(function(){
-		app.go(location.href);
-	}); //add app.go to the middleware stack
-	stack.next();//start the middleware stack.
-	app.run = function(){};//remove app.run
+    app.add(function(){
+        app.go(location.href);
+    }); //add app.go to the middleware stack
+    stack.next();//start the middleware stack.
+    app.run = function(){};//remove app.run
 };
 
 /**
@@ -323,30 +323,30 @@ app.run = function()
  */
 app.route = function()
 {
-	var args = [];
-	Array.prototype.push.apply( args, arguments );
-	var route = args.shift(); //first arg is always the path
-	var callback = args.pop(); //last arg is the callback
-	var middleware = args; //safe to assume remaining arguments are middleware
-	var isRegExp = typeof route == "object";
+    var args = [];
+    Array.prototype.push.apply( args, arguments );
+    var route = args.shift(); //first arg is always the path
+    var callback = args.pop(); //last arg is the callback
+    var middleware = args; //safe to assume remaining arguments are middleware
+    var isRegExp = typeof route == "object";
 
-	if (!isRegExp) {
-		route = getPath().replace(/\/+$/, '') + route;
-		// remove the last slash to unifiy all routes
-		if (route.lastIndexOf("/") == route.length - 1) {
-			route = route.substring(0, route.length - 1);
-		}
-		// if the routes were created with an absolute url ,we have to remove the absolute part
-		route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
-	}
+    if (!isRegExp) {
+        route = getPath().replace(/\/+$/, '') + route;
+        // remove the last slash to unifiy all routes
+        if (route.lastIndexOf("/") == route.length - 1) {
+            route = route.substring(0, route.length - 1);
+        }
+        // if the routes were created with an absolute url ,we have to remove the absolute part
+        route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+    }
 
-	routeList.push({
-		route: route,
-		middleware: middleware,
-		callback: callback,
-		type: isRegExp ? "regexp" : "string",
-	});
-	return app;
+    routeList.push({
+        route: route,
+        middleware: middleware,
+        callback: callback,
+        type: isRegExp ? "regexp" : "string",
+    });
+    return app;
 };
 
 /**
@@ -356,8 +356,8 @@ app.route = function()
  */
 app.setModel = function(obj)
 {
-	model = obj;
-	return app;
+    model = obj;
+    return app;
 };
 
 /**
@@ -367,8 +367,8 @@ app.setModel = function(obj)
  */
 app.setNotification = function(obj)
 {
-	notify = obj;
-	return app;
+    notify = obj;
+    return app;
 };
 
 /**
@@ -378,8 +378,8 @@ app.setNotification = function(obj)
  */
 app.setProgress = function(obj)
 {
-	progress = obj;
-	return app;
+    progress = obj;
+    return app;
 };
 
 /**
@@ -389,8 +389,8 @@ app.setProgress = function(obj)
  */
 app.setView = function(obj)
 {
-	view = obj;
-	return app;
+    view = obj;
+    return app;
 };
 
 /**
@@ -401,8 +401,8 @@ app.setView = function(obj)
  */
 app.svc = function(name,mixedvar)
 {
-	svc[name] = mixedvar;//services are flexible types.
-	return app;
+    svc[name] = mixedvar;//services are flexible types.
+    return app;
 };
 
 /**
@@ -413,12 +413,12 @@ app.svc = function(name,mixedvar)
  */
 app.trigger = function(event,eventData)
 {
-	emit(event,eventData);
-	return app;
+    emit(event,eventData);
+    return app;
 };
 
 app.debug = function(){
-	return {
-		routeList:routeList
-	};
+    return {
+        routeList:routeList
+    };
 };

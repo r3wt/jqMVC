@@ -1,5 +1,5 @@
 var app = {},
-	hasPushState = (history && history.pushState),
+    hasPushState = (history && history.pushState),
     hasHashState = !hasPushState && ("onhashchange" in window) && false,
     routeList = [],
     eventAdded = false,
@@ -8,48 +8,48 @@ var app = {},
     firstRun = false,
     router = {},
     notify = {
-		alert:function(message)
-		{
-			alert(message);
-		},
-		confirm:function(message,callback)
-		{
-			if(confirm(message)){
-				callback.apply(this);
-			}
-		}
-	},
+        alert:function(message)
+        {
+            alert(message);
+        },
+        confirm:function(message,callback)
+        {
+            if(confirm(message)){
+                callback.apply(this);
+            }
+        }
+    },
     progress = {
-		start: function(){},
-		stop: function(){}
-	},
+        start: function(){},
+        stop: function(){}
+    },
     view = {
-		render: function()
-		{
-			app.done();
-			throw 'You must implement a view library to use this feature.';
-		}
-	},
+        render: function()
+        {
+            app.done();
+            throw 'You must implement a view library to use this feature.';
+        }
+    },
     model = {},
-	stack = {},
-	jQselector = $.fn.init,
-	jQbound = [],
-	evt={},
-	evtOnce = [];
+    stack = {},
+    jQselector = $.fn.init,
+    jQbound = [],
+    evt={},
+    evtOnce = [];
 
-	/* define things are exposed */
-	window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-	window.ctrl = {};
-	window.svc = {};
-	window.models = {};
+    /* define things are exposed */
+    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+    window.ctrl = {};
+    window.svc = {};
+    window.models = {};
 
-	/* define default global settings that the app uses*/
-	window.app_path         = '/',
-	window.api_path         = '/api/';
-	window.view_path        = '/views';
-	window.module_path      ='/modules';
-	window.model_path       = '/models';
-	window.element          = $('body');
-	window.debug            = false;
-	window.binding_override = false;
+    /* define default global settings that the app uses*/
+    window.app_path         = '/',
+    window.api_path         = '/api/';
+    window.view_path        = '/views';
+    window.module_path      ='/modules';
+    window.model_path       = '/models';
+    window.element          = $('body');
+    window.debug            = false;
+    window.binding_override = false;
 
