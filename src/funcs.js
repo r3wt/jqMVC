@@ -91,7 +91,9 @@ function tryRoutes(routes)
                     tryRoutes(nextRoutes);//try the next route in the stack.
                 break;
                 case 'halt':
+                break;
                 default:
+                    throw e; //0.3.8 rethrow if not router control exception.
                 break;
             }
             window.onerror = oldOnError;
