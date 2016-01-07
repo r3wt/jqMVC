@@ -56,9 +56,9 @@ app.bindOnce = function(callback)
 };
 
 /**
- * resolve a string as a function at runtime. useful to prevent undefined errors that can occur accross modules due to data races.
+ * resolve a string as a function at runtime. useful to prevent undefined errors (because of race condition in scope chain) that can occur accross modules due to data races.
  * @example $.jqMVC.callableResolver('ctrl.middleware.isUserLoggedIn');
- * @param {string} any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
+ * @param {string} c - any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
  * @returns {function} callableResolver
  */
 app.callableResolver = function(c)

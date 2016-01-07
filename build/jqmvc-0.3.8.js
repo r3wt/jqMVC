@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-00-07_11:19:34 UTC
+ * @build     2016-00-07_11:21:52 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -529,9 +529,9 @@
     };
     
     /**
-     * resolve a string as a function at runtime. useful to prevent undefined errors that can occur accross modules due to data races.
+     * resolve a string as a function at runtime. useful to prevent undefined errors (because of race condition in scope chain) that can occur accross modules due to data races.
      * @example $.jqMVC.callableResolver('ctrl.middleware.isUserLoggedIn');
-     * @param {string} any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
+     * @param {string} c - any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
      * @returns {function} callableResolver
      */
     app.callableResolver = function(c)
