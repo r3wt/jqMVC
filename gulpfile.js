@@ -69,7 +69,7 @@ function getBuildDate()
         ts = Date.UTC.apply(Date,datevalues),
         date2 = new Date(ts);
         
-    var month = date2.getMonth();
+    var month = date2.getMonth() + 1;//date is 0 based in Node?
     var day = date2.getDate();
     var hour = date2.getHours();
     var min = date2.getMinutes();
@@ -80,7 +80,7 @@ function getBuildDate()
     hour = (hour < 10 ? '0' : '') + hour;
     min = (min < 10 ? '0' : '') + min;
     sec = (sec < 10 ? '0' : '') + sec;
-
+	
     var str = date.getFullYear() + '-' + month + '-' + day + '_' +  hour + ':' + min + ':' + sec + ' UTC';
 
     return str;

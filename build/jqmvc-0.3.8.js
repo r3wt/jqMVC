@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-00-07_11:37:36 UTC
+ * @build     2016-01-07_11:41:40 UTC
  */
 ;!(function($,window,document){
     var app = {},
