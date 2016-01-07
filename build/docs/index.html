@@ -103,6 +103,11 @@
                 loadModules
               </a>
               <a
+                href='#loadOnce'
+                class='block bold'>
+                loadOnce
+              </a>
+              <a
                 href='#merge'
                 class='block bold'>
                 merge
@@ -548,6 +553,45 @@
       </div>
     <h4>Examples</h4>
 <pre class='overflow-auto'>$.jqMVC.loadModules([<span class="hljs-string">'routes.js'</span>,<span class="hljs-string">'controllers.js'</span>,<span class="hljs-string">'models.js'</span>]);</pre>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='loadOnce' class='mt0'>
+    loadOnce<span class='gray'>(module, callback, error)</span>
+  </h2>
+  <p>this variant of loadModules loads a single module, then executes a callback. intended to be used with modules associated only with a specific route or routes. callback must be supplied to ensure script is loaded before events are bound.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>module</strong>
+          :
+          <div class='force-inline'>
+            <p>the name of the module to load</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>callback</strong>
+          :
+          <div class='force-inline'>
+            <p>the required callback function</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>error</strong>
+          :
+          <div class='force-inline'>
+            
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+    <h4>Examples</h4>
+<pre class='overflow-auto'>$.jqMVC.loadOnce(<span class="hljs-string">'users.js'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{ <span class="hljs-comment">//do stuff });</span></pre>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='merge' class='mt0'>

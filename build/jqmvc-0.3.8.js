@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-07_11:41:40 UTC
+ * @build     2016-01-07_12:01:03 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -673,7 +673,8 @@
      * @returns {object} $.jqMVC
      * @example $.jqMVC.loadModules(['routes.js','controllers.js','models.js']);
      */
-    app.loadModules = function(modules){
+    app.loadModules = function(modules)
+    {
         if(modules.length > 0){
             app.add(function(stack){
                 function loadScript(url) {
@@ -705,6 +706,41 @@
         }
         return app;
     };
+    
+    /**
+     * this variant of loadModules loads a single module, then executes a callback. intended to be used with modules associated only with a specific route or routes. callback must be supplied to ensure script is loaded before events are bound.
+     * @param {string} module - the name of the module to load
+     * @param {function} callback - the required callback function
+     * @param {function} error
+     * @returns {object} $.jqMVC
+     * @example $.jqMVC.loadOnce('users.js',function(){ //do stuff });
+     */
+    app.loadOnce = function(module,callback,error)
+    {
+        var file = getPath() + module_path + module;
+        if($('script[src="'+file+'"][jq-loadOnce]').length){
+            $('script[src="'+file+'"][jq-loadOnce]').remove();
+        }
+        var script = document.createElement('script');
+        script.src = file;
+        script.addEventListener('load', function() {
+            if(typeof callback === 'function'){
+                callback.apply(this);
+            }
+            throw 'loadOnce - callback is undefined';
+        }, false);
+        
+        script.addEventListener('error', function() {
+            if(typeof error === 'function'){
+                error.apply(this);
+            }else{
+                throw 'loadOnce - failed to load resource';
+            }
+            
+        }, false);
+        document.body.appendChild(script);
+        return app;
+    }
     
     /**
      * allows user to set event listeners on $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures, where listenOnce() should be bound instead.
