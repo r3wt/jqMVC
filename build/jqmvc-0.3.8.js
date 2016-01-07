@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-00-07_11:21:52 UTC
+ * @build     2016-00-07_11:37:36 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -802,10 +802,10 @@
     
     /**
      * create a route object and add it to the router. Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.
-     * @param {string} path - use `:name` for placeholders
+     * @param {string|RegExp} path - use `:name` for placeholders accepts either an String with optional placeholders or RegExp object
      * @param {function} callback - the route closure.
      * @example $.jqMVC.path('/posts/:title/:id',function(title,id){ //your code here });
-     * @example $.jqMVC.path(path,middleware1,middleware2,callback);
+     * @example $.jqMVC.path(/^\/user\/[0-9]+$/,middleware1,middleware2,callback);
      * @returns {object} $.jqMVC
      */
     app.route = function()
