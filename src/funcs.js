@@ -199,6 +199,11 @@ function emit(event,eventData)
     $(app).trigger(event,eventData);
 }
 
+function escapeRegExp(str)
+{
+  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
 $.fn.serializeObject = function()
 { 
     var b = this.serializeArray();

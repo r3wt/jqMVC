@@ -83,6 +83,11 @@
                 go
               </a>
               <a
+                href='#group'
+                class='block bold'>
+                group
+              </a>
+              <a
                 href='#halt'
                 class='block bold'>
                 halt
@@ -436,6 +441,39 @@
       </div>
     <h4>Examples</h4>
 <pre class='overflow-auto'>$.jqMVC.go(<span class="hljs-string">'/user/logout'</span>);</pre>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='group' class='mt0'>
+    group<span class='gray'>(prefix, groupCallback)</span>
+  </h2>
+  <p>Creates a route group. <code>$.jqMVC.route()</code> routes created in this closure will be prefixed with the provided prefix. RegExp routes will have their RegExp object modified to include prefix as well. nested groups are supported, but tentatively discouraged.</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>prefix</strong>
+          :
+          <div class='force-inline'>
+            <p>the route prefix</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>groupCallback</strong>
+          :
+          <div class='force-inline'>
+            <p>the group callback function.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+    <h4>Examples</h4>
+<pre class='overflow-auto'>$.jqMVC.group(<span class="hljs-string">'/users'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{  <span class="hljs-comment">//all routes here will be prefixed });</span></pre>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='halt' class='mt0'>

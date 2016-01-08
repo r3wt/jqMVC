@@ -183,6 +183,62 @@ app.go = function(url)
 };
 
 /**
+ * Creates a route group. `$.jqMVC.route()` routes created in this closure will be prefixed with the provided prefix. RegExp routes will have their RegExp object modified to include prefix as well. nested groups are supported, but tentatively discouraged.
+ * @param {string} prefix - the route prefix
+ * @param {function} groupCallback - the group callback function. 
+ * @example $.jqMVC.group('/users',function(){  //all routes here will be prefixed });
+ * @returns {object} $.jqMVC
+ */
+app.group = function(prefix,groupCallback)
+{
+	if(typeof prefix !== 'string'){
+		throw 'prefix must be a string';
+	}
+	var routeFunction = app.route;
+	
+	app.route = function()
+	{
+		var args = [];
+		Array.prototype.push.apply( args, arguments );
+		var route = args.shift(); //first arg is always the path
+		
+		//its a bit more difficult here. we need to ensure its not a regexp, and if it is we need to merge the expressions.
+		if(route instanceof RegExp){
+			route = route.toString().substr(1);//remove regexp literal "/"
+			
+			//to get the flags, we can split at "/"
+			var flags = '';
+			if(route.substr(-1) !== '/'){
+
+				route = route.split('/');
+
+				flags = route.pop();
+
+				route = route.join('/');
+
+			}else{
+				route = route.substr(0, route.length - 1);
+			}
+			
+			route = escapeRegExp(prefix) + route;
+			
+			route = new RegExp(route,flags);
+		}
+		
+		var callback = args.pop(); //last arg is the callback
+		var middleware = args; //safe to assume remaining arguments are middleware
+		var args2 = app.merge([route],middleware,[callback]);
+		routeFunction.apply(this,args2);
+	};
+	
+	groupCallback.apply(this);
+	
+	app.route = routeFunction;
+	
+	return app;
+};
+
+/**
  * Router Control Function - Used to halt the router. accepts a callback function as a parameter. you should continue execution in this callback, ie redirecting to a new route, showing an error, whatever it is.
  * @returns {object} $.jqMVC
  */
