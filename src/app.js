@@ -223,6 +223,8 @@ app.group = function(prefix,groupCallback)
 			route = escapeRegExp(prefix) + route;
 			
 			route = new RegExp(route,flags);
+		}else{
+			route = prefix + route;
 		}
 		
 		var callback = args.pop(); //last arg is the callback

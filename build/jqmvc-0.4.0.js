@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-08_12:17:54 UTC
+ * @build     2016-01-08_12:21:49 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -701,6 +701,8 @@
                 route = escapeRegExp(prefix) + route;
                 
                 route = new RegExp(route,flags);
+            }else{
+                route = prefix + route;
             }
             
             var callback = args.pop(); //last arg is the callback
