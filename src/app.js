@@ -318,11 +318,12 @@ app.loadModules = function(modules)
 app.loadOnce = function(module,callback,error)
 {
     var file = getPath() + module_path + module;
-    if($('script[src="'+file+'"][jq-loadOnce]').length){
-        $('script[src="'+file+'"][jq-loadOnce]').remove();
+    if($('script[src="'+file+'"][jq-loadonce]').length){
+        $('script[src="'+file+'"][jq-loadonce]').remove();
     }
     var script = document.createElement('script');
     script.src = file;
+	script.setAttribute('jq-loadonce','1');
     script.addEventListener('load', function() {
         if(typeof callback === 'function'){
             callback.apply(this);

@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-09_06:19:32 UTC
+ * @build     2016-01-09_06:48:51 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -796,11 +796,12 @@
     app.loadOnce = function(module,callback,error)
     {
         var file = getPath() + module_path + module;
-        if($('script[src="'+file+'"][jq-loadOnce]').length){
-            $('script[src="'+file+'"][jq-loadOnce]').remove();
+        if($('script[src="'+file+'"][jq-loadonce]').length){
+            $('script[src="'+file+'"][jq-loadonce]').remove();
         }
         var script = document.createElement('script');
         script.src = file;
+        script.setAttribute('jq-loadonce','1');
         script.addEventListener('load', function() {
             if(typeof callback === 'function'){
                 callback.apply(this);
