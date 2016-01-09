@@ -444,7 +444,7 @@
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='group' class='mt0'>
-    group<span class='gray'>(prefix, groupCallback)</span>
+    group<span class='gray'>(prefix, [groupMiddleware], groupCallback)</span>
   </h2>
   <p>Creates a route group. <code>$.jqMVC.route()</code> routes created in this closure will be prefixed with the provided prefix. RegExp routes will have their RegExp object modified to include prefix as well. nested groups are supported, but tentatively discouraged.</p>
 
@@ -454,6 +454,13 @@
           :
           <div class='force-inline'>
             <p>the route prefix</p>
+
+          </div>
+        </li>
+        <li><code>[<code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>]</code> <strong>groupMiddleware</strong>
+          :
+          <div class='force-inline'>
+            <p>(optional) middleware for any route declared in the group.</p>
 
           </div>
         </li>
@@ -759,7 +766,7 @@
 
       </div>
     <h4>Examples</h4>
-<pre class='overflow-auto'>$.jqMVC.path(<span class="hljs-string">'/posts/:title/:id'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">title,id</span>)</span>{ <span class="hljs-comment">//your code here });</span></pre><pre class='overflow-auto'>$.jqMVC.path(<span class="hljs-regexp">/^\/user\/[0-9]+$/</span>,middleware1,middleware2,callback);</pre>
+<pre class='overflow-auto'>$.jqMVC.route(<span class="hljs-string">'/posts/:title/:id'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">title,id</span>)</span>{ <span class="hljs-comment">//your code here });</span></pre><pre class='overflow-auto'>$.jqMVC.route(<span class="hljs-regexp">/^\/user\/[0-9]+$/</span>,middleware1,middleware2,callback);</pre>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
   <h2 id='run' class='mt0'>

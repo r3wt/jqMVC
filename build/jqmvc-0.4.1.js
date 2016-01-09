@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.4.0
+ * @version   0.4.1
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-08_12:21:49 UTC
+ * @build     2016-01-09_06:19:32 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -663,15 +663,24 @@
     /**
      * Creates a route group. `$.jqMVC.route()` routes created in this closure will be prefixed with the provided prefix. RegExp routes will have their RegExp object modified to include prefix as well. nested groups are supported, but tentatively discouraged.
      * @param {string} prefix - the route prefix
+     * @param {function} [groupMiddleware] - (optional) middleware for any route declared in the group.
      * @param {function} groupCallback - the group callback function. 
      * @example $.jqMVC.group('/users',function(){  //all routes here will be prefixed });
      * @returns {object} $.jqMVC
      */
-    app.group = function(prefix,groupCallback)
+    app.group = function(prefix,groupMiddleware,groupCallback)
     {
+        if(typeof groupMiddleware === 'function' && typeof groupCallback === 'undefined')
+        {
+            //no middleware provided
+            var groupCallback = groupMiddleware;
+            groupMiddleware = null;
+        }
+        
         if(typeof prefix !== 'string'){
             throw 'prefix must be a string';
         }
+        
         var routeFunction = app.route;
         
         app.route = function()
@@ -707,8 +716,14 @@
             
             var callback = args.pop(); //last arg is the callback
             var middleware = args; //safe to assume remaining arguments are middleware
+            
+            if(groupMiddleware !== null){
+                middleware = app.merge([groupMiddleware],middleware);//make sure groupMiddleware is always first
+            }
+            
             var args2 = app.merge([route],middleware,[callback]);
             routeFunction.apply(this,args2);
+            return app;
         };
         
         groupCallback.apply(this);
@@ -903,8 +918,8 @@
      * create a route object and add it to the router. Note: Any arguments between first and last argument of the function are treated as middleware.Middleware should accept a stack argument. stack has two functions, next and halt(callback). if halt is called the route closure is not invoked. therefore to continue execution, you must define some behavior in the callback provided to halt, such as triggering a notFound error, or redirecting to another page with go() showing a permissions error screen etc.
      * @param {string|RegExp} path - use `:name` for placeholders accepts either an String with optional placeholders or RegExp object
      * @param {function} callback - the route closure.
-     * @example $.jqMVC.path('/posts/:title/:id',function(title,id){ //your code here });
-     * @example $.jqMVC.path(/^\/user\/[0-9]+$/,middleware1,middleware2,callback);
+     * @example $.jqMVC.route('/posts/:title/:id',function(title,id){ //your code here });
+     * @example $.jqMVC.route(/^\/user\/[0-9]+$/,middleware1,middleware2,callback);
      * @returns {object} $.jqMVC
      */
     app.route = function()
