@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-09_06:48:51 UTC
+ * @build     2016-01-09_07:00:20 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -278,6 +278,18 @@
             a[b[i].name] = b[i].value;
         }
         return a;
+    };
+    
+    $.fn.jq = function(attr,val)
+    {
+        if(typeof attr === 'string'){
+            if(typeof val !== 'undefined'){
+                this.attr('jq-'+attr,val);
+            }else{
+                return this.attr('jq-'+attr);
+            }
+        }
+        return this;
     };
     //everything event related
     $.fn.init = function(selector,context)

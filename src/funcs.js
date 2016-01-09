@@ -213,3 +213,15 @@ $.fn.serializeObject = function()
     }
     return a;
 };
+
+$.fn.jq = function(attr,val)
+{
+	if(typeof attr === 'string'){
+		if(typeof val !== 'undefined'){
+			this.attr('jq-'+attr,val);
+		}else{
+			return this.attr('jq-'+attr);
+		}
+	}
+	return this;
+};
