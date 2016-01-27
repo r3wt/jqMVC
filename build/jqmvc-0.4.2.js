@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.4.1
+ * @version   0.4.2
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-09_07:00:20 UTC
+ * @build     2016-01-27_14:04:03 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -1006,6 +1006,16 @@
         view = obj;
         return app;
     };
+    
+    /**
+     *  exposes the internal view object via a getter.
+     *  @name view
+     */
+    Object.defineProperty(app, "view", { 
+        get: function () { 
+            return view; 
+        } 
+    });
     
     /**
      * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.

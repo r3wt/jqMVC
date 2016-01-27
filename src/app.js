@@ -518,6 +518,16 @@ app.setView = function(obj)
 };
 
 /**
+ *  exposes the internal view object via a getter.
+ *  @name view
+ */
+Object.defineProperty(app, "view", { 
+	get: function () { 
+		return view; 
+	} 
+});
+
+/**
  * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
  * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
  * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
