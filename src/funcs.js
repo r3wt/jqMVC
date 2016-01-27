@@ -225,3 +225,97 @@ $.fn.jq = function(attr,val)
 	}
 	return this;
 };
+
+function jobPending()
+{
+	for(var job in jobs){
+		//called by the system before navigation to temporarily suspend jobs.
+		//therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
+		if(jobs[job].state !== 3){
+			jobs[job].state = 0;
+			clearInterval(jobs[job].timer);
+		}
+	}	
+}
+
+function jobResume(targets,ignoreState)
+{
+	switch(true){
+		case (targets === undefined):
+		case (targets !== undefined && targets === '*'):
+			for(var job in jobs){
+				if(jobs[job].state == 0 || ignoreState !== undefined){
+					jobs[job].state = 1;
+					jobs[job].timer = setInterval(function(){
+						if(jobs[job].state !== 2){
+							jobs[job].state = 2;
+							jobs[job].payload();
+							jobs[job].state = 1;
+						}
+					},jobs[job].interval);
+				}
+			}
+		break;
+		default:
+			var job = targets;
+			if(jobs.hasOwnProperty(job)){
+				if(jobs[job].state == 0 || ignoreState !== undefined){
+					jobs[job].state = 1;
+					job.timer = setInterval(function(){
+						if(jobs[job].state !== 2){
+							jobs[job].state = 2;
+							jobs[job].payload.call();
+							if(jobs[job].state !== 3){
+								jobs[job].state = 1;
+							}
+						}
+					},jobs[job].interval);
+				}
+			}
+		break;
+	}
+			
+}
+
+function jobPause(targets)
+{
+	if(targets === '*'){
+		for(var job in jobs){
+			jobs[job].state = 3;
+			clearInterval(jobs[job].timer);	
+		}
+	}else{
+		if(jobs.hasOwnProperty(targets)){
+			jobs[targets].state = 3;
+			clearInterval(jobs[targets].timer);	
+		}
+	}
+}
+
+function jobDestroy(targets)
+{
+	if(targets == '*'){
+		for(var job in jobs){
+			clearInterval(jobs[job].timer);
+			delete jobs[job];
+		}
+	}else{
+		if(jobs.hasOwnProperty(job)){
+			clearInterval(jobs[job].timer);
+			delete jobs[job];	
+		}
+	}
+}
+
+function jobInspect(targets)
+{
+	if(targets === '*'){
+		return jobs;
+	}else{
+		if(jobs.hasOwnProperty(targets)){
+			return jobs[targets];
+		}else{
+			return 'job doesnt exist';
+		}
+	}
+}

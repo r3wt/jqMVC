@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-27_14:04:03 UTC
+ * @build     2016-01-27_16:19:30 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -45,7 +45,8 @@
         jQselector = $.fn.init,
         jQbound = [],
         evt={},
-        evtOnce = [];
+        evtOnce = [],
+        jobs={};
     
         /* define things are exposed */
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -291,6 +292,100 @@
         }
         return this;
     };
+    
+    function jobPending()
+    {
+        for(var job in jobs){
+            //called by the system before navigation to temporarily suspend jobs.
+            //therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
+            if(jobs[job].state !== 3){
+                jobs[job].state = 0;
+                clearInterval(jobs[job].timer);
+            }
+        }    
+    }
+    
+    function jobResume(targets,ignoreState)
+    {
+        switch(true){
+            case (targets === undefined):
+            case (targets !== undefined && targets === '*'):
+                for(var job in jobs){
+                    if(jobs[job].state == 0 || ignoreState !== undefined){
+                        jobs[job].state = 1;
+                        jobs[job].timer = setInterval(function(){
+                            if(jobs[job].state !== 2){
+                                jobs[job].state = 2;
+                                jobs[job].payload();
+                                jobs[job].state = 1;
+                            }
+                        },jobs[job].interval);
+                    }
+                }
+            break;
+            default:
+                var job = targets;
+                if(jobs.hasOwnProperty(job)){
+                    if(jobs[job].state == 0 || ignoreState !== undefined){
+                        jobs[job].state = 1;
+                        job.timer = setInterval(function(){
+                            if(jobs[job].state !== 2){
+                                jobs[job].state = 2;
+                                jobs[job].payload.call();
+                                if(jobs[job].state !== 3){
+                                    jobs[job].state = 1;
+                                }
+                            }
+                        },jobs[job].interval);
+                    }
+                }
+            break;
+        }
+                
+    }
+    
+    function jobPause(targets)
+    {
+        if(targets === '*'){
+            for(var job in jobs){
+                jobs[job].state = 3;
+                clearInterval(jobs[job].timer);    
+            }
+        }else{
+            if(jobs.hasOwnProperty(targets)){
+                jobs[targets].state = 3;
+                clearInterval(jobs[targets].timer);    
+            }
+        }
+    }
+    
+    function jobDestroy(targets)
+    {
+        if(targets == '*'){
+            for(var job in jobs){
+                clearInterval(jobs[job].timer);
+                delete jobs[job];
+            }
+        }else{
+            if(jobs.hasOwnProperty(job)){
+                clearInterval(jobs[job].timer);
+                delete jobs[job];    
+            }
+        }
+    }
+    
+    function jobInspect(targets)
+    {
+        if(targets === '*'){
+            return jobs;
+        }else{
+            if(jobs.hasOwnProperty(targets)){
+                return jobs[targets];
+            }else{
+                return 'job doesnt exist';
+            }
+        }
+    }
     //everything event related
     $.fn.init = function(selector,context)
     {
@@ -640,6 +735,7 @@
             callback.apply(this);
         }
         $(router).trigger('accept');
+        jobResume();//resume all non-paused jobs.
         return false;
     };
     
@@ -651,6 +747,7 @@
      */
     app.go = function(url)
     {   
+        jobPending();//halt all jobs.
         if (hasPushState) {
             history.pushState({}, null, url);
             checkRoutes();
@@ -832,6 +929,51 @@
         document.body.appendChild(script);
         return app;
     }
+    
+    
+    /**
+     * call an action on a job
+     * @param {string} action - action to call on job. valid options are `pause`,`destroy`,`inspect` and `resume`
+     * @param {string} name - name of job. use `"*"` to target all jobs
+     * @returns {object} $.jqMVC - <strong>NOTE:</strong> <em>if inspect action is called, this function returns either the jobs object or a single job object.
+     */
+    /**
+     * allows for creation of periodic execution of a payload function, with management states and api for pausing,destroying etc.
+     * @param {string} name - name to assign job
+     * @param {function} payload - the payload to execute
+     * @param {integer} interval - how often to execute the job.
+     * @returns {object} $.jqMVC
+     */
+    app.job = function()
+    {
+        switch(arguments.length){
+            case 3:
+                jobs[arguments[0]] = {
+                    state: 0,
+                    payload: arguments[1],
+                    interval: arguments[2],
+                    timer: null
+                };
+            break;
+            case 2:
+                switch(arguments[0]){
+                    case 'pause':
+                        jobPause(arguments[1]);
+                    break;
+                    case 'destroy':
+                        jobDestroy(arguments[1]);
+                    break;
+                    case 'resume':
+                        jobResume(arguments[1],true);
+                    break;
+                    case 'inspect':
+                        return jobInspect(arguments[1]);
+                    break;
+                }
+            break;
+        }
+        return app;
+    };
     
     /**
      * allows user to set event listeners on $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures, where listenOnce() should be bound instead.

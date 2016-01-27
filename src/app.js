@@ -150,6 +150,7 @@ app.done = function(callback)
         callback.apply(this);
     }
     $(router).trigger('accept');
+	jobResume();//resume all non-paused jobs.
     return false;
 };
 
@@ -161,6 +162,7 @@ app.done = function(callback)
  */
 app.go = function(url)
 {   
+	jobPending();//halt all jobs.
     if (hasPushState) {
         history.pushState({}, null, url);
         checkRoutes();
@@ -342,6 +344,51 @@ app.loadOnce = function(module,callback,error)
     document.body.appendChild(script);
     return app;
 }
+
+
+/**
+ * call an action on a job
+ * @param {string} action - action to call on job. valid options are `pause`,`destroy`,`inspect` and `resume`
+ * @param {string} name - name of job. use `"*"` to target all jobs
+ * @returns {object} $.jqMVC - <strong>NOTE:</strong> <em>if inspect action is called, this function returns either the jobs object or a single job object.
+ */
+/**
+ * allows for creation of periodic execution of a payload function, with management states and api for pausing,destroying etc.
+ * @param {string} name - name to assign job
+ * @param {function} payload - the payload to execute
+ * @param {integer} interval - how often to execute the job.
+ * @returns {object} $.jqMVC
+ */
+app.job = function()
+{
+    switch(arguments.length){
+		case 3:
+			jobs[arguments[0]] = {
+				state: 0,
+				payload: arguments[1],
+				interval: arguments[2],
+				timer: null
+			};
+		break;
+		case 2:
+			switch(arguments[0]){
+				case 'pause':
+					jobPause(arguments[1]);
+				break;
+				case 'destroy':
+					jobDestroy(arguments[1]);
+				break;
+				case 'resume':
+					jobResume(arguments[1],true);
+				break;
+				case 'inspect':
+					return jobInspect(arguments[1]);
+				break;
+			}
+		break;
+	}
+    return app;
+};
 
 /**
  * allows user to set event listeners on $.jqMVC. Should be noted that events bound on $.jqMVC are not garbage collected, so be mindful of binding with listen inside of route closures, where listenOnce() should be bound instead.
