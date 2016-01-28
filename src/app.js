@@ -71,7 +71,7 @@ app.debug = function(){
 };
 
 /**
- * resolve a string as a function at runtime. useful to prevent undefined errors (because of race condition in scope chain) that can occur accross modules due to data races.
+ * resolve a string as a function at runtime. useful to prevent undefined errors because of racing modules that might reference a variable that isnt defined *yet*
  * @example $.jqMVC.callableResolver('ctrl.middleware.isUserLoggedIn');
  * @param {string} c - any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
  * @returns {function} callableResolver
@@ -120,20 +120,17 @@ app.data = function(args)
 };
 
 /**
- * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings, optionally executing a callback if passed.
+ * emits `on.done` event, calls internal progress.start() unbinds all bound events then invokes all bindings,resumes jobs. this function must be called somewhere in a route closure.
  * @param {function} [callback]
  * @returns {object} $.jqMVC
  */
-app.done = function(callback)
+app.done = function()
 {
-    emit('on.done');
     progress.stop();
     unbind();
     bind();
-    if(typeof callback === 'function'){
-        callback.apply(this);
-    }
     jobResume();//resume all non-paused jobs.
+	emit('on.done');
     throw 'accept';
 };
 
