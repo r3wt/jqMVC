@@ -163,9 +163,8 @@ app.done = function(callback)
     if(typeof callback === 'function'){
         callback.apply(this);
     }
-    $(router).trigger('accept');
     jobResume();//resume all non-paused jobs.
-    return false;
+    throw 'accept';
 };
 
 /**

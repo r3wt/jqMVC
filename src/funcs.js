@@ -56,51 +56,47 @@ function tryRoutes(routes)
     }else{
         var route = routes.shift();
         var nextRoutes = routes.slice();
-        var oldOnError = window.onerror;
-        window.onerror = function(message, file, lineNumber) { return true; };
-        function acceptRoute(){
-            window.onerror = oldOnError;
-            log('jqMVC -> router -> accept');
-        }
-        try{
-            var args = [];
-            for(var prop in route.data){
-                args.push(route.data[prop]);
-            }
-            var mwStack = {
-                items: route.middleware.slice(),
-                next : function(){
-                    window.location.query = getQueryString(); // #75
-                    if(mwStack.items.length > 0){
-                        log('jqMVC -> router -> route -> mw -> next');
-                        mwStack.items.shift().call(this,mwStack);
-                    }else{
-                        log('jqMVC -> router -> route -> callback');
-                        route.callback.apply(this,args);
-                    }
-                }
-            };
-            mwStack.next();
-            $(router).off('accept',acceptRoute);
-            $(router).one('accept',acceptRoute);
-        }
-        catch(e){
-            var reason = e.toString();
-            switch(reason){
+		var oldError = window.onerror;
+		window.onerror = function(e){
+			var e = e.replace('uncaught exception:','').trim();
+			switch(e){
+				case 'accept':
+					log('jqMVC -> router -> accept');
+				break;
                 case 'pass':
+					log('jqMVC -> router -> pass');
                     tryRoutes(nextRoutes);//try the next route in the stack.
                 break;
                 case 'halt':
+					log('jqMVC -> router -> halt');
                 break;
                 default:
-                    throw e; //0.3.8 rethrow if not router control exception.
+                    log('jqMVC -> router -> uncaught exception: '+e); //log exception and return.
                 break;
             }
-            window.onerror = oldOnError;
-            log('jqMVC -> router -> '+reason);
-        }
+			window.onerror = oldError;
+			return true;
+		};
+		var args = [];
+		for(var prop in route.data){
+			args.push(route.data[prop]);
+		}
+		var mwStack = {
+			items: route.middleware.slice(),
+			next : function(){
+				window.location.query = getQueryString(); // #75
+				if(mwStack.items.length > 0){
+					log('jqMVC -> router -> route -> mw -> next');
+					mwStack.items.shift().call(this,mwStack);
+				}else{
+					log('jqMVC -> router -> route -> callback');
+					route.callback.apply(this,args);
+				}
+			}
+		};
+		mwStack.next();
     }
-    return false;
+    return;
 }
 
 function parseUrl(url)
@@ -114,7 +110,7 @@ function parseUrl(url)
         if (location.hash.indexOf("#!/") === 0) {
             currentUrl += location.hash.substring(3);
         } else {
-        return '';
+			return '';
         }
     }
     
@@ -175,13 +171,7 @@ function getParameters(url)
 
 function handleRoutes(e)
 {
-    if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
-        checkRoutes();
-    }
-    else if (hasHashState) {
-        checkRoutes();
-    }
-    else if (!hasHashState && !hasPushState) {
+    if ( (e != null && e.originalEvent && e.originalEvent.state !== undefined) || hasHashState || (!hasHashState && !hasPushState) ) {
         checkRoutes();
     }
 }
@@ -232,63 +222,57 @@ function jobPending()
         //called by the system before navigation to temporarily suspend jobs.
         //therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
         if(jobs[job].state !== 3){
-            jobs[job].state = 0;
-            clearInterval(jobs[job].timer);
+            safelyStopJob(job,0);
         }
     }   
 }
 
+function safelyStopJob(job,newState)
+{
+	if(jobs[job].state !== 1 && jobs[job].state !== 2){
+		jobs[job].state = newState;
+        clearInterval(jobs[job].timer);
+		if(newState == -1){
+			delete jobs[job];
+		}
+	}else{
+		setTimeout(function(){ safelyStopJob(job,newState); }, 10);
+	}
+}
+
 function jobResume(targets,ignoreState)
 {
-    switch(true){
-        case (targets === undefined):
-        case (targets !== undefined && targets === '*'):
-            for(var job in jobs){
-                if(jobs[job].state == 0 || ignoreState !== undefined){
-                    jobs[job].state = 1;
-                    jobs[job].timer = interval(function(){
-                        if(jobs[job].state !== 2){
-                            jobs[job].state = 2;
-                            jobs[job].payload.call(this);
-                            jobs[job].state = 1;
-                        }
-                    },jobs[job].interval);
-                }
-            }
-        break;
-        default:
-            var job = targets;
-            if(jobs.hasOwnProperty(job)){
-                if(jobs[job].state == 0 || ignoreState !== undefined){
-                    jobs[job].state = 1;
-                    jobs[job].timer = interval(function(){
-                        if(jobs[job].state !== 2){
-                            jobs[job].state = 2;
-                            jobs[job].payload.call();
-                            if(jobs[job].state !== 3){
-                                jobs[job].state = 1;
-                            }
-                        }
-                    },jobs[job].interval);
-                }
-            }
-        break;
-    }
-            
+	var obj = (targets === undefined || (targets !== undefined && targets === '*')) ? jobs : false;
+	if(!obj){
+		obj = {};
+		if(jobs.hasOwnProperty(targets)){
+			obj[targets] = jobs[targets];
+		}
+	}
+	
+	for(var job in obj){
+		if(jobs[job].state == 0 || ignoreState !== undefined){
+			jobs[job].state = 1;
+			jobs[job].timer = setInterval(function(){
+				if(jobs[job].state !== 2){
+					jobs[job].state = 2;
+					jobs[job].payload.call(this);
+					jobs[job].state = 1;
+				}
+			},jobs[job].interval);
+		}
+	}          
 }
 
 function jobPause(targets)
 {
     if(targets === '*'){
         for(var job in jobs){
-            jobs[job].state = 3;
-            clearInterval(jobs[job].timer); 
+			safelyStopJob(job,3);
         }
     }else{
         if(jobs.hasOwnProperty(targets)){
-            //todo in case job is running this will cause race condition.
-            jobs[targets].state = 3;
-            clearInterval(jobs[targets].timer); 
+            safelyStopJob(targets,3);
         }
     }
 }
@@ -297,13 +281,11 @@ function jobDestroy(targets)
 {
     if(targets == '*'){
         for(var job in jobs){
-            clearInterval(jobs[job].timer);
-            delete jobs[job];
+            safelyStopJob(job,-1);
         }
     }else{
         if(jobs.hasOwnProperty(job)){
-            clearInterval(jobs[job].timer);
-            delete jobs[job];   
+            safelyStopJob(job,-1);
         }
     }
 }
@@ -342,10 +324,4 @@ function timeParse(t)
     }
     log('parsed time: ' + t);
     return t;
-}
-
-function interval(a,b)
-{
-    //in future we will have race conditions here. best to proxy to setInterval so we can track the active intervals.
-    return setInterval(a,b);
 }

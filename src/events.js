@@ -8,7 +8,7 @@ $.fn.init = function(selector,context)
     
     // we only track events bound on element(s), document, and window. 
     // events bound on plain objects such as those that are bound with 
-	// $.jqMVC.listen and $.jqMVC.listenOnce are NOT tracked. #87
+    // $.jqMVC.listen and $.jqMVC.listenOnce are NOT tracked. #87
     if(trackSelector){
         jQbound = app.merge(jQbound,[selector]);//to prevent dupes in jqBound
     }
