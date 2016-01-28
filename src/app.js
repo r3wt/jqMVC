@@ -56,6 +56,21 @@ app.bindOnce = function(callback)
 };
 
 /**
+ * Dumps Information about the framework/environment.
+ * @returns {object} { routes, bindings, controllers, services, models, jobs }
+ */
+app.debug = function(){
+    return {
+        routes:routeList,
+		bindings:evt,
+		controllers: ctrl,
+		services: svc,
+		models: models,
+		jobs: jobs,
+    };
+};
+
+/**
  * resolve a string as a function at runtime. useful to prevent undefined errors (because of race condition in scope chain) that can occur accross modules due to data races.
  * @example $.jqMVC.callableResolver('ctrl.middleware.isUserLoggedIn');
  * @param {string} c - any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
@@ -598,8 +613,7 @@ app.trigger = function(event,eventData)
     return app;
 };
 
-app.debug = function(){
-    return {
-        routeList:routeList
-    };
+app.unload = function(callable)
+{
+	
 };

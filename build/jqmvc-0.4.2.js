@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-28_09:32:05 UTC
+ * @build     2016-01-28_09:42:49 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -671,6 +671,21 @@
     };
     
     /**
+     * Dumps Information about the framework/environment.
+     * @returns {object} { routes, bindings, controllers, services, models, jobs }
+     */
+    app.debug = function(){
+        return {
+            routes:routeList,
+            bindings:evt,
+            controllers: ctrl,
+            services: svc,
+            models: models,
+            jobs: jobs,
+        };
+    };
+    
+    /**
      * resolve a string as a function at runtime. useful to prevent undefined errors (because of race condition in scope chain) that can occur accross modules due to data races.
      * @example $.jqMVC.callableResolver('ctrl.middleware.isUserLoggedIn');
      * @param {string} c - any valid callable as a string , eg `fooBar` or `ctrl.fooBar.baz` or `svc.fooBar`
@@ -1213,10 +1228,9 @@
         return app;
     };
     
-    app.debug = function(){
-        return {
-            routeList:routeList
-        };
+    app.unload = function(callable)
+    {
+        
     };
     $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));
