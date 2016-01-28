@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-28_09:42:49 UTC
+ * @build     2016-01-28_09:53:45 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -46,7 +46,8 @@
         jQbound = [],
         evt={},
         evtOnce = [],
-        jobs={};
+        jobs={},
+        destructors = [];
     
         /* define things are exposed */
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -302,7 +303,7 @@
                 jobs[job].state = 0;
                 clearInterval(jobs[job].timer);
             }
-        }    
+        }   
     }
     
     function jobResume(targets,ignoreState)
@@ -349,13 +350,13 @@
         if(targets === '*'){
             for(var job in jobs){
                 jobs[job].state = 3;
-                clearInterval(jobs[job].timer);    
+                clearInterval(jobs[job].timer); 
             }
         }else{
             if(jobs.hasOwnProperty(targets)){
                 //todo in case job is running this will cause race condition.
                 jobs[targets].state = 3;
-                clearInterval(jobs[targets].timer);    
+                clearInterval(jobs[targets].timer); 
             }
         }
     }
@@ -370,7 +371,7 @@
         }else{
             if(jobs.hasOwnProperty(job)){
                 clearInterval(jobs[job].timer);
-                delete jobs[job];    
+                delete jobs[job];   
             }
         }
     }
@@ -539,9 +540,13 @@
     
     };
     
-    function unbindEvents()
+    function unbind()
     {
-        log('jqMVC -> unbindEvents');
+        log('jqMVC -> unbind');
+        for(var i=0;i<destructors.length;i++){
+            destructors[i].call(this);
+        }
+        destructors.length = 0;
         for(var i=0;i<jQbound.length;i++){
             $(jQbound[i]).find("*").addBack().off();
         }
@@ -549,20 +554,15 @@
         clearInterval(router.interval);//if router is using an interval it must be destroyed.
     }
     
-    function bindEvents()
+    function bind()
     {
-        log('jqMVC -> bindEvents');
+        log('jqMVC -> bind');
         for(var ev in evt){
             var c = evt[ev];
             if(typeof c === 'function'){
                 c.apply(this);
             }
         }
-    }
-    
-    function bindOneTimeEvents()
-    {
-        log('jqMVC -> bindOneTimeEvents');
         for(var i=0;i<evtOnce.length;i++){
             var c = evtOnce[i];
             if(typeof c === 'function'){
@@ -773,9 +773,8 @@
     {
         emit('on.done');
         progress.stop();
-        unbindEvents();
-        bindEvents();
-        bindOneTimeEvents();
+        unbind();
+        bind();
         if(typeof callback === 'function'){
             callback.apply(this);
         }
@@ -1218,7 +1217,7 @@
     
     /**
      * trigger an event on $.jqMVC
-     * @param {string) event - the event to trigger
+     * @param {string} event - the event to trigger
      * @param {object} [eventData] - optional event data to pass to event.
      * @returns {object} $.jqMVC
      */
@@ -1228,9 +1227,15 @@
         return app;
     };
     
+    /**
+     * create a handler for destroying things before.go. should be called from inside `bind()` or `bindOnce()`. this function only executes once per view, between navigations.
+     * @param {function} callable - a valid callable function.
+     * @returns {object} $.jqMVC
+     */
     app.unload = function(callable)
     {
-        
+        destructors.push(callable);
+        return app;
     };
     $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));

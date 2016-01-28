@@ -36,7 +36,8 @@ var app = {},
     jQbound = [],
     evt={},
     evtOnce = [],
-	jobs={};
+    jobs={},
+    destructors = [];
 
     /* define things are exposed */
     window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');

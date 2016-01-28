@@ -216,136 +216,136 @@ $.fn.serializeObject = function()
 
 $.fn.jq = function(attr,val)
 {
-	if(typeof attr === 'string'){
-		if(typeof val !== 'undefined'){
-			this.attr('jq-'+attr,val);
-		}else{
-			return this.attr('jq-'+attr);
-		}
-	}
-	return this;
+    if(typeof attr === 'string'){
+        if(typeof val !== 'undefined'){
+            this.attr('jq-'+attr,val);
+        }else{
+            return this.attr('jq-'+attr);
+        }
+    }
+    return this;
 };
 
 function jobPending()
 {
-	for(var job in jobs){
-		//called by the system before navigation to temporarily suspend jobs.
-		//therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
-		if(jobs[job].state !== 3){
-			jobs[job].state = 0;
-			clearInterval(jobs[job].timer);
-		}
-	}	
+    for(var job in jobs){
+        //called by the system before navigation to temporarily suspend jobs.
+        //therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
+        if(jobs[job].state !== 3){
+            jobs[job].state = 0;
+            clearInterval(jobs[job].timer);
+        }
+    }   
 }
 
 function jobResume(targets,ignoreState)
 {
-	switch(true){
-		case (targets === undefined):
-		case (targets !== undefined && targets === '*'):
-			for(var job in jobs){
-				if(jobs[job].state == 0 || ignoreState !== undefined){
-					jobs[job].state = 1;
-					jobs[job].timer = interval(function(){
-						if(jobs[job].state !== 2){
-							jobs[job].state = 2;
-							jobs[job].payload.call(this);
-							jobs[job].state = 1;
-						}
-					},jobs[job].interval);
-				}
-			}
-		break;
-		default:
-			var job = targets;
-			if(jobs.hasOwnProperty(job)){
-				if(jobs[job].state == 0 || ignoreState !== undefined){
-					jobs[job].state = 1;
-					jobs[job].timer = interval(function(){
-						if(jobs[job].state !== 2){
-							jobs[job].state = 2;
-							jobs[job].payload.call();
-							if(jobs[job].state !== 3){
-								jobs[job].state = 1;
-							}
-						}
-					},jobs[job].interval);
-				}
-			}
-		break;
-	}
-			
+    switch(true){
+        case (targets === undefined):
+        case (targets !== undefined && targets === '*'):
+            for(var job in jobs){
+                if(jobs[job].state == 0 || ignoreState !== undefined){
+                    jobs[job].state = 1;
+                    jobs[job].timer = interval(function(){
+                        if(jobs[job].state !== 2){
+                            jobs[job].state = 2;
+                            jobs[job].payload.call(this);
+                            jobs[job].state = 1;
+                        }
+                    },jobs[job].interval);
+                }
+            }
+        break;
+        default:
+            var job = targets;
+            if(jobs.hasOwnProperty(job)){
+                if(jobs[job].state == 0 || ignoreState !== undefined){
+                    jobs[job].state = 1;
+                    jobs[job].timer = interval(function(){
+                        if(jobs[job].state !== 2){
+                            jobs[job].state = 2;
+                            jobs[job].payload.call();
+                            if(jobs[job].state !== 3){
+                                jobs[job].state = 1;
+                            }
+                        }
+                    },jobs[job].interval);
+                }
+            }
+        break;
+    }
+            
 }
 
 function jobPause(targets)
 {
-	if(targets === '*'){
-		for(var job in jobs){
-			jobs[job].state = 3;
-			clearInterval(jobs[job].timer);	
-		}
-	}else{
-		if(jobs.hasOwnProperty(targets)){
-			//todo in case job is running this will cause race condition.
-			jobs[targets].state = 3;
-			clearInterval(jobs[targets].timer);	
-		}
-	}
+    if(targets === '*'){
+        for(var job in jobs){
+            jobs[job].state = 3;
+            clearInterval(jobs[job].timer); 
+        }
+    }else{
+        if(jobs.hasOwnProperty(targets)){
+            //todo in case job is running this will cause race condition.
+            jobs[targets].state = 3;
+            clearInterval(jobs[targets].timer); 
+        }
+    }
 }
 
 function jobDestroy(targets)
 {
-	if(targets == '*'){
-		for(var job in jobs){
-			clearInterval(jobs[job].timer);
-			delete jobs[job];
-		}
-	}else{
-		if(jobs.hasOwnProperty(job)){
-			clearInterval(jobs[job].timer);
-			delete jobs[job];	
-		}
-	}
+    if(targets == '*'){
+        for(var job in jobs){
+            clearInterval(jobs[job].timer);
+            delete jobs[job];
+        }
+    }else{
+        if(jobs.hasOwnProperty(job)){
+            clearInterval(jobs[job].timer);
+            delete jobs[job];   
+        }
+    }
 }
 
 function jobInspect(targets)
 {
-	if(targets === '*'){
-		return jobs;
-	}else{
-		if(jobs.hasOwnProperty(targets)){
-			return jobs[targets];
-		}else{
-			return 'job doesnt exist';
-		}
-	}
+    if(targets === '*'){
+        return jobs;
+    }else{
+        if(jobs.hasOwnProperty(targets)){
+            return jobs[targets];
+        }else{
+            return 'job doesnt exist';
+        }
+    }
 }
 
 function timeParse(t)
 {
-	log('parsing time: '+t);
-	if(typeof t == 'string'){
-		var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
-		if(m.length == 3){
-			var a = parseInt(m[1]),
-				b = m[2].toLowerCase(),
-				c = {
-					ms: 1,
-					s : 1000,
-					m : 60000,
-					h : 3.6e+6
-				};
-			t = a * c[b];
-		}else{
-			t = -1;
-		}
-	}
-	log('parsed time: ' + t);
-	return t;
+    log('parsing time: '+t);
+    if(typeof t == 'string'){
+        var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
+        if(m.length == 3){
+            var a = parseInt(m[1]),
+                b = m[2].toLowerCase(),
+                c = {
+                    ms: 1,
+                    s : 1000,
+                    m : 60000,
+                    h : 3.6e+6
+                };
+            t = a * c[b];
+        }else{
+            t = -1;
+        }
+    }
+    log('parsed time: ' + t);
+    return t;
 }
 
 function interval(a,b)
 {
-	//in future we will have race conditions here. best to proxy to setInterval so we can track the active intervals.
-	return setInterval(a,b);
+    //in future we will have race conditions here. best to proxy to setInterval so we can track the active intervals.
+    return setInterval(a,b);
 }

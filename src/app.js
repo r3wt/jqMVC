@@ -62,11 +62,11 @@ app.bindOnce = function(callback)
 app.debug = function(){
     return {
         routes:routeList,
-		bindings:evt,
-		controllers: ctrl,
-		services: svc,
-		models: models,
-		jobs: jobs,
+        bindings:evt,
+        controllers: ctrl,
+        services: svc,
+        models: models,
+        jobs: jobs,
     };
 };
 
@@ -158,14 +158,13 @@ app.done = function(callback)
 {
     emit('on.done');
     progress.stop();
-    unbindEvents();
-    bindEvents();
-    bindOneTimeEvents();
+    unbind();
+    bind();
     if(typeof callback === 'function'){
         callback.apply(this);
     }
     $(router).trigger('accept');
-	jobResume();//resume all non-paused jobs.
+    jobResume();//resume all non-paused jobs.
     return false;
 };
 
@@ -177,7 +176,7 @@ app.done = function(callback)
  */
 app.go = function(url)
 {   
-	jobPending();//halt all jobs.
+    jobPending();//halt all jobs.
     if (hasPushState) {
         history.pushState({}, null, url);
         checkRoutes();
@@ -209,67 +208,67 @@ app.go = function(url)
  */
 app.group = function(prefix,groupMiddleware,groupCallback)
 {
-	if(typeof groupMiddleware === 'function' && typeof groupCallback === 'undefined')
-	{
-		//no middleware provided
-		var groupCallback = groupMiddleware;
-		groupMiddleware = null;
-	}
-	
-	if(typeof prefix !== 'string'){
-		throw 'prefix must be a string';
-	}
-	
-	var routeFunction = app.route;
-	
-	app.route = function()
-	{
-		var args = [];
-		Array.prototype.push.apply( args, arguments );
-		var route = args.shift(); //first arg is always the path
-		
-		//its a bit more difficult here. we need to ensure its not a regexp, and if it is we need to merge the expressions.
-		if(route instanceof RegExp){
-			route = route.toString().substr(1);//remove regexp literal "/"
-			
-			//to get the flags, we can split at "/"
-			var flags = '';
-			if(route.substr(-1) !== '/'){
+    if(typeof groupMiddleware === 'function' && typeof groupCallback === 'undefined')
+    {
+        //no middleware provided
+        var groupCallback = groupMiddleware;
+        groupMiddleware = null;
+    }
+    
+    if(typeof prefix !== 'string'){
+        throw 'prefix must be a string';
+    }
+    
+    var routeFunction = app.route;
+    
+    app.route = function()
+    {
+        var args = [];
+        Array.prototype.push.apply( args, arguments );
+        var route = args.shift(); //first arg is always the path
+        
+        //its a bit more difficult here. we need to ensure its not a regexp, and if it is we need to merge the expressions.
+        if(route instanceof RegExp){
+            route = route.toString().substr(1);//remove regexp literal "/"
+            
+            //to get the flags, we can split at "/"
+            var flags = '';
+            if(route.substr(-1) !== '/'){
 
-				route = route.split('/');
+                route = route.split('/');
 
-				flags = route.pop();
+                flags = route.pop();
 
-				route = route.join('/');
+                route = route.join('/');
 
-			}else{
-				route = route.substr(0, route.length - 1);
-			}
-			
-			route = escapeRegExp(prefix) + route;
-			
-			route = new RegExp(route,flags);
-		}else{
-			route = prefix + route;
-		}
-		
-		var callback = args.pop(); //last arg is the callback
-		var middleware = args; //safe to assume remaining arguments are middleware
-		
-		if(groupMiddleware !== null){
-			middleware = app.merge([groupMiddleware],middleware);//make sure groupMiddleware is always first
-		}
-		
-		var args2 = app.merge([route],middleware,[callback]);
-		routeFunction.apply(this,args2);
-		return app;
-	};
-	
-	groupCallback.apply(this);
-	
-	app.route = routeFunction;
-	
-	return app;
+            }else{
+                route = route.substr(0, route.length - 1);
+            }
+            
+            route = escapeRegExp(prefix) + route;
+            
+            route = new RegExp(route,flags);
+        }else{
+            route = prefix + route;
+        }
+        
+        var callback = args.pop(); //last arg is the callback
+        var middleware = args; //safe to assume remaining arguments are middleware
+        
+        if(groupMiddleware !== null){
+            middleware = app.merge([groupMiddleware],middleware);//make sure groupMiddleware is always first
+        }
+        
+        var args2 = app.merge([route],middleware,[callback]);
+        routeFunction.apply(this,args2);
+        return app;
+    };
+    
+    groupCallback.apply(this);
+    
+    app.route = routeFunction;
+    
+    return app;
 };
 
 /**
@@ -340,7 +339,7 @@ app.loadOnce = function(module,callback,error)
     }
     var script = document.createElement('script');
     script.src = file;
-	script.setAttribute('jq-loadonce','1');
+    script.setAttribute('jq-loadonce','1');
     script.addEventListener('load', function() {
         if(typeof callback === 'function'){
             callback.apply(this);
@@ -377,31 +376,31 @@ app.loadOnce = function(module,callback,error)
 app.job = function()
 {
     switch(arguments.length){
-		case 3:
-			jobs[arguments[0]] = {
-				state: 0,
-				payload: arguments[1],
-				interval: timeParse(arguments[2]),
-				timer: null
-			};
-		break;
-		case 2:
-			switch(arguments[0]){
-				case 'pause':
-					jobPause(arguments[1]);
-				break;
-				case 'destroy':
-					jobDestroy(arguments[1]);
-				break;
-				case 'resume':
-					jobResume(arguments[1],true);
-				break;
-				case 'inspect':
-					return jobInspect(arguments[1]);
-				break;
-			}
-		break;
-	}
+        case 3:
+            jobs[arguments[0]] = {
+                state: 0,
+                payload: arguments[1],
+                interval: timeParse(arguments[2]),
+                timer: null
+            };
+        break;
+        case 2:
+            switch(arguments[0]){
+                case 'pause':
+                    jobPause(arguments[1]);
+                break;
+                case 'destroy':
+                    jobDestroy(arguments[1]);
+                break;
+                case 'resume':
+                    jobResume(arguments[1],true);
+                break;
+                case 'inspect':
+                    return jobInspect(arguments[1]);
+                break;
+            }
+        break;
+    }
     return app;
 };
 
@@ -584,9 +583,9 @@ app.setView = function(obj)
  *  @name view
  */
 Object.defineProperty(app, "view", { 
-	get: function () { 
-		return view; 
-	} 
+    get: function () { 
+        return view; 
+    } 
 });
 
 /**
@@ -603,7 +602,7 @@ app.svc = function(name,mixedvar)
 
 /**
  * trigger an event on $.jqMVC
- * @param {string) event - the event to trigger
+ * @param {string} event - the event to trigger
  * @param {object} [eventData] - optional event data to pass to event.
  * @returns {object} $.jqMVC
  */
@@ -613,7 +612,13 @@ app.trigger = function(event,eventData)
     return app;
 };
 
+/**
+ * create a handler for destroying things before.go. should be called from inside `bind()` or `bindOnce()`. this function only executes once per view, between navigations.
+ * @param {function} callable - a valid callable function.
+ * @returns {object} $.jqMVC
+ */
 app.unload = function(callable)
 {
-	
+    destructors.push(callable);
+    return app;
 };

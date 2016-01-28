@@ -121,9 +121,13 @@ evt.bindModel = function()
 
 };
 
-function unbindEvents()
+function unbind()
 {
-    log('jqMVC -> unbindEvents');
+    log('jqMVC -> unbind');
+    for(var i=0;i<destructors.length;i++){
+        destructors[i].call(this);
+    }
+    destructors.length = 0;
     for(var i=0;i<jQbound.length;i++){
         $(jQbound[i]).find("*").addBack().off();
     }
@@ -131,20 +135,15 @@ function unbindEvents()
     clearInterval(router.interval);//if router is using an interval it must be destroyed.
 }
 
-function bindEvents()
+function bind()
 {
-    log('jqMVC -> bindEvents');
+    log('jqMVC -> bind');
     for(var ev in evt){
         var c = evt[ev];
         if(typeof c === 'function'){
             c.apply(this);
         }
     }
-}
-
-function bindOneTimeEvents()
-{
-    log('jqMVC -> bindOneTimeEvents');
     for(var i=0;i<evtOnce.length;i++){
         var c = evtOnce[i];
         if(typeof c === 'function'){
