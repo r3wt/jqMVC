@@ -249,7 +249,6 @@ function jobResume(targets,ignoreState)
 			obj[targets] = jobs[targets];
 		}
 	}
-	
 	for(var job in obj){
 		if(jobs[job].state == 0 || ignoreState !== undefined){
 			jobs[job].state = 1;

@@ -3,12 +3,6 @@ router.interval = null;
 router.currentId = "";
 router.currentParameters = {};
 
-router.capabilities = {
-    hash: hasHashState,
-    pushState: hasPushState,
-    timer: !hasHashState && !hasPushState
-};
-
 router.checkRoute = function(url) 
 {
     return getParameters(parseUrl(url)).length > 0;

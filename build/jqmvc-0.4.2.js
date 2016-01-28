@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-28_15:55:13 UTC
+ * @build     2016-01-28_16:13:30 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -317,7 +317,6 @@
                 obj[targets] = jobs[targets];
             }
         }
-        
         for(var job in obj){
             if(jobs[job].state == 0 || ignoreState !== undefined){
                 jobs[job].state = 1;
@@ -558,12 +557,6 @@
     router.interval = null;
     router.currentId = "";
     router.currentParameters = {};
-    
-    router.capabilities = {
-        hash: hasHashState,
-        pushState: hasPushState,
-        timer: !hasHashState && !hasPushState
-    };
     
     router.checkRoute = function(url) 
     {
