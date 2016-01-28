@@ -42,11 +42,17 @@ jqMVC.js is a MVC/SPA framework designed for usage with jQuery.
 ---
 ### Dependencies
 
-* [jQuery] - https://code.jquery.com/
+* [jQuery](https://code.jquery.com/)
+
+---
+### Contributor Guidelines
+
+* Interested in contributing? [Read the Guidelines](https://github.com/r3wt/jqMVC/blob/master/CONTRIBUTING.md)
 
 ---
 ### Docs 
-* [view documentation](http://jqmvc.openex.info/build/docs/index.html)
+
+* [View The Docs](http://jqmvc.openex.info/build/docs/index.html)
 
 ---
 ### License
