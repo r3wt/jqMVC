@@ -366,7 +366,7 @@ app.job = function()
 			jobs[arguments[0]] = {
 				state: 0,
 				payload: arguments[1],
-				interval: arguments[2],
+				interval: timeParse(arguments[2]),
 				timer: null
 			};
 		break;

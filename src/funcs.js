@@ -246,10 +246,10 @@ function jobResume(targets,ignoreState)
 			for(var job in jobs){
 				if(jobs[job].state == 0 || ignoreState !== undefined){
 					jobs[job].state = 1;
-					jobs[job].timer = setInterval(function(){
+					jobs[job].timer = interval(function(){
 						if(jobs[job].state !== 2){
 							jobs[job].state = 2;
-							jobs[job].payload();
+							jobs[job].payload.call(this);
 							jobs[job].state = 1;
 						}
 					},jobs[job].interval);
@@ -261,7 +261,7 @@ function jobResume(targets,ignoreState)
 			if(jobs.hasOwnProperty(job)){
 				if(jobs[job].state == 0 || ignoreState !== undefined){
 					jobs[job].state = 1;
-					job.timer = setInterval(function(){
+					jobs[job].timer = interval(function(){
 						if(jobs[job].state !== 2){
 							jobs[job].state = 2;
 							jobs[job].payload.call();
@@ -286,6 +286,7 @@ function jobPause(targets)
 		}
 	}else{
 		if(jobs.hasOwnProperty(targets)){
+			//todo in case job is running this will cause race condition.
 			jobs[targets].state = 3;
 			clearInterval(jobs[targets].timer);	
 		}
@@ -318,4 +319,33 @@ function jobInspect(targets)
 			return 'job doesnt exist';
 		}
 	}
+}
+
+function timeParse(t)
+{
+	log('parsing time: '+t);
+	if(typeof t == 'string'){
+		var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
+		if(m.length == 3){
+			var a = parseInt(m[1]),
+				b = m[2].toLowerCase(),
+				c = {
+					ms: 1,
+					s : 1000,
+					m : 60000,
+					h : 3.6e+6
+				};
+			t = a * c[b];
+		}else{
+			t = -1;
+		}
+	}
+	log('parsed time: ' + t);
+	return t;
+}
+
+function interval(a,b)
+{
+	//in future we will have race conditions here. best to proxy to setInterval so we can track the active intervals.
+	return setInterval(a,b);
 }

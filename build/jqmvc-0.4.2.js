@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-27_16:19:30 UTC
+ * @build     2016-01-28_09:32:05 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -313,10 +313,10 @@
                 for(var job in jobs){
                     if(jobs[job].state == 0 || ignoreState !== undefined){
                         jobs[job].state = 1;
-                        jobs[job].timer = setInterval(function(){
+                        jobs[job].timer = interval(function(){
                             if(jobs[job].state !== 2){
                                 jobs[job].state = 2;
-                                jobs[job].payload();
+                                jobs[job].payload.call(this);
                                 jobs[job].state = 1;
                             }
                         },jobs[job].interval);
@@ -328,7 +328,7 @@
                 if(jobs.hasOwnProperty(job)){
                     if(jobs[job].state == 0 || ignoreState !== undefined){
                         jobs[job].state = 1;
-                        job.timer = setInterval(function(){
+                        jobs[job].timer = interval(function(){
                             if(jobs[job].state !== 2){
                                 jobs[job].state = 2;
                                 jobs[job].payload.call();
@@ -353,6 +353,7 @@
             }
         }else{
             if(jobs.hasOwnProperty(targets)){
+                //todo in case job is running this will cause race condition.
                 jobs[targets].state = 3;
                 clearInterval(jobs[targets].timer);    
             }
@@ -385,6 +386,35 @@
                 return 'job doesnt exist';
             }
         }
+    }
+    
+    function timeParse(t)
+    {
+        log('parsing time: '+t);
+        if(typeof t == 'string'){
+            var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
+            if(m.length == 3){
+                var a = parseInt(m[1]),
+                    b = m[2].toLowerCase(),
+                    c = {
+                        ms: 1,
+                        s : 1000,
+                        m : 60000,
+                        h : 3.6e+6
+                    };
+                t = a * c[b];
+            }else{
+                t = -1;
+            }
+        }
+        log('parsed time: ' + t);
+        return t;
+    }
+    
+    function interval(a,b)
+    {
+        //in future we will have race conditions here. best to proxy to setInterval so we can track the active intervals.
+        return setInterval(a,b);
     }
     //everything event related
     $.fn.init = function(selector,context)
@@ -951,7 +981,7 @@
                 jobs[arguments[0]] = {
                     state: 0,
                     payload: arguments[1],
-                    interval: arguments[2],
+                    interval: timeParse(arguments[2]),
                     timer: null
                 };
             break;
