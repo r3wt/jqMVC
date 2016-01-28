@@ -85,36 +85,6 @@ app.callableResolver = function(c)
 };
 
 /**
- * check whether the framework can run in this environment
- * @returns {object} $.jqMVC
- */
-app.checkCompatibility = function()
-{
-    try{
-        
-        var v = $.fn.jquery.split('.'),
-            n = [];
-        for(var i=0;i<v.length;i++){
-            n.push(parseInt(v[i]));
-        }
-        switch(true){
-            case(n[0] < 2):
-            case(n[1] < 1):
-            case(n[2] < 3):
-                throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-            break;
-        }
-        log('using jQuery version '+n.join('.'));
-        
-    }
-    catch(e){
-        emit('incompatible',{reason:e});
-        // todo create a way to prevent further execution of app.
-    }
-    return app;
-};
-
-/**
  * Call the internal notify.confirm() method, which is set by by setNotification(object)
  * @returns {object} $.jqMVC
  */

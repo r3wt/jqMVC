@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-28_16:13:30 UTC
+ * @build     2016-01-28_16:25:08 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -666,36 +666,6 @@
             var args = arguments;
             return eval(c+'.apply(this,args)'); 
         };
-    };
-    
-    /**
-     * check whether the framework can run in this environment
-     * @returns {object} $.jqMVC
-     */
-    app.checkCompatibility = function()
-    {
-        try{
-            
-            var v = $.fn.jquery.split('.'),
-                n = [];
-            for(var i=0;i<v.length;i++){
-                n.push(parseInt(v[i]));
-            }
-            switch(true){
-                case(n[0] < 2):
-                case(n[1] < 1):
-                case(n[2] < 3):
-                    throw 'jqMVC requires jQuery 2.1.3 or greater. Upgrade dummy!';
-                break;
-            }
-            log('using jQuery version '+n.join('.'));
-            
-        }
-        catch(e){
-            emit('incompatible',{reason:e});
-            // todo create a way to prevent further execution of app.
-        }
-        return app;
     };
     
     /**
