@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-29_11:09:55 UTC
+ * @build     2016-01-29_12:21:33 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -94,7 +94,8 @@
     
     function getPath()
     {
-        var path = app_path.replace(window.location.origin,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
+        var r = new RegExp(window.location.origin);
+        var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
         return (!path.length ? '/' : path);
     }
     
@@ -430,7 +431,7 @@
         $(document).on('click','a[data-href]',function(e){
             e.preventDefault();
             emit('before.go');
-            app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
+            app.go( $(this).data('href') ,'Loading');
             return false;
         });
     };
@@ -715,6 +716,8 @@
      */
     app.go = function(url)
     {   
+        var url = getPath().replace(/\/+$/, '')+url;
+        log(url);
         jobPending();//halt all jobs.
         if (hasPushState) {
             history.pushState({}, null, url);
@@ -1045,7 +1048,7 @@
     app.run = function()
     {
         app.add(function(){
-            app.go(location.href);
+            app.go(location.href.replace(location.origin,'').replace(getPath(),'/'));
         }); //add app.go to the middleware stack
         stack.next();//start the middleware stack.
         app.run = function(){};//remove app.run

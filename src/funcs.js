@@ -26,7 +26,8 @@ function isApp(t)
 
 function getPath()
 {
-    var path = app_path.replace(window.location.origin,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
+	var r = new RegExp(window.location.origin);
+    var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
     return (!path.length ? '/' : path);
 }
 

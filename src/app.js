@@ -142,6 +142,8 @@ app.done = function()
  */
 app.go = function(url)
 {   
+	var url = getPath().replace(/\/+$/, '')+url;
+	log(url);
     jobPending();//halt all jobs.
     if (hasPushState) {
         history.pushState({}, null, url);
@@ -472,7 +474,7 @@ app.render = function()
 app.run = function()
 {
     app.add(function(){
-        app.go(location.href);
+        app.go(location.href.replace(location.origin,'').replace(getPath(),'/'));
     }); //add app.go to the middleware stack
     stack.next();//start the middleware stack.
     app.run = function(){};//remove app.run

@@ -47,7 +47,7 @@ evt.bindHref = function()
     $(document).on('click','a[data-href]',function(e){
         e.preventDefault();
         emit('before.go');
-        app.go( getPath().replace(/\/+$/, '')+$(this).data('href') ,'Loading');
+        app.go( $(this).data('href') ,'Loading');
         return false;
     });
 };
