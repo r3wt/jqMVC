@@ -30,16 +30,6 @@ function getPath()
     return (!path.length ? '/' : path);
 }
 
-function getQueryString() 
-{
-    var str = (window.location.search || '?').substr(1);
-    return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
-        var parts = param.replace(/\+/g, ' ').split('=');
-        ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
-        return ret;
-    }, {}));    
-}
-
 function checkRoutes()
 {
     var currentUrl = parseUrl(location.pathname);
@@ -84,7 +74,6 @@ function tryRoutes(routes)
 		var mwStack = {
 			items: route.middleware.slice(),
 			next : function(){
-				window.location.query = getQueryString(); // #75
 				if(mwStack.items.length > 0){
 					log('jqMVC -> router -> route -> mw -> next');
 					mwStack.items.shift().call(this,mwStack);

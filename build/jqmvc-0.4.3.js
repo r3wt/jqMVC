@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.4.2
+ * @version   0.4.3
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-28_16:29:31 UTC
+ * @build     2016-01-29_11:09:55 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -98,16 +98,6 @@
         return (!path.length ? '/' : path);
     }
     
-    function getQueryString() 
-    {
-        var str = (window.location.search || '?').substr(1);
-        return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
-            var parts = param.replace(/\+/g, ' ').split('=');
-            ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
-            return ret;
-        }, {}));    
-    }
-    
     function checkRoutes()
     {
         var currentUrl = parseUrl(location.pathname);
@@ -152,7 +142,6 @@
             var mwStack = {
                 items: route.middleware.slice(),
                 next : function(){
-                    window.location.query = getQueryString(); // #75
                     if(mwStack.items.length > 0){
                         log('jqMVC -> router -> route -> mw -> next');
                         mwStack.items.shift().call(this,mwStack);
@@ -1024,6 +1013,20 @@
     app.pass = function()
     {
         throw 'pass';
+    };
+    
+    /**
+     * parses the querystring into an object of key value pairs and returns it. returns empty object if querystring isnt set.
+     * @returns {object} querystring
+     */
+    app.query = function () 
+    {
+        var str = (window.location.search || '?').substr(1);
+        return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
+            var parts = param.replace(/\+/g, ' ').split('=');
+            ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+            return ret;
+        }, {}));    
     };
     
     /**

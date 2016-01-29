@@ -443,6 +443,20 @@ app.pass = function()
 };
 
 /**
+ * parses the querystring into an object of key value pairs and returns it. returns empty object if querystring isnt set.
+ * @returns {object} querystring
+ */
+app.query = function () 
+{
+    var str = (window.location.search || '?').substr(1);
+    return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
+        var parts = param.replace(/\+/g, ' ').split('=');
+        ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+        return ret;
+    }, {}));    
+};
+
+/**
  * calls internal view.render method with all arguments passed. view is set via setView
  * @returns {object} $.jqMVC
  */
