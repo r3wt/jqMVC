@@ -10,6 +10,7 @@ var doc   =  require('gulp-documentation'),
         'events.js',//check
         'stack.js',//check
         'router.js',//check
+		'worker.js',
         'app.js',//check
         'footer.js'//check
     ];

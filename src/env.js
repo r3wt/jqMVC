@@ -21,7 +21,8 @@ var app = {},
     evt={},
     evtOnce = [],
     jobs={},
-    destructors = [];
+    destructors = [],
+	workers={};
 
     /* define things are exposed */
     window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -35,9 +36,7 @@ var app = {},
     window.api_path         = '/api/';
     window.view_path        = '/views';
     window.module_path      ='/modules';
-    window.model_path       = '/models';
     window.element          = $('body');
     window.debug            = false;
     window.binding_override = false;
-	window.force_hash       = false;
 

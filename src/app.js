@@ -541,16 +541,6 @@ app.setView = function(obj)
 };
 
 /**
- *  exposes the internal view object via a getter.
- *  @name view
- */
-Object.defineProperty(app, "view", { 
-    get: function () { 
-        return view; 
-    } 
-});
-
-/**
  * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
  * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
  * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
@@ -584,3 +574,35 @@ app.unload = function(callable)
     destructors.push(callable);
     return app;
 };
+
+/**
+ *  exposes the internal view object via a getter.
+ *  @name view
+ */
+Object.defineProperty(app, "view", { 
+    get: function () { 
+        return view; 
+    } 
+});
+
+/**
+ * Add a named Web Worker to the internal workers object
+ * @param {string} name - the name for the Web Worker
+ * @param {function} onmessage - the worker function. works the same as onmessage of a webworker.
+ * @returns {object} $.jqMVC
+ */
+app.worker = function(name,onmessage)
+{
+	workers[name] = Worker.create(onmessage);
+    return app;
+};
+
+/**
+ *  exposes the worker object, so dev can retrieve reference to a specific worker or inspect workers.
+ *  @name workers
+ */
+Object.defineProperty(app, "workers", { 
+    get: function () { 
+        return workers; 
+    } 
+});

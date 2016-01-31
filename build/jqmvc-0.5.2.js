@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.5.1
+ * @version   0.5.2
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-31_15:40:48 UTC
+ * @build     2016-01-31_16:06:46 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -31,7 +31,8 @@
         evt={},
         evtOnce = [],
         jobs={},
-        destructors = [];
+        destructors = [],
+        workers={};
     
         /* define things are exposed */
         window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
@@ -45,11 +46,9 @@
         window.api_path         = '/api/';
         window.view_path        = '/views';
         window.module_path      ='/modules';
-        window.model_path       = '/models';
         window.element          = $('body');
         window.debug            = false;
         window.binding_override = false;
-        window.force_hash       = false;
     
     
     //internal utilities
@@ -539,6 +538,20 @@
             router.checkRoutes();
         }
     }
+    if(typeof Worker !== 'undefined'){
+        Worker.createURL = function(c)
+        {
+            var str = (typeof c === 'function')?c.toString():c;
+            var blob = new Blob(['\'use strict\';\nself.onmessage ='+str], { type: 'text/javascript' });
+            return window.URL.createObjectURL(blob);
+        };
+    
+        Worker.create = function(c)
+        {
+          return new Worker(Worker.createURL(c));
+        };    
+    }
+    
     /**
      * Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()
      * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
@@ -1082,16 +1095,6 @@
     };
     
     /**
-     *  exposes the internal view object via a getter.
-     *  @name view
-     */
-    Object.defineProperty(app, "view", { 
-        get: function () { 
-            return view; 
-        } 
-    });
-    
-    /**
      * Add a service to the global svc object. services are a great way to write reusable objects and functions and access them from any scope.
      * @param {string} name - the name for the service eg 'foobar' would be accessed svc.foobar()
      * @param {*} mixedvar - an object or callable function are recommended, but a service can be anything.
@@ -1125,5 +1128,37 @@
         destructors.push(callable);
         return app;
     };
+    
+    /**
+     *  exposes the internal view object via a getter.
+     *  @name view
+     */
+    Object.defineProperty(app, "view", { 
+        get: function () { 
+            return view; 
+        } 
+    });
+    
+    /**
+     * Add a named Web Worker to the internal workers object
+     * @param {string} name - the name for the Web Worker
+     * @param {function} onmessage - the worker function. works the same as onmessage of a webworker.
+     * @returns {object} $.jqMVC
+     */
+    app.worker = function(name,onmessage)
+    {
+        workers[name] = Worker.create(onmessage);
+        return app;
+    };
+    
+    /**
+     *  exposes the worker object, so dev can retrieve reference to a specific worker or inspect workers.
+     *  @name workers
+     */
+    Object.defineProperty(app, "workers", { 
+        get: function () { 
+            return workers; 
+        } 
+    });
     $.jqMVC = app;//expose jqMVC
 }(jQuery,window,document));

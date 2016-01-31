@@ -188,6 +188,11 @@
                 unload
               </a>
               <a
+                href='#worker'
+                class='block bold'>
+                worker
+              </a>
+              <a
                 href='#path'
                 class='block bold'>
                 path
@@ -196,6 +201,11 @@
                 href='#view'
                 class='block bold'>
                 view
+              </a>
+              <a
+                href='#workers'
+                class='block bold'>
+                workers
               </a>
           </div>
         </div>
@@ -1052,6 +1062,37 @@
       </div>
 </section>
 </div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='worker' class='mt0'>
+    worker<span class='gray'>(name, onmessage)</span>
+  </h2>
+  <p>Add a named Web Worker to the internal workers object</p>
+
+    <h4>Parameters</h4>
+    <ul class='suppress-p-margin'>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code> <strong>name</strong>
+          :
+          <div class='force-inline'>
+            <p>the name for the Web Worker</p>
+
+          </div>
+        </li>
+        <li><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code> <strong>onmessage</strong>
+          :
+          <div class='force-inline'>
+            <p>the worker function. works the same as onmessage of a webworker.</p>
+
+          </div>
+        </li>
+    </ul>
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></code></code>
+      :
+      <div class='force-inline'>
+        <p>$.jqMVC</p>
+
+      </div>
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
   <h2 id='path' class='mt0'>
     path<span class='gray'></span>
   </h2>
@@ -1063,6 +1104,13 @@
     view<span class='gray'></span>
   </h2>
   <p>exposes the internal view object via a getter.</p>
+
+</section>
+</div><div class='py1'><section class='py2 clearfix'>
+  <h2 id='workers' class='mt0'>
+    workers<span class='gray'></span>
+  </h2>
+  <p>exposes the worker object, so dev can retrieve reference to a specific worker or inspect workers.</p>
 
 </section>
 </div>
