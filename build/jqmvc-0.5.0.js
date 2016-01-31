@@ -5,11 +5,10 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-31_14:45:35 UTC
+ * @build     2016-01-31_15:06:19 UTC
  */
 ;!(function($,window,document){
     var app = {},
-        hasPushState = (history && history.pushState),
         routeList = [],
         eventAdded = false,
         currentUsedUrl = location.href,
@@ -96,7 +95,7 @@
     {
         var can = true,
         reason = {};
-        if(!hasPushState){
+        if(!(history && history.pushState)){
             can = false;
             reason[1] = 'Browser Does not support History API';
         }
@@ -397,24 +396,20 @@
         if(app_path !== '/' && url.indexOf(app_path) !== 0){
             url = (app_path + url).trim('/');
         }
-        log(url);
+        
         url = url.replace(new RegExp(window.location.origin,'g'),'').replace(/\/+/g, '/').trim('/');
         if(!url.length){
             url = '/';
         }
+        log('jqMVC -> router -> normalize :: '+url);
         return url;
-    };
-    
-    router.init = function()
-    {
-        router.go(location.href);
     };
     
     router.go = function(url)
     {
         var url = router.normalize(url);
         history.pushState({}, null, url);
-        checkRoutes();
+        router.checkRoutes();
         if(!eventAdded){
             evt.bindRouter();
         }
@@ -442,16 +437,16 @@
         return router.currentParameters;
     };
     
-    function checkRoutes()
+    router.checkRoutes = function()
     {
         var currentUrl = router.normalize(location.href);
         var actionList = router.params(currentUrl);
         var matches = actionList.slice();
-        log(matches);
-        tryRoutes(matches);
+        log('jqMVC -> router -> checkRoutes :: found '+matches.length+' routes',matches);
+        router.tryRoutes(matches);
     }
     
-    function tryRoutes(routes) 
+    router.tryRoutes = function(routes) 
     {
         if(routes.length === 0){
             emit('notFound');
@@ -467,7 +462,7 @@
                     break;
                     case 'pass':
                         log('jqMVC -> router -> pass');
-                        tryRoutes(nextRoutes);//try the next route in the stack.
+                        router.tryRoutes(nextRoutes);//use recursion to cycle through matched routes.
                     break;
                     case 'halt':
                         log('jqMVC -> router -> halt');
@@ -550,7 +545,7 @@
     router.popstate = function(e)
     {
         if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
-            checkRoutes();
+            router.checkRoutes();
         }
     }
     /**
@@ -1026,7 +1021,7 @@
             emit('app.incompatible',can_run);//can_run would have details of why it cant run.
         }
         app.add(function(){
-            router.init();
+            router.go(location.href);
         }); //add app.go to the middleware stack
         stack.next();//start the middleware stack.
         app.run = function(){};//remove app.run

@@ -1,5 +1,4 @@
 var app = {},
-    hasPushState = (history && history.pushState),
     routeList = [],
     eventAdded = false,
     currentUsedUrl = location.href,

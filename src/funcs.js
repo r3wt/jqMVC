@@ -28,7 +28,7 @@ function canRun()
 {
 	var can = true,
 	reason = {};
-	if(!hasPushState){
+	if(!(history && history.pushState)){
 		can = false;
 		reason[1] = 'Browser Does not support History API';
 	}

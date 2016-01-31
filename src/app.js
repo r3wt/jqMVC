@@ -471,7 +471,7 @@ app.run = function()
 		emit('app.incompatible',can_run);//can_run would have details of why it cant run.
 	}
     app.add(function(){
-        router.init();
+		router.go(location.href);
     }); //add app.go to the middleware stack
     stack.next();//start the middleware stack.
     app.run = function(){};//remove app.run

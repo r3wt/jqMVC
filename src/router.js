@@ -4,24 +4,20 @@ router.normalize = function(url)
 	if(app_path !== '/' && url.indexOf(app_path) !== 0){
 		url = (app_path + url).trim('/');
 	}
-	log(url);
+	
 	url = url.replace(new RegExp(window.location.origin,'g'),'').replace(/\/+/g, '/').trim('/');
 	if(!url.length){
 		url = '/';
 	}
+	log('jqMVC -> router -> normalize :: '+url);
 	return url;
-};
-
-router.init = function()
-{
-	router.go(location.href);
 };
 
 router.go = function(url)
 {
 	var url = router.normalize(url);
 	history.pushState({}, null, url);
-	checkRoutes();
+	router.checkRoutes();
 	if(!eventAdded){
 		evt.bindRouter();
 	}
@@ -49,16 +45,16 @@ router.params = function(url)
     return router.currentParameters;
 };
 
-function checkRoutes()
+router.checkRoutes = function()
 {
     var currentUrl = router.normalize(location.href);
     var actionList = router.params(currentUrl);
     var matches = actionList.slice();
-    log(matches);
-    tryRoutes(matches);
+    log('jqMVC -> router -> checkRoutes :: found '+matches.length+' routes',matches);
+    router.tryRoutes(matches);
 }
 
-function tryRoutes(routes) 
+router.tryRoutes = function(routes) 
 {
     if(routes.length === 0){
         emit('notFound');
@@ -74,7 +70,7 @@ function tryRoutes(routes)
 				break;
                 case 'pass':
 					log('jqMVC -> router -> pass');
-                    tryRoutes(nextRoutes);//try the next route in the stack.
+                    router.tryRoutes(nextRoutes);//use recursion to cycle through matched routes.
                 break;
                 case 'halt':
 					log('jqMVC -> router -> halt');
@@ -157,6 +153,6 @@ router.params = function(url)
 router.popstate = function(e)
 {
     if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
-        checkRoutes();
+        router.checkRoutes();
 	}
 }
