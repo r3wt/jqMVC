@@ -1,16 +1,14 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.4.3
+ * @version   0.5.0
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-29_12:21:33 UTC
+ * @build     2016-01-31_15:06:19 UTC
  */
 ;!(function($,window,document){
     var app = {},
-        hasPushState = (history && history.pushState),
-        hasHashState = !hasPushState && ("onhashchange" in window) && false,
         routeList = [],
         eventAdded = false,
         currentUsedUrl = location.href,
@@ -64,6 +62,7 @@
         window.element          = $('body');
         window.debug            = false;
         window.binding_override = false;
+        window.force_hash       = false;
     
     
     //internal utilities
@@ -92,146 +91,15 @@
         return t === app;
     }
     
-    function getPath()
+    function canRun()
     {
-        var r = new RegExp(window.location.origin);
-        var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
-        return (!path.length ? '/' : path);
-    }
-    
-    function checkRoutes()
-    {
-        var currentUrl = parseUrl(location.pathname);
-        var actionList = getParameters(currentUrl);
-        var matches = actionList.slice();
-        log(matches);
-        tryRoutes(matches);
-    }
-    
-    function tryRoutes(routes) 
-    {
-        if(routes.length === 0){
-            emit('notFound');
-        }else{
-            var route = routes.shift();
-            var nextRoutes = routes.slice();
-            var oldError = window.onerror;
-            window.onerror = function(e){
-                var e = e.replace('uncaught exception:','').trim();
-                switch(e){
-                    case 'accept':
-                        log('jqMVC -> router -> accept');
-                    break;
-                    case 'pass':
-                        log('jqMVC -> router -> pass');
-                        tryRoutes(nextRoutes);//try the next route in the stack.
-                    break;
-                    case 'halt':
-                        log('jqMVC -> router -> halt');
-                    break;
-                    default:
-                        log('jqMVC -> router -> uncaught exception: '+e); //log exception and return.
-                    break;
-                }
-                window.onerror = oldError;
-                return true;
-            };
-            var args = [];
-            for(var prop in route.data){
-                args.push(route.data[prop]);
-            }
-            var mwStack = {
-                items: route.middleware.slice(),
-                next : function(){
-                    if(mwStack.items.length > 0){
-                        log('jqMVC -> router -> route -> mw -> next');
-                        mwStack.items.shift().call(this,mwStack);
-                    }else{
-                        log('jqMVC -> router -> route -> callback');
-                        route.callback.apply(this,args);
-                    }
-                }
-            };
-            mwStack.next();
+        var can = true,
+        reason = {};
+        if(!(history && history.pushState)){
+            can = false;
+            reason[1] = 'Browser Does not support History API';
         }
-        return;
-    }
-    
-    function parseUrl(url)
-    {
-        var currentUrl = url ? url : location.pathname;
-    
-        currentUrl = decodeURI(currentUrl);
-    
-        // if no pushstate is availabe we have to use the hash
-        if (!hasPushState) {   
-            if (location.hash.indexOf("#!/") === 0) {
-                currentUrl += location.hash.substring(3);
-            } else {
-                return '';
-            }
-        }
-        
-        // and if the last character is a slash, we just remove it
-        if(currentUrl.slice(-1) == '/'){
-            currentUrl = currentUrl.substring(0, currentUrl.length-1);
-        }
-    
-        return currentUrl;
-    }
-    
-    function getParameters(url)
-    {
-        var dataList = [];
-        for (var i = 0; i < routeList.length; i++) {
-            var route = routeList[i];
-            if (route.type == "regexp") {
-                var result = url.match(route.route);
-                if (result) {
-                    var obj = (function(){ return route; }());
-                    obj.data = {matches: result};
-                    dataList.push(obj);
-                }
-            } else {
-                var currentUrlParts = url.split("/");
-                var routeParts = route.route.split("/");
-                if (routeParts.length == currentUrlParts.length) {
-                    var data = {};
-                    var matched = true;
-                    var matchCounter = 0;
-    
-                    for(var j = 0; j < routeParts.length; j++) {
-                        if (routeParts[j].indexOf(":") === 0) {
-                            //its a parameter
-                            data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
-                            matchCounter++;
-                        } else {
-                            //not a parameter, ensure the segments match.
-                            if (routeParts[j] == currentUrlParts[j]) {
-                                matchCounter++;
-                            }
-                        }
-                    }
-    
-                    // we've an exact match. break
-                    if (routeParts.length == matchCounter) {
-                        var obj = (function(){ return route; }());
-                        obj.data = data;
-                        dataList.push(obj);
-                        router.currentParameters = data;
-                    }
-                }
-            }
-        }
-    
-        return dataList;
-    }
-    
-    function handleRoutes(e)
-    {
-        if ( (e != null && e.originalEvent && e.originalEvent.state !== undefined) || hasHashState || (!hasHashState && !hasPushState) ) {
-            checkRoutes();
-        }
+        return (can === false) ? reason : true;
     }
     
     function log()
@@ -402,28 +270,7 @@
         
     evt.bindRouter = function(){
         eventAdded = true;
-        router.fromHash = false;
-    
-        if (hasPushState) {
-            if (location.hash.indexOf("#!/") === 0) {
-                var url = location.pathname + location.hash.replace(/^#!\//gi, "");
-                history.replaceState({}, "", url);
-                router.fromHash = true;
-            }
-    
-            $(window).bind("popstate", handleRoutes);
-            
-        } else if (hasHashState) {
-            $(window).bind("hashchange.router", handleRoutes);
-        } else {
-            // if no events are available we use a timer to check periodically for changes in the url
-            router.interval = setInterval(function(){
-                if (location.href != currentUsedUrl) {
-                    handleRoutes();
-                    currentUsedUrl = location.href;
-                }
-            }, 500);
-        }
+        $(window).bind("popstate", router.popstate);
     };
     
     evt.bindHref = function()
@@ -543,24 +390,42 @@
         log('jqMVC -> middleware -> next()');
         stack.items.shift().call($,stack);
     };
-    //router
-    router.interval = null;
+    
+    router.normalize = function(url)
+    {
+        if(app_path !== '/' && url.indexOf(app_path) !== 0){
+            url = (app_path + url).trim('/');
+        }
+        
+        url = url.replace(new RegExp(window.location.origin,'g'),'').replace(/\/+/g, '/').trim('/');
+        if(!url.length){
+            url = '/';
+        }
+        log('jqMVC -> router -> normalize :: '+url);
+        return url;
+    };
+    
+    router.go = function(url)
+    {
+        var url = router.normalize(url);
+        history.pushState({}, null, url);
+        router.checkRoutes();
+        if(!eventAdded){
+            evt.bindRouter();
+        }
+    };
+    
     router.currentId = "";
     router.currentParameters = {};
     
-    router.checkRoute = function(url) 
-    {
-        return getParameters(parseUrl(url)).length > 0;
-    };
-    
     // get the current parameters for either a specified url or the current one if parameters is ommited
-    router.parameters = function(url)
+    router.params = function(url)
     {
         // parse the url so that we handle a unified url
-        var currentUrl = parseUrl(url);
+        var currentUrl = router.normalize(url);
     
         // get the list of actions for the current url
-        var list = getParameters(currentUrl);
+        var list = router.params(currentUrl);
     
         // if the list is empty, return an empty object
         if (list.length == 0) {
@@ -571,7 +436,118 @@
     
         return router.currentParameters;
     };
-    //endrouter
+    
+    router.checkRoutes = function()
+    {
+        var currentUrl = router.normalize(location.href);
+        var actionList = router.params(currentUrl);
+        var matches = actionList.slice();
+        log('jqMVC -> router -> checkRoutes :: found '+matches.length+' routes',matches);
+        router.tryRoutes(matches);
+    }
+    
+    router.tryRoutes = function(routes) 
+    {
+        if(routes.length === 0){
+            emit('notFound');
+        }else{
+            var route = routes.shift();
+            var nextRoutes = routes.slice();
+            var oldError = window.onerror;
+            window.onerror = function(e){
+                var e = e.replace('uncaught exception:','').trim();
+                switch(e){
+                    case 'accept':
+                        log('jqMVC -> router -> accept');
+                    break;
+                    case 'pass':
+                        log('jqMVC -> router -> pass');
+                        router.tryRoutes(nextRoutes);//use recursion to cycle through matched routes.
+                    break;
+                    case 'halt':
+                        log('jqMVC -> router -> halt');
+                    break;
+                    default:
+                        log('jqMVC -> router -> uncaught exception: '+e); //log exception and return.
+                    break;
+                }
+                window.onerror = oldError;
+                return true;
+            };
+            var args = [];
+            for(var prop in route.data){
+                args.push(route.data[prop]);
+            }
+            var mwStack = {
+                items: route.middleware.slice(),
+                next : function(){
+                    if(mwStack.items.length > 0){
+                        log('jqMVC -> router -> route -> mw -> next');
+                        mwStack.items.shift().call(this,mwStack);
+                    }else{
+                        log('jqMVC -> router -> route -> callback');
+                        route.callback.apply(this,args);
+                    }
+                }
+            };
+            mwStack.next();
+        }
+        return;
+    }
+    
+    router.params = function(url)
+    {
+        var dataList = [];
+        for (var i = 0; i < routeList.length; i++) {
+            var route = routeList[i];
+            if (route.type == "regexp") {
+                var result = url.match(route.route);
+                if (result) {
+                    var obj = (function(){ return route; }());
+                    obj.data = {matches: result};
+                    dataList.push(obj);
+                }
+            } else {
+                var currentUrlParts = url.split("/");
+                var routeParts = route.route.split("/");
+                if (routeParts.length == currentUrlParts.length) {
+                    var data = {};
+                    var matched = true;
+                    var matchCounter = 0;
+    
+                    for(var j = 0; j < routeParts.length; j++) {
+                        if (routeParts[j].indexOf(":") === 0) {
+                            //its a parameter
+                            data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
+                            matchCounter++;
+                        } else {
+                            //not a parameter, ensure the segments match.
+                            if (routeParts[j] == currentUrlParts[j]) {
+                                matchCounter++;
+                            }
+                        }
+                    }
+    
+                    // we've an exact match. break
+                    if (routeParts.length == matchCounter) {
+                        var obj = (function(){ return route; }());
+                        obj.data = data;
+                        dataList.push(obj);
+                        router.currentParameters = data;
+                    }
+                }
+            }
+        }
+    
+        return dataList;
+    }
+    
+    router.popstate = function(e)
+    {
+        if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
+            router.checkRoutes();
+        }
+    }
     /**
      * Add a middleware function to the middleware stack. IF called after .run() it does nothing. middleware should accept a single argument, the stack object. when middleware is done doing its work, it should call stack.next()
      * @param {function} middleware - a valid callable accepting the middleware stack object as argument.
@@ -716,27 +692,8 @@
      */
     app.go = function(url)
     {   
-        var url = getPath().replace(/\/+$/, '')+url;
-        log(url);
         jobPending();//halt all jobs.
-        if (hasPushState) {
-            history.pushState({}, null, url);
-            checkRoutes();
-            if(!eventAdded){
-                evt.bindRouter();
-            }
-        } else {
-            if(!eventAdded){
-                evt.bindRouter();
-            }
-            url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-            var hash = url.replace(location.pathname, "");
-            if (hash.indexOf("!") < 0)
-            {
-                hash = "!/" + hash;
-            }
-            location.hash = hash;
-        }
+        router.go(url);
         return app;
     };
     
@@ -853,7 +810,7 @@
                 var returned = 0,
                 state={};
                 for(var i=0;i<modules.length;i++){
-                    loadScript(getPath() + module_path + modules[i]);
+                    loadScript(app.path + module_path + modules[i]);
                 }
                 $(state).on('check',function(){
                     if(returned >= modules.length){
@@ -875,7 +832,7 @@
      */
     app.loadOnce = function(module,callback,error)
     {
-        var file = getPath() + module_path + module;
+        var file = app.path + module_path + module;
         if($('script[src="'+file+'"][jq-loadonce]').length){
             $('script[src="'+file+'"][jq-loadonce]').remove();
         }
@@ -1019,6 +976,18 @@
     };
     
     /**
+     *  the path to the application
+     *  @name path
+     */
+    Object.defineProperty(app, "path", { 
+        get: function () { 
+            var r = new RegExp(window.location.origin);
+            var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
+            return (!path.length ? '/' : path);
+        } 
+    });
+    
+    /**
      * parses the querystring into an object of key value pairs and returns it. returns empty object if querystring isnt set.
      * @returns {object} querystring
      */
@@ -1047,8 +1016,12 @@
      */
     app.run = function()
     {
+        var can_run = canRun();
+        if(can_run !== true){
+            emit('app.incompatible',can_run);//can_run would have details of why it cant run.
+        }
         app.add(function(){
-            app.go(location.href.replace(location.origin,'').replace(getPath(),'/'));
+            router.go(location.href);
         }); //add app.go to the middleware stack
         stack.next();//start the middleware stack.
         app.run = function(){};//remove app.run
@@ -1072,15 +1045,8 @@
         var isRegExp = typeof route == "object";
     
         if (!isRegExp) {
-            route = getPath().replace(/\/+$/, '') + route;
-            // remove the last slash to unifiy all routes
-            if (route.lastIndexOf("/") == route.length - 1) {
-                route = route.substring(0, route.length - 1);
-            }
-            // if the routes were created with an absolute url ,we have to remove the absolute part
-            route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+            route = router.normalize(route);
         }
-    
         routeList.push({
             route: route,
             middleware: middleware,
