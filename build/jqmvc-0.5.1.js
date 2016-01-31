@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.5.0
+ * @version   0.5.1
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-31_15:06:19 UTC
+ * @build     2016-01-31_15:40:48 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -16,28 +16,14 @@
         firstRun = false,
         router = {},
         notify = {
-            alert:function(message)
-            {
-                alert(message);
-            },
-            confirm:function(message,callback)
-            {
-                if(confirm(message)){
-                    callback.apply(this);
-                }
-            }
+            alert:function(){},
+            confirm:function(){}
         },
         progress = {
             start: function(){},
             stop: function(){}
         },
-        view = {
-            render: function()
-            {
-                app.done();
-                throw 'You must implement a view library to use this feature.';
-            }
-        },
+        view = {},
         model = {},
         stack = {},
         jQselector = $.fn.init,
@@ -52,6 +38,7 @@
         window.ctrl = {};
         window.svc = {};
         window.models = {};
+        window.workers = {};
     
         /* define default global settings that the app uses*/
         window.app_path         = '/',
@@ -97,9 +84,13 @@
         reason = {};
         if(!(history && history.pushState)){
             can = false;
-            reason[1] = 'Browser Does not support History API';
+            reason['router'] = 'Browser Does not support History API';
         }
-        return (can === false) ? reason : true;
+        if((!window.URL.createObjectURL) || typeof Worker === "undefined"){
+            can = false;
+            reason['worker'] = 'Browser Does not support Webworkers';
+        }
+        return (!can) ? reason : true;
     }
     
     function log()
@@ -999,16 +990,6 @@
             ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
             return ret;
         }, {}));    
-    };
-    
-    /**
-     * calls internal view.render method with all arguments passed. view is set via setView
-     * @returns {object} $.jqMVC
-     */
-    app.render = function()
-    {
-        view.render.apply(this,arguments);
-        return app;
     };
     
     /**

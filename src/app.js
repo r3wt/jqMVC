@@ -452,16 +452,6 @@ app.query = function ()
 };
 
 /**
- * calls internal view.render method with all arguments passed. view is set via setView
- * @returns {object} $.jqMVC
- */
-app.render = function()
-{
-    view.render.apply(this,arguments);
-    return app;
-};
-
-/**
  * runs the app for the first time, then overwrites run so it cant be called again. executes all middleware, including the app itself. no params and no return value.
  */
 app.run = function()

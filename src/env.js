@@ -6,28 +6,14 @@ var app = {},
     firstRun = false,
     router = {},
     notify = {
-        alert:function(message)
-        {
-            alert(message);
-        },
-        confirm:function(message,callback)
-        {
-            if(confirm(message)){
-                callback.apply(this);
-            }
-        }
+        alert:function(){},
+        confirm:function(){}
     },
     progress = {
         start: function(){},
         stop: function(){}
     },
-    view = {
-        render: function()
-        {
-            app.done();
-            throw 'You must implement a view library to use this feature.';
-        }
-    },
+    view = {},
     model = {},
     stack = {},
     jQselector = $.fn.init,
@@ -42,6 +28,7 @@ var app = {},
     window.ctrl = {};
     window.svc = {};
     window.models = {};
+	window.workers = {};
 
     /* define default global settings that the app uses*/
     window.app_path         = '/',

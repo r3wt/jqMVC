@@ -30,9 +30,13 @@ function canRun()
 	reason = {};
 	if(!(history && history.pushState)){
 		can = false;
-		reason[1] = 'Browser Does not support History API';
+		reason['router'] = 'Browser Does not support History API';
 	}
-	return (can === false) ? reason : true;
+	if((!window.URL.createObjectURL) || typeof Worker === "undefined"){
+		can = false;
+		reason['worker'] = 'Browser Does not support Webworkers';
+	}
+	return (!can) ? reason : true;
 }
 
 function log()
