@@ -142,27 +142,8 @@ app.done = function()
  */
 app.go = function(url)
 {   
-	var url = getPath().replace(/\/+$/, '')+url;
-	log(url);
     jobPending();//halt all jobs.
-    if (hasPushState) {
-        history.pushState({}, null, url);
-        checkRoutes();
-        if(!eventAdded){
-            evt.bindRouter();
-        }
-    } else {
-        if(!eventAdded){
-            evt.bindRouter();
-        }
-        url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-        var hash = url.replace(location.pathname, "");
-        if (hash.indexOf("!") < 0)
-        {
-            hash = "!/" + hash;
-        }
-        location.hash = hash;
-    }
+    router.go(url);
     return app;
 };
 
@@ -279,7 +260,7 @@ app.loadModules = function(modules)
             var returned = 0,
             state={};
             for(var i=0;i<modules.length;i++){
-                loadScript(getPath() + module_path + modules[i]);
+                loadScript(app.path + module_path + modules[i]);
             }
             $(state).on('check',function(){
                 if(returned >= modules.length){
@@ -301,7 +282,7 @@ app.loadModules = function(modules)
  */
 app.loadOnce = function(module,callback,error)
 {
-    var file = getPath() + module_path + module;
+    var file = app.path + module_path + module;
     if($('script[src="'+file+'"][jq-loadonce]').length){
         $('script[src="'+file+'"][jq-loadonce]').remove();
     }
@@ -445,6 +426,18 @@ app.pass = function()
 };
 
 /**
+ *  the path to the application
+ *  @name path
+ */
+Object.defineProperty(app, "path", { 
+    get: function () { 
+		var r = new RegExp(window.location.origin);
+		var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
+		return (!path.length ? '/' : path);
+    } 
+});
+
+/**
  * parses the querystring into an object of key value pairs and returns it. returns empty object if querystring isnt set.
  * @returns {object} querystring
  */
@@ -473,8 +466,12 @@ app.render = function()
  */
 app.run = function()
 {
+	var can_run = canRun();
+	if(can_run !== true){
+		emit('app.incompatible',can_run);//can_run would have details of why it cant run.
+	}
     app.add(function(){
-        app.go(location.href.replace(location.origin,'').replace(getPath(),'/'));
+        router.init();
     }); //add app.go to the middleware stack
     stack.next();//start the middleware stack.
     app.run = function(){};//remove app.run
@@ -498,15 +495,8 @@ app.route = function()
     var isRegExp = typeof route == "object";
 
     if (!isRegExp) {
-        route = getPath().replace(/\/+$/, '') + route;
-        // remove the last slash to unifiy all routes
-        if (route.lastIndexOf("/") == route.length - 1) {
-            route = route.substring(0, route.length - 1);
-        }
-        // if the routes were created with an absolute url ,we have to remove the absolute part
-        route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+        route = router.normalize(route);
     }
-
     routeList.push({
         route: route,
         middleware: middleware,

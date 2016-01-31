@@ -24,146 +24,15 @@ function isApp(t)
     return t === app;
 }
 
-function getPath()
+function canRun()
 {
-	var r = new RegExp(window.location.origin);
-    var path = app_path.replace(r,'').replace(/\/+/g, '/').trim('/');//possibly unsafe.
-    return (!path.length ? '/' : path);
-}
-
-function checkRoutes()
-{
-    var currentUrl = parseUrl(location.pathname);
-    var actionList = getParameters(currentUrl);
-    var matches = actionList.slice();
-    log(matches);
-    tryRoutes(matches);
-}
-
-function tryRoutes(routes) 
-{
-    if(routes.length === 0){
-        emit('notFound');
-    }else{
-        var route = routes.shift();
-        var nextRoutes = routes.slice();
-		var oldError = window.onerror;
-		window.onerror = function(e){
-			var e = e.replace('uncaught exception:','').trim();
-			switch(e){
-				case 'accept':
-					log('jqMVC -> router -> accept');
-				break;
-                case 'pass':
-					log('jqMVC -> router -> pass');
-                    tryRoutes(nextRoutes);//try the next route in the stack.
-                break;
-                case 'halt':
-					log('jqMVC -> router -> halt');
-                break;
-                default:
-                    log('jqMVC -> router -> uncaught exception: '+e); //log exception and return.
-                break;
-            }
-			window.onerror = oldError;
-			return true;
-		};
-		var args = [];
-		for(var prop in route.data){
-			args.push(route.data[prop]);
-		}
-		var mwStack = {
-			items: route.middleware.slice(),
-			next : function(){
-				if(mwStack.items.length > 0){
-					log('jqMVC -> router -> route -> mw -> next');
-					mwStack.items.shift().call(this,mwStack);
-				}else{
-					log('jqMVC -> router -> route -> callback');
-					route.callback.apply(this,args);
-				}
-			}
-		};
-		mwStack.next();
-    }
-    return;
-}
-
-function parseUrl(url)
-{
-    var currentUrl = url ? url : location.pathname;
-
-    currentUrl = decodeURI(currentUrl);
-
-    // if no pushstate is availabe we have to use the hash
-    if (!hasPushState) {   
-        if (location.hash.indexOf("#!/") === 0) {
-            currentUrl += location.hash.substring(3);
-        } else {
-			return '';
-        }
-    }
-    
-    // and if the last character is a slash, we just remove it
-    if(currentUrl.slice(-1) == '/'){
-        currentUrl = currentUrl.substring(0, currentUrl.length-1);
-    }
-
-    return currentUrl;
-}
-
-function getParameters(url)
-{
-    var dataList = [];
-    for (var i = 0; i < routeList.length; i++) {
-        var route = routeList[i];
-        if (route.type == "regexp") {
-            var result = url.match(route.route);
-            if (result) {
-                var obj = (function(){ return route; }());
-                obj.data = {matches: result};
-                dataList.push(obj);
-            }
-        } else {
-            var currentUrlParts = url.split("/");
-            var routeParts = route.route.split("/");
-            if (routeParts.length == currentUrlParts.length) {
-                var data = {};
-                var matched = true;
-                var matchCounter = 0;
-
-                for(var j = 0; j < routeParts.length; j++) {
-                    if (routeParts[j].indexOf(":") === 0) {
-                        //its a parameter
-                        data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
-                        matchCounter++;
-                    } else {
-                        //not a parameter, ensure the segments match.
-                        if (routeParts[j] == currentUrlParts[j]) {
-                            matchCounter++;
-                        }
-                    }
-                }
-
-                // we've an exact match. break
-                if (routeParts.length == matchCounter) {
-                    var obj = (function(){ return route; }());
-                    obj.data = data;
-                    dataList.push(obj);
-                    router.currentParameters = data;
-                }
-            }
-        }
-    }
-
-    return dataList;
-}
-
-function handleRoutes(e)
-{
-    if ( (e != null && e.originalEvent && e.originalEvent.state !== undefined) || hasHashState || (!hasHashState && !hasPushState) ) {
-        checkRoutes();
-    }
+	var can = true,
+	reason = {};
+	if(!hasPushState){
+		can = false;
+		reason[1] = 'Browser Does not support History API';
+	}
+	return (can === false) ? reason : true;
 }
 
 function log()

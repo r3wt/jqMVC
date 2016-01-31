@@ -1,6 +1,5 @@
 var app = {},
     hasPushState = (history && history.pushState),
-    hasHashState = !hasPushState && ("onhashchange" in window) && false,
     routeList = [],
     eventAdded = false,
     currentUsedUrl = location.href,
@@ -54,4 +53,5 @@ var app = {},
     window.element          = $('body');
     window.debug            = false;
     window.binding_override = false;
+	window.force_hash       = false;
 

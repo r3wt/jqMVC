@@ -18,28 +18,7 @@ $.fn.init = function(selector,context)
     
 evt.bindRouter = function(){
     eventAdded = true;
-    router.fromHash = false;
-
-    if (hasPushState) {
-        if (location.hash.indexOf("#!/") === 0) {
-            var url = location.pathname + location.hash.replace(/^#!\//gi, "");
-            history.replaceState({}, "", url);
-            router.fromHash = true;
-        }
-
-        $(window).bind("popstate", handleRoutes);
-        
-    } else if (hasHashState) {
-        $(window).bind("hashchange.router", handleRoutes);
-    } else {
-        // if no events are available we use a timer to check periodically for changes in the url
-        router.interval = setInterval(function(){
-            if (location.href != currentUsedUrl) {
-                handleRoutes();
-                currentUsedUrl = location.href;
-            }
-        }, 500);
-    }
+	$(window).bind("popstate", router.popstate);
 };
 
 evt.bindHref = function()
