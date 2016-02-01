@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.5.2
+ * @version   0.5.3
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-01-31_16:06:46 UTC
+ * @build     2016-02-01_19:44:43 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -381,13 +381,17 @@
         stack.items.shift().call($,stack);
     };
     
-    router.normalize = function(url)
+    router.normalize = function(url,keep_qs)
     {
         if(app_path !== '/' && url.indexOf(app_path) !== 0){
             url = (app_path + url).trim('/');
         }
         
         url = url.replace(new RegExp(window.location.origin,'g'),'').replace(/\/+/g, '/').trim('/');
+        if(typeof keep_qs === 'undefined'){
+            url = url.split('?')[0];
+        }
+        
         if(!url.length){
             url = '/';
         }
@@ -397,7 +401,7 @@
     
     router.go = function(url)
     {
-        var url = router.normalize(url);
+        var url = router.normalize(url,true);
         history.pushState({}, null, url);
         router.checkRoutes();
         if(!eventAdded){

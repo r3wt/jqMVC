@@ -1,11 +1,15 @@
 
-router.normalize = function(url)
+router.normalize = function(url,keep_qs)
 {
 	if(app_path !== '/' && url.indexOf(app_path) !== 0){
 		url = (app_path + url).trim('/');
 	}
 	
 	url = url.replace(new RegExp(window.location.origin,'g'),'').replace(/\/+/g, '/').trim('/');
+	if(typeof keep_qs === 'undefined'){
+		url = url.split('?')[0];
+	}
+	
 	if(!url.length){
 		url = '/';
 	}
@@ -15,7 +19,7 @@ router.normalize = function(url)
 
 router.go = function(url)
 {
-	var url = router.normalize(url);
+	var url = router.normalize(url,true);
 	history.pushState({}, null, url);
 	router.checkRoutes();
 	if(!eventAdded){
