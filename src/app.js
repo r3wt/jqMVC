@@ -292,8 +292,9 @@ app.loadOnce = function(module,callback,error)
     script.addEventListener('load', function() {
         if(typeof callback === 'function'){
             callback.apply(this);
-        }
-        throw 'loadOnce - callback is undefined';
+        }else{
+			throw 'loadOnce - callback is undefined';
+		}
     }, false);
     
     script.addEventListener('error', function() {
@@ -302,7 +303,6 @@ app.loadOnce = function(module,callback,error)
         }else{
             throw 'loadOnce - failed to load resource';
         }
-        
     }, false);
     document.body.appendChild(script);
     return app;

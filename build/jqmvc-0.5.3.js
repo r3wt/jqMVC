@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-02-01_19:44:43 UTC
+ * @build     2016-02-04_16:29:58 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -850,8 +850,9 @@
         script.addEventListener('load', function() {
             if(typeof callback === 'function'){
                 callback.apply(this);
+            }else{
+                throw 'loadOnce - callback is undefined';
             }
-            throw 'loadOnce - callback is undefined';
         }, false);
         
         script.addEventListener('error', function() {
@@ -860,7 +861,6 @@
             }else{
                 throw 'loadOnce - failed to load resource';
             }
-            
         }, false);
         document.body.appendChild(script);
         return app;
