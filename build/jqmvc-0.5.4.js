@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.5.3
+ * @version   0.5.4
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-02-04_16:29:58 UTC
+ * @build     2016-03-01_12:17:55 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -298,12 +298,13 @@
                 $this.processData = true;
             }
             
-            if(typeof $this.bf === 'function'){
-                new Promise(window.ctrl[$this.ctrl][$this.bf])
-                .then(function(){
+            if(typeof $this.bf !== 'undefined'){
+                new Promise(function(resolve,reject){
+                    window.ctrl[$this.ctrl][$this.bf]($this,resolve,reject);
+                }).then(function(){
                     formSubmit();
                 },function(){
-                    //do we do anything else here or just let the before function handle the errors
+                   
                 });
             }else{
                 formSubmit();

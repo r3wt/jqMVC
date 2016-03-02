@@ -56,12 +56,13 @@ evt.bindForm = function()
             $this.processData = true;
         }
         
-        if(typeof $this.bf === 'function'){
-            new Promise(window.ctrl[$this.ctrl][$this.bf])
-            .then(function(){
+        if(typeof $this.bf !== 'undefined'){
+            new Promise(function(resolve,reject){
+				window.ctrl[$this.ctrl][$this.bf]($this,resolve,reject);
+            }).then(function(){
                 formSubmit();
             },function(){
-                //do we do anything else here or just let the before function handle the errors
+               
             });
         }else{
             formSubmit();
