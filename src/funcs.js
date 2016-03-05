@@ -57,28 +57,6 @@ function escapeRegExp(str)
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-$.fn.serializeObject = function()
-{ 
-    var b = this.serializeArray();
-    var a = {};
-    for(var i=0;i<b.length;i++){
-        a[b[i].name] = b[i].value;
-    }
-    return a;
-};
-
-$.fn.jq = function(attr,val)
-{
-    if(typeof attr === 'string'){
-        if(typeof val !== 'undefined'){
-            this.attr('jq-'+attr,val);
-        }else{
-            return this.attr('jq-'+attr);
-        }
-    }
-    return this;
-};
-
 function jobPending()
 {
     for(var job in jobs){

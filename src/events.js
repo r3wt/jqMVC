@@ -15,36 +15,113 @@ $.fn.init = function(selector,context)
 
     return jQinstance;
 };
-    
-evt.bindRouter = function(){
-    eventAdded = true;
-	$(window).bind("popstate", router.popstate);
+
+$.fn.serializeObject = function()
+{ 
+    var b = this.serializeArray();
+    var a = {};
+    for(var i=0;i<b.length;i++){
+        a[b[i].name] = b[i].value;
+    }
+    return a;
 };
 
-evt.bindHref = function()
+$.fn.jq = function(attr,val)
 {
-    $(document).on('click','a[data-href]',function(e){
-        e.preventDefault();
-        emit('before.go');
-        app.go( $(this).data('href') ,'Loading');
-        return false;
-    });
+    if(typeof attr === 'string'){
+        if(typeof val !== 'undefined'){
+            this.attr('jq-'+attr,val);
+        }else{
+            return this.attr('jq-'+attr);
+        }
+    }
+    return this;
 };
 
-evt.bindForm = function()
+function getController(t)
 {
-    $(document).on('submit','form[method][ctrl][action][callback]',function(event){
+	var c = t.closest('jq-ctrl');
+	if(c typeof string){
+		var a = window.ctrl[c] || false;
+		if(!a){
+			return null;//let it blow up
+		}
+		return a;
+	}else{
+		return window.ctrl;//no controller is set. assume they will call controller.method() ie `foobar.SomeFunc()`
+	}
+}
+
+//t = $(element)
+//c = string controller method OR controller name . method
+//ex `jq-ctrl="fooController" jq-unload="barMethod"` OR `jq-unload="fooController.barMethod"`
+resolve(t,c)
+{
+	var d = getController(t);
+	if(d === window.ctrl){
+		return eval(t.jq(c));//ugly i know :-(
+	}else{
+		return d[t.jq(c)];
+	}
+}
+
+evt.bindDefaults = function()
+{
+	//default html bindings.
+	/*
+	jq-selected = add into select tag to set selected option when rendered.
+	jq-swipe-left = on swipe left. (touch device only)
+	jq-swipe-right = on swipe right. (touch device only)
+	jq-scroll-up = on scroll up only.
+	jq-scroll-down = on scroll down only.
+	jq-observe = observe mutation of element.
+	*/
+	
+	/***
+	  * blocked
+	  * jq-subview= example <div jq-view="template,apiCall,apiArgs"></div>
+	  *
+	  */
+	 
+	//some can simply be converted to natives.
+	var natives = [
+		'click','dblclick','mousedown','mouseup','keydown','keypress','keyup','change','scroll','dragstart','dragstop','error'
+	];
+	for(var i=0;i<natives.length;i++){
+		$(document).on('click','[jq-'+natives[i]+']',function(e){
+			//return the output of callable in case return false was used to stop propagation
+			//set selector as context and pass event
+			return resolve( $(this), natives[i] ).apply(this,[e]);
+		});
+	}
+	
+	//jq load/unload
+	$('[jq-load]').each(function(i,v){
+		resolve( $(this), 'load' ).apply(this);
+	});
+	$('[jq-unload]').each(function(i,v){
+		app.unload( resolve( $(this) , 'unload' ) );//because aliens.
+	});
+	
+	//swipe left
+	
+	//swipe right
+	
+	//swipe down
+	 
+	$(document).on('submit','form[jq-method][jq-action][jq-callback]',function(event){
         //refactor to support file uploads.
         event.preventDefault();
         
         var $this = {};
         $this.el     = $(this);
-        $this.method = $this.el.attr('method');
-        $this.action = $this.el.attr('action');
-        $this.ctrl   = $this.el.attr('ctrl');
-        $this.bf     = $this.el.attr('before');
-        $this.cb     = $this.el.attr('callback');
+        $this.method = $this.el.jq('method');
+        $this.action = $this.el.jq('action');
+        $this.bf     = $this.el.jq('before');
+        $this.cb     = $this.el.jq('callback');
         $this.isFile = !!$this.el.find(':input[type="file"]').length;
+		
+		var controller = getController($this.el);
         
         if($this.isFile){
             $this.data  = new FormData(this);
@@ -58,7 +135,7 @@ evt.bindForm = function()
         
         if(typeof $this.bf !== 'undefined'){
             new Promise(function(resolve,reject){
-				window.ctrl[$this.ctrl][$this.bf]($this,resolve,reject);
+				controller[$this.bf]($this,resolve,reject);
             }).then(function(){
                 formSubmit();
             },function(){
@@ -82,10 +159,10 @@ evt.bindForm = function()
                 processData:$this.processData,
                 success: function(data){
                     var data = JSON.parse(data);
-                    window.ctrl[$this.ctrl][$this.cb].call( $this.el , data );
+					controller[$this.cb].call( $this.el , data );
                 },
                 error: function(jqXHR, textStatus, errorThrown ){
-                    window.ctrl[$this.ctrl][$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
+                    controller[$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
                 }           
             }).always(function(){
                 $this.el.find('button[type="submit"]').prop('disabled',false);
@@ -94,12 +171,20 @@ evt.bindForm = function()
         }
         return false;
     });
-};
-
-evt.bindModel = function()
-{
-
-};
+	
+	$(document).on('click','[jq-href]',function(e){
+        e.preventDefault();
+        emit('before.go');
+        app.go( $(this).jq('href') ,'Loading');
+        return false;
+    });
+	
+	if(!eventAdded){
+		eventAdded = true;
+	}
+	
+	$(window).bind("popstate", router.popstate);
+}
 
 function unbind()
 {
