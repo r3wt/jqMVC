@@ -19,12 +19,9 @@ router.normalize = function(url,keep_qs)
 
 router.go = function(url)
 {
-	var url = router.normalize(url,true);
+	url = router.normalize(url,true);
 	history.pushState({}, null, url);
 	router.checkRoutes();
-	if(!eventAdded){
-		evt.bindRouter();
-	}
 };
 
 router.currentId = "";
@@ -56,7 +53,7 @@ router.checkRoutes = function()
     var matches = actionList.slice();
     log('jqMVC -> router -> checkRoutes :: found '+matches.length+' routes',matches);
     router.tryRoutes(matches);
-}
+};
 
 router.tryRoutes = function(routes) 
 {
@@ -67,7 +64,7 @@ router.tryRoutes = function(routes)
         var nextRoutes = routes.slice();
 		var oldError = window.onerror;
 		window.onerror = function(e){
-			var e = e.replace('uncaught exception:','').trim();
+			e = e.replace('uncaught exception:','').trim();
 			switch(e){
 				case 'accept':
 					log('jqMVC -> router -> accept');
@@ -105,7 +102,7 @@ router.tryRoutes = function(routes)
 		mwStack.next();
     }
     return;
-}
+};
 
 router.params = function(url)
 {
@@ -152,11 +149,12 @@ router.params = function(url)
     }
 
     return dataList;
-}
+};
 
 router.popstate = function(e)
 {
-    if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
+    if (e !== null && e.originalEvent && e.originalEvent.state !== undefined) {
+		log('jqMVC -> router -> popstate');
         router.checkRoutes();
 	}
-}
+};

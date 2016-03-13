@@ -30,20 +30,22 @@ function canRun()
 	reason = {};
 	if(!(history && history.pushState)){
 		can = false;
-		reason['router'] = 'Browser Does not support History API';
+		reason.router = 'Browser Does not support History API';
 	}
 	if((!window.URL.createObjectURL) || typeof Worker === "undefined"){
 		can = false;
-		reason['worker'] = 'Browser Does not support Webworkers';
+		reason.worker = 'Browser Does not support Webworkers';
 	}
 	return (!can) ? reason : true;
 }
 
 function log()
 {
-    if (debug) {
-        window.console && console.log.apply(console,arguments);
-    }
+	if (debug) {
+		/* jshint ignore:start */
+		window.console && console.log.apply(console,arguments);
+		/* jshint ignore:end */
+	}
 }
 
 function emit(event,eventData)
@@ -124,8 +126,8 @@ function jobDestroy(targets)
             safelyStopJob(job,-1);
         }
     }else{
-        if(jobs.hasOwnProperty(job)){
-            safelyStopJob(job,-1);
+        if(jobs.hasOwnProperty(targets)){
+            safelyStopJob(targets,-1);
         }
     }
 }

@@ -1,11 +1,11 @@
 /**
  * jqMVC - The jQuery MVC Framework
  *
- * @version   0.5.4
+ * @version   0.6.0
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-03-01_12:17:55 UTC
+ * @build     2016-03-13_06:29:39 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -42,7 +42,7 @@
         window.workers = {};
     
         /* define default global settings that the app uses*/
-        window.app_path         = '/',
+        window.app_path         = '/';
         window.api_path         = '/api/';
         window.view_path        = '/views';
         window.module_path      ='/modules';
@@ -83,11 +83,11 @@
         reason = {};
         if(!(history && history.pushState)){
             can = false;
-            reason['router'] = 'Browser Does not support History API';
+            reason.router = 'Browser Does not support History API';
         }
         if((!window.URL.createObjectURL) || typeof Worker === "undefined"){
             can = false;
-            reason['worker'] = 'Browser Does not support Webworkers';
+            reason.worker = 'Browser Does not support Webworkers';
         }
         return (!can) ? reason : true;
     }
@@ -95,7 +95,9 @@
     function log()
     {
         if (debug) {
+            /* jshint ignore:start */
             window.console && console.log.apply(console,arguments);
+            /* jshint ignore:end */
         }
     }
     
@@ -109,28 +111,6 @@
     {
       return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
-    
-    $.fn.serializeObject = function()
-    { 
-        var b = this.serializeArray();
-        var a = {};
-        for(var i=0;i<b.length;i++){
-            a[b[i].name] = b[i].value;
-        }
-        return a;
-    };
-    
-    $.fn.jq = function(attr,val)
-    {
-        if(typeof attr === 'string'){
-            if(typeof val !== 'undefined'){
-                this.attr('jq-'+attr,val);
-            }else{
-                return this.attr('jq-'+attr);
-            }
-        }
-        return this;
-    };
     
     function jobPending()
     {
@@ -199,8 +179,8 @@
                 safelyStopJob(job,-1);
             }
         }else{
-            if(jobs.hasOwnProperty(job)){
-                safelyStopJob(job,-1);
+            if(jobs.hasOwnProperty(targets)){
+                safelyStopJob(targets,-1);
             }
         }
     }
@@ -257,36 +237,173 @@
     
         return jQinstance;
     };
+    
+    $.fn.serializeObject = function()
+    { 
+        var b = this.serializeArray();
+        var a = {};
+        for(var i=0;i<b.length;i++){
+            a[b[i].name] = b[i].value;
+        }
+        return a;
+    };
+    
+    $.fn.jq = function(attr,val)
+    {
+        if(typeof attr === 'string'){
+            if(typeof val !== 'undefined'){
+                this.attr('jq-'+attr,val);
+            }else{
+                return this.attr('jq-'+attr);
+            }
+        }
+        return this;
+    };
+    
+    function getController(t)
+    {
+        var c = t.closest('[jq-ctrl]');
         
-    evt.bindRouter = function(){
-        eventAdded = true;
-        $(window).bind("popstate", router.popstate);
-    };
+        if(c.length > 0){
+            return window.ctrl[c.jq('ctrl')] || false;
+        }else{
+            return window.ctrl;//no controller is set. assume they will use controller.method ie `foobar.SomeFunc`
+        }
+    }
     
-    evt.bindHref = function()
+    //this function simply resolves a binding to its controller, if it exists.
+    //t = $(element)
+    //c = string controller method OR controller name . method
+    //ex `jq-ctrl="fooController" jq-unload="barMethod"` OR `jq-unload="fooController.barMethod"`
+    function resolve(t,c)
     {
-        $(document).on('click','a[data-href]',function(e){
-            e.preventDefault();
-            emit('before.go');
-            app.go( $(this).data('href') ,'Loading');
-            return false;
+        var d = getController(t);
+        if(d !== false){
+            return d[t.jq(c)];
+        }else{
+            return eval('window.ctrl.'+t.jq(c));//nasty!
+        }
+    }
+    
+    evt.bindDefaults = function()
+    {
+        //default html bindings.
+        
+        /***
+          * blocked
+          * jq-subview= example <div jq-view="template,apiCall,apiArgs"></div>
+          * jq-observe= observe mutation of element.
+          */
+        
+        
+        if(!eventAdded){
+            //author `cocco` @ http://stackoverflow.com/a/17567696/2401804
+            (function(d){
+                var ce=function(e,n){
+                    var a=document.createEvent("CustomEvent");
+                a.initCustomEvent(n,true,true,e.target);
+                    e.target.dispatchEvent(a);
+                    a=null;
+                    return false;
+                },
+                nm=true,
+                sp={x:0,y:0},
+                ep={x:0,y:0},
+                touch={
+                    touchstart:function(e){
+                        sp={x:e.touches[0].pageX,y:e.touches[0].pageY};
+                    },
+                    touchmove:function(e){
+                        nm=false;
+                        ep={x:e.touches[0].pageX,y:e.touches[0].pageY};
+                    },
+                    touchend:function(e){
+                        if(nm){
+                            ce(e,'fc');
+                        }else{
+                            var x=ep.x-sp.x,
+                            xr=Math.abs(x),
+                            y=ep.y-sp.y,
+                            yr=Math.abs(y);
+                            if(Math.max(xr,yr)>20){
+                                ce(e,(xr>yr?(x<0?'swl':'swr'):(y<0?'swu':'swd')));
+                            }
+                        }
+                        nm=true;
+                    },
+                    touchcancel:function(e){
+                        nm=false;
+                    }
+                };
+                for(var a in touch){
+                    d.addEventListener(a,touch[a],false);
+                }
+            }(document));
+            //end taken from stackoverflow.
+            eventAdded = true;
+        }
+        
+        
+        /*
+        jq-swipe-left = on swipe left. (touch device only)
+        jq-swipe-right = on swipe right. (touch device only)
+        jq-swipe-up = on swipe up only.
+        jq-swipe-down = on down only.
+        jq-fast-click  = fastclick
+        */
+    
+        $.each({
+            swr: 'swipe-right',
+            swl: 'swipe-left',
+            swu: 'swipe-up',
+            swd: 'swipe-down',
+            fc:  'fast-click'
+        },function(k,v){
+            $('[jq-'+v+']').each(function(){
+                $(this).on( k, resolve( $(this), v) );
+            });
+        })
+        
+        $.each([
+            'click',
+            'dblclick',
+            'mousedown',
+            'mouseup',
+            'keydown',
+            'keypress',
+            'keyup',
+            'change',
+            'scroll',
+            'dragstart',
+            'dragstop',
+            'error'
+        ],function(k,v){
+            $('[jq-'+v+']').each(function(){
+                $(this).on( v , resolve( $(this), v ) );
+            });
         });
-    };
-    
-    evt.bindForm = function()
-    {
-        $(document).on('submit','form[method][ctrl][action][callback]',function(event){
+        
+        //jq load/unload
+        $('[jq-load]').each(function(i,v){
+            resolve( $(this), 'load' ).apply(this);
+        });
+        $('[jq-unload]').each(function(i,v){
+            app.unload( resolve( $(this) , 'unload' ) );//because aliens.
+        });
+        
+        $(document).on('submit','form[jq-method][jq-action][jq-callback]',function(event){
             //refactor to support file uploads.
             event.preventDefault();
             
             var $this = {};
             $this.el     = $(this);
-            $this.method = $this.el.attr('method');
-            $this.action = $this.el.attr('action');
-            $this.ctrl   = $this.el.attr('ctrl');
-            $this.bf     = $this.el.attr('before');
-            $this.cb     = $this.el.attr('callback');
+            $this.method = $this.el.jq('method');
+            $this.action = $this.el.jq('action');
+            $this.bf     = $this.el.jq('before');
+            $this.cb     = $this.el.jq('callback');
             $this.isFile = !!$this.el.find(':input[type="file"]').length;
+            
+            var controller = getController($this.el);
             
             if($this.isFile){
                 $this.data  = new FormData(this);
@@ -300,7 +417,7 @@
             
             if(typeof $this.bf !== 'undefined'){
                 new Promise(function(resolve,reject){
-                    window.ctrl[$this.ctrl][$this.bf]($this,resolve,reject);
+                    controller[$this.bf]($this,resolve,reject);
                 }).then(function(){
                     formSubmit();
                 },function(){
@@ -309,8 +426,6 @@
             }else{
                 formSubmit();
             }
-            
-            log(window,$this);
             
             function formSubmit()
             {
@@ -323,11 +438,11 @@
                     cache: false,
                     processData:$this.processData,
                     success: function(data){
-                        var data = JSON.parse(data);
-                        window.ctrl[$this.ctrl][$this.cb].call( $this.el , data );
+                        data = JSON.parse(data);
+                        controller[$this.cb].call( $this.el , data );
                     },
                     error: function(jqXHR, textStatus, errorThrown ){
-                        window.ctrl[$this.ctrl][$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
+                        controller[$this.cb].call( $this.el , {'error':1,'message': jqXHR.status +' '+ jqXHR.responseText} );
                     }           
                 }).always(function(){
                     $this.el.find('button[type="submit"]').prop('disabled',false);
@@ -336,12 +451,18 @@
             }
             return false;
         });
+        
+        $(document).on('click','[jq-href]',function(e){
+            e.preventDefault();
+            emit('before.go');
+            app.go( $(this).jq('href') ,'Loading');
+            return false;
+        });
+        
+        $(window).bind("popstate", router.popstate);
     };
     
-    evt.bindModel = function()
-    {
     
-    };
     
     function unbind()
     {
@@ -402,12 +523,9 @@
     
     router.go = function(url)
     {
-        var url = router.normalize(url,true);
+        url = router.normalize(url,true);
         history.pushState({}, null, url);
         router.checkRoutes();
-        if(!eventAdded){
-            evt.bindRouter();
-        }
     };
     
     router.currentId = "";
@@ -439,7 +557,7 @@
         var matches = actionList.slice();
         log('jqMVC -> router -> checkRoutes :: found '+matches.length+' routes',matches);
         router.tryRoutes(matches);
-    }
+    };
     
     router.tryRoutes = function(routes) 
     {
@@ -450,7 +568,7 @@
             var nextRoutes = routes.slice();
             var oldError = window.onerror;
             window.onerror = function(e){
-                var e = e.replace('uncaught exception:','').trim();
+                e = e.replace('uncaught exception:','').trim();
                 switch(e){
                     case 'accept':
                         log('jqMVC -> router -> accept');
@@ -488,7 +606,7 @@
             mwStack.next();
         }
         return;
-    }
+    };
     
     router.params = function(url)
     {
@@ -535,14 +653,15 @@
         }
     
         return dataList;
-    }
+    };
     
     router.popstate = function(e)
     {
-        if (e != null && e.originalEvent && e.originalEvent.state !== undefined) {
+        if (e !== null && e.originalEvent && e.originalEvent.state !== undefined) {
+            log('jqMVC -> router -> popstate');
             router.checkRoutes();
         }
-    }
+    };
     if(typeof Worker !== 'undefined'){
         Worker.createURL = function(c)
         {
@@ -719,7 +838,7 @@
         if(typeof groupMiddleware === 'function' && typeof groupCallback === 'undefined')
         {
             //no middleware provided
-            var groupCallback = groupMiddleware;
+            groupCallback = groupMiddleware;
             groupMiddleware = null;
         }
         
@@ -865,7 +984,7 @@
         }, false);
         document.body.appendChild(script);
         return app;
-    }
+    };
     
     
     /**
@@ -948,7 +1067,7 @@
         var args = [],
         result = [],
         unique = function(a,b) {
-            var a = a.concat(b);
+            a = a.concat(b);
             for(var i=0; i<a.length; ++i) {
                 for(var j=i+1; j<a.length; ++j) {
                     if(a[i] === a[j])
@@ -958,7 +1077,7 @@
             return a;
         };
         Array.prototype.push.apply(args,arguments);
-        for(k=0;k<args.length;k++){
+        for(var k=0;k<args.length;k++){
             result = unique(result,args[k]);
         }
         return result; 

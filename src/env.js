@@ -32,7 +32,7 @@ var app = {},
 	window.workers = {};
 
     /* define default global settings that the app uses*/
-    window.app_path         = '/',
+    window.app_path         = '/';
     window.api_path         = '/api/';
     window.view_path        = '/views';
     window.module_path      ='/modules';

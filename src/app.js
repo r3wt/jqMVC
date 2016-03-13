@@ -160,7 +160,7 @@ app.group = function(prefix,groupMiddleware,groupCallback)
     if(typeof groupMiddleware === 'function' && typeof groupCallback === 'undefined')
     {
         //no middleware provided
-        var groupCallback = groupMiddleware;
+        groupCallback = groupMiddleware;
         groupMiddleware = null;
     }
     
@@ -306,7 +306,7 @@ app.loadOnce = function(module,callback,error)
     }, false);
     document.body.appendChild(script);
     return app;
-}
+};
 
 
 /**
@@ -389,7 +389,7 @@ app.merge = function(){
     var args = [],
     result = [],
     unique = function(a,b) {
-        var a = a.concat(b);
+        a = a.concat(b);
         for(var i=0; i<a.length; ++i) {
             for(var j=i+1; j<a.length; ++j) {
                 if(a[i] === a[j])
@@ -399,7 +399,7 @@ app.merge = function(){
         return a;
     };
     Array.prototype.push.apply(args,arguments);
-    for(k=0;k<args.length;k++){
+    for(var k=0;k<args.length;k++){
         result = unique(result,args[k]);
     }
     return result; 
