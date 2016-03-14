@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-03-13_06:29:39 UTC
+ * @build     2016-03-14_02:00:33 UTC
  */
 ;!(function($,window,document){
     var app = {},
@@ -220,7 +220,7 @@
         log('parsed time: ' + t);
         return t;
     }
-    //everything event related
+    //override fn.init of jQuery so we can track selectors with bound event handlers.
     $.fn.init = function(selector,context)
     {
         
@@ -238,16 +238,12 @@
         return jQinstance;
     };
     
-    $.fn.serializeObject = function()
-    { 
-        var b = this.serializeArray();
-        var a = {};
-        for(var i=0;i<b.length;i++){
-            a[b[i].name] = b[i].value;
-        }
-        return a;
-    };
+    // jQuery.serializeObject() - Copyright (c) 2013 David Hong
+    // https://github.com/hongymagic/jQuery.serializeObject
+    $.fn.serializeObject=function(){"use strict";var a={},b=function(b,c){var d=a[c.name];"undefined"!=typeof d&&d!==null?$.isArray(d)?d.push(c.value):a[c.name]=[d,c.value]:a[c.name]=c.value};return $.each(this.serializeArray(),b),a};
+    //end jQuery.serializeObject()
     
+    //like jQuery.data() but specifically for jqMVC's namespaced html attributes.
     $.fn.jq = function(attr,val)
     {
         if(typeof attr === 'string'){
