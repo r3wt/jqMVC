@@ -1,9 +1,0 @@
-/**
- * jqMVC - The jQuery MVC Framework
- *
- * @version   {{version}}
- * @link      https://github.com/r3wt/jqMVC
- * @copyright (c) {{copyright_years}} Garrett R. Morris
- * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     {{date}}
- */
