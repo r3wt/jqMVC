@@ -58,3 +58,10 @@ of those sections to manage the look and feel of the site. */
     text-align: center;
     background: #eee;
 }
+.gh-row{
+	text-align: center;
+}
+.gh-wrap{
+	display: inline-block;
+    line-height: 30px;
+}
