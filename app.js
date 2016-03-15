@@ -5,7 +5,8 @@ $.jqMVC
 	module_path : 'modules/',
 	element : $('#main'),
 	debug : false,
-	binding_override: false
+	binding_override: false,
+	default_args: {},
 })
 .before() //start the loading indicator
 .setView({
