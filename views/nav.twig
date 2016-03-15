@@ -1,0 +1,34 @@
+{% if state == 'home' %}
+<!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+<li class="hidden">
+		<a class="page-scroll" href="#page-top"></a>
+</li>
+<li>
+		<a class="page-scroll" href="#about">About</a>
+</li>
+<li>
+		<a class="page-scroll" href="#services">Services</a>
+</li>
+<li>
+		<a class="page-scroll" href="#contact">Contact</a>
+</li>
+{% endif %}
+{% if state == 'doc' %}
+<!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+<li>
+		<a jq-href="/">Home</a>
+</li>
+<li>
+		<a jq-href="/docs">Docs</a>
+</li>
+<li>
+		<a jq-href="/?scroll=about">About</a>
+</li>
+<li>
+		<a jq-href="/?scroll=services">Services</a>
+</li>
+<li>
+		<a jq-href="/?scroll=contact">Contact</a>
+</li>
+{% endif %}
+

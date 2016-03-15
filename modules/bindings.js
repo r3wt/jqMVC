@@ -1,6 +1,17 @@
 $.jqMVC
 .bind('app',function(){
-	console.log('app binding fired!');
-	//use bind() like document.ready
-	//i like to organize each component in its own private binding, but if you want to do it all in one giant binding thats fine.
-})
+	$(window).on('scroll',function() {
+		if ($(".navbar").offset().top > 50) {
+			$(".navbar-fixed-top").addClass("top-nav-collapse");
+		} else {
+			$(".navbar-fixed-top").removeClass("top-nav-collapse");
+		}
+	});
+	$('a.page-scroll').bind('click', function(event) {
+		var $anchor = $(this);
+		$('html, body').stop().animate({
+			scrollTop: $($anchor.attr('href')).offset().top
+		}, 1500, 'easeInOutExpo');
+		event.preventDefault();
+	});
+});
