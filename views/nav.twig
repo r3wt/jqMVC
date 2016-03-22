@@ -1,37 +1,54 @@
-{% if state == 'home' %}
-<!-- Hidden li included to remove active class from about link when scrolled up past about section -->
-<li class="hidden">
-		<a class="page-scroll" href="#page-top"></a>
-</li>
-<li>
-		<a jq-href="/docs">Docs</a>
-</li>
-<li>
-		<a class="page-scroll" href="#about">About</a>
-</li>
-<li>
-		<a class="page-scroll" href="#services">Services</a>
-</li>
-<li>
-		<a class="page-scroll" href="#contact">Contact</a>
-</li>
-{% endif %}
-{% if state == 'docs' %}
-<!-- Hidden li included to remove active class from about link when scrolled up past about section -->
-<li>
-		<a jq-href="/">Home</a>
-</li>
-<li>
-		<a jq-href="/docs">Docs</a>
-</li>
-<li>
-		<a jq-href="/?scroll=about">About</a>
-</li>
-<li>
-		<a jq-href="/?scroll=services">Services</a>
-</li>
-<li>
-		<a jq-href="/?scroll=contact">Contact</a>
-</li>
-{% endif %}
+<div class="navbar-header page-scroll">
+	<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+		<span class="sr-only">Toggle navigation</span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+	</button>
+	{% if state != 'home' %}
+	<a class="navbar-brand" jq-href="/">jqMVC</a>
+	{% else %}
+	<a class="navbar-brand page-scroll" href="#page-top">jqMVC</a>
+	{% endif %}
+</div>
+<div class="collapse navbar-collapse navbar-ex1-collapse">
+	<ul class="nav navbar-nav" id="nav">
+		{% if state == 'home' %}
+		<li>
+			<a class="page-scroll" href="#why">Why</a>
+		</li>
+		<li>
+			<a jq-href="/chat">Chat</a>
+		</li>
+		<li>
+			<a jq-href="/learn">Learn</a>
+		</li>
+		<li>
+			<a jq-href="/download">Download</a>
+		</li>
+		<li>
+			<a jq-href="/docs">Docs</a>
+		</li>
+		{% else %}
+		<li>
+				<a jq-href="/">Home</a>
+		</li>
+		<li>
+				<a jq-href="/?scroll=why">Why</a>
+		</li>
+		<li>
+			<a jq-href="/chat">Chat</a>
+		</li>
+		<li>
+			<a jq-href="/learn">Learn</a>
+		</li>
+		<li>
+			<a jq-href="/download">Download</a>
+		</li>
+		<li>
+			<a jq-href="/docs">Docs</a>
+		</li>
+		{% endif %}
+	</ul>
+</div>
 

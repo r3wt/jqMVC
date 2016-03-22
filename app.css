@@ -59,7 +59,9 @@ of those sections to manage the look and feel of the site. */
     background: #eee;
 }
 #main.container{
-	height: 100%;/*gawd i hate bootstrap */
+	height: 100%;
+	width: 100%;
+	padding: 0;
 }
 .gh-row{
 	text-align: center;
