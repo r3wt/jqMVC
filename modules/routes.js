@@ -22,7 +22,12 @@ $.jqMVC
 		$.jqMVC.view.render('learn.twig');//empty args and no callback imply defaults of {} and jqMVC.done
 	});
 })
-.route('/downloads',function(name){
+.route('/chat',function(name){
+	svc.nav('',function(){
+		$.jqMVC.view.render('chat.twig');//empty args and no callback imply defaults of {} and jqMVC.done
+	});
+})
+.route('/download',function(name){
 	$.getJSON('https://api.github.com/repos/r3wt/jqMVC/releases',function(data){
 		svc.nav('',function(){
 			$.jqMVC.view.render('downloads.twig',{downloads: data},$.jqMVC.done);

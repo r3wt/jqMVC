@@ -4,7 +4,7 @@ $.jqMVC
 .ctrl('docs',{
 })
 .ctrl('chat',{
-	resize: function(){
+	resizeChat: function(){
 		$('#chat-frame').height($(window).height() - $('.navbar').height() - 50);
 	}
 });
