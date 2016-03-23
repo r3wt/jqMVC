@@ -7,7 +7,7 @@ $.jqMVC
 			var scroll = query.scroll || false;
 			if(scroll){
 				$.jqMVC.bindOnce(function(){
-					$('#'+scroll).click();
+					$('.page-scroll[href="#'+scroll+'"]').click();
 				});
 			}
 			$.jqMVC.view.render('index.twig',{},$.jqMVC.done);
