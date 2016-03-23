@@ -1,9 +1,15 @@
 $.jqMVC
 .route('/',function(){
-	var query = $.jqMVC.query;
+	var query = $.jqMVC.query();
 	var redirect = query.redirect || false;
 	if(!redirect){
 		svc.nav('home',function(){
+			var scroll = query.scroll || false;
+			if(scroll){
+				$.jqMVC.bindOnce(function(){
+					$('#'+scroll).click();
+				});
+			}
 			$.jqMVC.view.render('index.twig',{},$.jqMVC.done);
 		});	
 	}else{
