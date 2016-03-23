@@ -25,7 +25,7 @@ $.jqMVC
 .route('/downloads',function(name){
 	$.getJSON('https://api.github.com/repos/r3wt/jqMVC/releases',function(data){
 		svc.nav('',function(){
-			$.jqMVC.view.render('downloads.twig',{downloads: data},$.jqMVC.done);//empty args and no callback imply defaults of {} and jqMVC.done
+			$.jqMVC.view.render('downloads.twig',{downloads: data},$.jqMVC.done);
 		});	
 	});
 });
