@@ -5,6 +5,6 @@ $.jqMVC
 })
 .ctrl('chat',{
 	resizeChat: function(){
-		$('#chat-frame').height( $(window).height() - ($('.navbar').height() + 45) );
+		$('#chat-frame').height( $(window).height() - ($('.navbar').height() + 41) );
 	}
 });
