@@ -17,6 +17,9 @@ html {
 	padding: 91px 0 0;
 	margin-bottom: -20px;
 }
+#download-row{
+	padding-top:91px;
+}
 #chat-container > div {
     padding-bottom: 0;
     margin: 0;
