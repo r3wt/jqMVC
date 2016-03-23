@@ -22,6 +22,11 @@ html {
     margin: 0;
 }
 
+#chat-frame{
+	padding: 0px;
+	border: medium none;
+}
+
 @media(min-width:767px) {
     .navbar {
         padding: 20px 0;
