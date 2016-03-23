@@ -5,9 +5,9 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-03-14_02:00:33 UTC
+ * @build     2016-03-23_01:22:03 UTC
  */
-;!(function($,window,document){
+!(function($,window,document){
     var app = {},
         routeList = [],
         eventAdded = false,
@@ -49,8 +49,6 @@
         window.element          = $('body');
         window.debug            = false;
         window.binding_override = false;
-    
-    
     //internal utilities
     function isDefined(t)
     {
@@ -448,6 +446,7 @@
             return false;
         });
         
+        //jq-href
         $(document).on('click','[jq-href]',function(e){
             e.preventDefault();
             emit('before.go');
@@ -455,7 +454,23 @@
             return false;
         });
         
+        //router
         $(window).bind("popstate", router.popstate);
+        
+        //jq-resize
+        (function(){
+            var a = [];
+            $('[jq-resize]').each(function(i,v){
+                var fn = resolve( $(this), 'resize' );
+                a.push( fn );
+                log(a.length);
+                log(fn);
+            });
+            $(window).resize(function(){
+                $.each(a,function(i,v){ v.apply(window); });
+            });
+        }());
+        
     };
     
     
@@ -471,7 +486,6 @@
             $(jQbound[i]).find("*").addBack().off();
         }
         jQbound.length = 0;
-        clearInterval(router.interval);//if router is using an interval it must be destroyed.
     }
     
     function bind()
@@ -498,7 +512,6 @@
         log('jqMVC -> middleware -> next()');
         stack.items.shift().call($,stack);
     };
-    
     router.normalize = function(url,keep_qs)
     {
         if(app_path !== '/' && url.indexOf(app_path) !== 0){

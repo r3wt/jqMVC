@@ -39,4 +39,3 @@ var app = {},
     window.element          = $('body');
     window.debug            = false;
     window.binding_override = false;
-

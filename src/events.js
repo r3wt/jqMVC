@@ -226,6 +226,7 @@ evt.bindDefaults = function()
 		return false;
 	});
 	
+	//jq-href
 	$(document).on('click','[jq-href]',function(e){
 		e.preventDefault();
 		emit('before.go');
@@ -233,7 +234,23 @@ evt.bindDefaults = function()
 		return false;
 	});
 	
+	//router
 	$(window).bind("popstate", router.popstate);
+	
+	//jq-resize
+	(function(){
+		var a = [];
+		$('[jq-resize]').each(function(i,v){
+			var fn = resolve( $(this), 'resize' );
+			a.push( fn );
+			log(a.length);
+			log(fn);
+		});
+		$(window).resize(function(){
+			$.each(a,function(i,v){ v.apply(window); });
+		});
+	}());
+	
 };
 
 
@@ -249,7 +266,6 @@ function unbind()
         $(jQbound[i]).find("*").addBack().off();
     }
     jQbound.length = 0;
-    clearInterval(router.interval);//if router is using an interval it must be destroyed.
 }
 
 function bind()

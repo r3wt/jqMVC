@@ -1,4 +1,3 @@
-
 router.normalize = function(url,keep_qs)
 {
 	if(app_path !== '/' && url.indexOf(app_path) !== 0){
