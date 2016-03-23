@@ -1,0 +1,37 @@
+<div class="row">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div id="postlist">
+			{% for item in downloads %}
+			<div class="panel">
+				<div class="panel-heading">
+					<div class="text-center">
+						<div class="row">
+							<div class="col-sm-9">
+								<h3 class="pull-left">{{item.tag_name}}</h3>
+							</div>
+							<div class="col-sm-3">
+								<h4 class="pull-right">
+									<small>Release Date: <em>{{item.published_at}}</em></small>
+								</h4>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-body">
+					<a href="#"><a href="{{item.html_url}}" target="_blank">Release Notes</a></a>
+				</div>
+
+				<div class="panel-footer">
+					{% for item2 in item.assets %}
+					<a href="{{item2.browser_download_url}}" target="_blank" class="btn btn-success">{{item2.name}}</a>
+					{% endfor %}
+					<a href="{{item.tarball_url}}" target="_blank" class="btn btn-secondary">Tar Archive</a>
+					<a href="{{item.zipball_url}}" target="_blank" class="btn btn-secondary">Zip Archive</a>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>
