@@ -4,7 +4,7 @@ $.jqMVC
 	view_path : 'jqMVC/views/',
 	module_path : 'modules/',
 	element : $('#main'),
-	debug : false,
+	debug : true,
 	binding_override: false,
 	default_args: {},
 })
