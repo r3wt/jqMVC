@@ -38,5 +38,7 @@ $.jqMVC
 		svc.nav('',function(){
 			$.jqMVC.view.render('downloads.twig',{downloads: data},$.jqMVC.done);
 		});	
+	}).fail(function(){
+		//rate limit probably exceeded.
 	});
 });
