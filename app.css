@@ -42,36 +42,18 @@ html {
 	float: none;
 }
 .search-el{
-        margin:0;
-        margin-top: 5px;
-        padding: 0;
-    }
+	margin: 5px 0;
+	padding: 0;
+}
 .search-el .search-query{
-	padding-right: 3px;
-	padding-right: 4px \9;
-	padding-left: 3px;
-	padding-left: 4px \9;
-	/* IE7-8 doesn't have border-radius, so don't indent the padding */
-
+	padding-left: 15px;
 	margin-bottom: 0;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	width: 100%;
-}
-.search-el button{
-	border: 0;
-	background: none;
-	/** belows styles are working good */
-	padding: 2px 5px;
-	margin-top: 2px;
-	position: relative;
-	left: -28px;
-	/* IE7-8 doesn't have border-radius, so don't indent the padding */
-	margin-bottom: 0;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
+	border: 1px solid #ddd;
+	font-size: 20px;
 }
 
 .row{
