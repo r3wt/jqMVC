@@ -30,6 +30,18 @@ html {
 	border: medium none;
 }
 
+.doc-sidebar{
+	position: sticky;
+	top: 50px;
+	height: calc(100vh - 50px);
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+.doc-sidebar .ctr{
+	margin: 0px auto;
+	float: none;
+}
+
 @media(min-width:767px) {
     .navbar {
         padding: 20px 0;
