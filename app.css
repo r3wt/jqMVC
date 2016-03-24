@@ -90,3 +90,215 @@ of those sections to manage the look and feel of the site. */
 .nav a{
 	cursor: pointer;
 }
+
+/*
+
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #333;
+  background: #f8f8f8;
+  -webkit-text-size-adjust: none;
+}
+
+.hljs-comment,
+.diff .hljs-header,
+.hljs-javadoc {
+  color: #998;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.css .rule .hljs-keyword,
+.hljs-winutils,
+.nginx .hljs-title,
+.hljs-subst,
+.hljs-request,
+.hljs-status {
+  color: #1184CE;
+}
+
+.hljs-number,
+.hljs-hexcolor,
+.ruby .hljs-constant {
+  color: #ed225d;
+}
+
+.hljs-string,
+.hljs-tag .hljs-value,
+.hljs-phpdoc,
+.hljs-dartdoc,
+.tex .hljs-formula {
+  color: #ed225d;
+}
+
+.hljs-title,
+.hljs-id,
+.scss .hljs-preprocessor {
+  color: #900;
+  font-weight: bold;
+}
+
+.hljs-list .hljs-keyword,
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-class .hljs-title,
+.hljs-type,
+.vhdl .hljs-literal,
+.tex .hljs-command {
+  color: #458;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-tag .hljs-title,
+.hljs-rules .hljs-property,
+.django .hljs-tag .hljs-keyword {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-attribute,
+.hljs-variable,
+.lisp .hljs-body {
+  color: #008080;
+}
+
+.hljs-regexp {
+  color: #009926;
+}
+
+.hljs-symbol,
+.ruby .hljs-symbol .hljs-string,
+.lisp .hljs-keyword,
+.clojure .hljs-keyword,
+.scheme .hljs-keyword,
+.tex .hljs-special,
+.hljs-prompt {
+  color: #990073;
+}
+
+.hljs-built_in {
+  color: #0086b3;
+}
+
+.hljs-preprocessor,
+.hljs-pragma,
+.hljs-pi,
+.hljs-doctype,
+.hljs-shebang,
+.hljs-cdata {
+  color: #999;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.diff .hljs-change {
+  background: #0086b3;
+}
+
+.hljs-chunk {
+  color: #aaa;
+}
+.documentation a {
+  color: #1184CE;
+}
+
+.documentation .suppress-p-margin p {
+  margin:0;
+}
+
+.force-inline, .force-inline p {
+  display: inline;
+  color: #222;
+}
+
+.container-small {
+  max-width: 58rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.max-height-100 {
+  max-height: 100%;
+}
+
+.fade {
+  opacity:0.50;
+}
+
+.button-indent {
+  padding: .25rem 1.5rem;
+  font-size: 90%;
+}
+
+.section-indent {
+  border-left: 2px solid #eee;
+}
+
+.bg-cloudy {
+  background: #fafafa;
+}
+
+.force-inline * {
+  display:inline;
+}
+
+.block {
+    display: block;
+}
+
+section:target h3 {
+  font-weight:700;
+}
+
+.documentation,
+.documentation h1,
+.documentation h2,
+.documentation h3,
+.documentation h4,
+.documentation h5,
+.documentation h6 {
+    font-family: inherit;
+}
+
+.documentation pre,
+.documentation code,
+.documentation samp {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 90%;
+}
+
+.documentation td,
+.documentation th {
+    padding: .25rem .25rem;
+}
+
+h1:hover .anchorjs-link,
+h2:hover .anchorjs-link,
+h3:hover .anchorjs-link,
+h4:hover .anchorjs-link {
+  opacity: 1;
+}
+
+.collapsible .collapser {
+  display:none;
+}
+
+.collapsible:target .collapser {
+  display: block;
+}
