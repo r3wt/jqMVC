@@ -157,3 +157,38 @@ function timeParse(t)
 	}
 	return t;
 }
+
+function xssFilter(a)
+{
+	var b = decodeURIComponent(a).replace(/<script([^'"]|"(\\.|[^"\\])*"|'(\\.|[^'\\])*')*?<\/script>/g,'').split(''),
+		c = [],
+		d  = 0,
+		e = 0;
+    for( i=0; i < b.length; i++ ){
+		switch( b[i] + d + e ){
+			case "<00": 
+				d = 1; 
+			break;
+			case ">10" : 
+				d = 0; 
+				c.push(' '); 
+			break;
+			case '"10': 
+				e = 1; 
+			break;
+			case "'10": 
+				e = 2;
+			break;
+			case '"11': 
+			case "'12": 
+				e = 0;
+			break;
+			default: 
+				if(!d){
+					c.push(b[i]); 
+				}
+			break;
+		}
+    }
+    return c.join('');
+}

@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-03-27_07:12:15 UTC
+ * @build     2016-03-27_07:42:17 UTC
  */
 !(function($,window,document){
     var app = {},
@@ -207,6 +207,41 @@
             }
         }
         return t;
+    }
+    
+    function xssFilter(a)
+    {
+        var b = decodeURIComponent(a).replace(/<script([^'"]|"(\\.|[^"\\])*"|'(\\.|[^'\\])*')*?<\/script>/g,'').split(''),
+            c = [],
+            d  = 0,
+            e = 0;
+        for( i=0; i < b.length; i++ ){
+            switch( b[i] + d + e ){
+                case "<00": 
+                    d = 1; 
+                break;
+                case ">10" : 
+                    d = 0; 
+                    c.push(' '); 
+                break;
+                case '"10': 
+                    e = 1; 
+                break;
+                case "'10": 
+                    e = 2;
+                break;
+                case '"11': 
+                case "'12": 
+                    e = 0;
+                break;
+                default: 
+                    if(!d){
+                        c.push(b[i]); 
+                    }
+                break;
+            }
+        }
+        return c.join('');
     }
     //override fn.init of jQuery so we can track selectors with bound event handlers.
     $.fn.init = function(selector,context)
@@ -630,7 +665,7 @@
                     for(var j = 0; j < routeParts.length; j++) {
                         if (routeParts[j].indexOf(":") === 0) {
                             //its a parameter
-                            data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
+                            data[routeParts[j].substring(1)] = xssFilter(currentUrlParts[j]);
                             matchCounter++;
                         } else {
                             //not a parameter, ensure the segments match.
@@ -1123,7 +1158,7 @@
         var str = (window.location.search || '?').substr(1);
         return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
             var parts = param.replace(/\+/g, ' ').split('=');
-            ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+            ret[parts[0]] = parts[1] === undefined ? null : xssFilter(parts[1]);
             return ret;
         }, {}));    
     };

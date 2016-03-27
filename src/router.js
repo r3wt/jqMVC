@@ -126,7 +126,7 @@ router.params = function(url)
                 for(var j = 0; j < routeParts.length; j++) {
                     if (routeParts[j].indexOf(":") === 0) {
                         //its a parameter
-                        data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
+                        data[routeParts[j].substring(1)] = xssFilter(currentUrlParts[j]);
                         matchCounter++;
                     } else {
                         //not a parameter, ensure the segments match.

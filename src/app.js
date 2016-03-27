@@ -446,7 +446,7 @@ app.query = function ()
     var str = (window.location.search || '?').substr(1);
     return (!str.length ? {} : str.trim().split('&').reduce(function (ret, param) {
         var parts = param.replace(/\+/g, ' ').split('=');
-        ret[parts[0]] = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
+        ret[parts[0]] = parts[1] === undefined ? null : xssFilter(parts[1]);
         return ret;
     }, {}));    
 };
