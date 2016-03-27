@@ -61,25 +61,21 @@ function escapeRegExp(str)
 
 function jobPending()
 {
-    for(var job in jobs){
-        //called by the system before navigation to temporarily suspend jobs.
-        //therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
-        if(jobs[job].state !== 3){
-            safelyStopJob(job,0);
-        }
-    }   
+	for(var job in jobs){
+		//called by the system before navigation to temporarily suspend jobs.
+		//therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
+		safelyStopJob(job,0);
+	}   
 }
 
 function safelyStopJob(job,newState)
 {
-	if(jobs[job].state !== 1 && jobs[job].state !== 2){
+	if(jobs[job].state !== 3){
 		jobs[job].state = newState;
-        clearInterval(jobs[job].timer);
-		if(newState == -1){
-			delete jobs[job];
-		}
-	}else{
-		setTimeout(function(){ safelyStopJob(job,newState); }, 10);
+	}
+	clearInterval(jobs[job].timer);
+	if(newState == -1){
+		delete jobs[job];
 	}
 }
 
@@ -93,77 +89,71 @@ function jobResume(targets,ignoreState)
 		}
 	}
 	for(var job in obj){
-		if(jobs[job].state == 0 || ignoreState !== undefined){
-			jobs[job].state = 1;
-			jobs[job].timer = setInterval(function(){
-				if(jobs[job].state !== 2){
-					jobs[job].state = 2;
-					jobs[job].payload.call(this);
-					jobs[job].state = 1;
-				}
-			},jobs[job].interval);
+		if(jobs[job].state !==3 || targets == '*'){
+			safelyStopJob(job,0);
+			var thisJob = jobs[job];
+			thisJob.state = 1;
+			thisJob.timer = setInterval(thisJob.payload,thisJob.interval);
 		}
 	}          
 }
 
 function jobPause(targets)
 {
-    if(targets === '*'){
-        for(var job in jobs){
+	if(targets === '*'){
+		for(var job in jobs){
 			safelyStopJob(job,3);
-        }
-    }else{
-        if(jobs.hasOwnProperty(targets)){
-            safelyStopJob(targets,3);
-        }
-    }
+		}
+	}else{
+		if(jobs.hasOwnProperty(targets)){
+			safelyStopJob(targets,3);
+		}
+	}
 }
 
 function jobDestroy(targets)
 {
-    if(targets == '*'){
-        for(var job in jobs){
-            safelyStopJob(job,-1);
-        }
-    }else{
-        if(jobs.hasOwnProperty(targets)){
-            safelyStopJob(targets,-1);
-        }
-    }
+	if(targets == '*'){
+		for(var job in jobs){
+			safelyStopJob(job,-1);
+		}
+	}else{
+		if(jobs.hasOwnProperty(targets)){
+			safelyStopJob(targets,-1);
+		}
+	}
 }
 
 function jobInspect(targets)
 {
-    if(targets === '*'){
-        return jobs;
-    }else{
-        if(jobs.hasOwnProperty(targets)){
-            return jobs[targets];
-        }else{
-            return 'job doesnt exist';
-        }
-    }
+	if(targets === '*'){
+		return jobs;
+	}else{
+		if(jobs.hasOwnProperty(targets)){
+			return jobs[targets];
+		}else{
+			return 'job doesnt exist';
+		}
+	}
 }
 
 function timeParse(t)
 {
-    log('parsing time: '+t);
-    if(typeof t == 'string'){
-        var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
-        if(m.length == 3){
-            var a = parseInt(m[1]),
-                b = m[2].toLowerCase(),
-                c = {
-                    ms: 1,
-                    s : 1000,
-                    m : 60000,
-                    h : 3.6e+6
-                };
-            t = a * c[b];
-        }else{
-            t = -1;
-        }
-    }
-    log('parsed time: ' + t);
-    return t;
+	if(typeof t == 'string'){
+		var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
+		if(m.length == 3){
+			var a = parseInt(m[1]),
+				b = m[2].toLowerCase(),
+				c = {
+					ms: 1,
+					s : 1000,
+					m : 60000,
+					h : 3.6e+6
+				};
+			t = a * c[b];
+		}else{
+			t = -1;
+		}
+	}
+	return t;
 }

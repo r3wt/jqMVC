@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-03-23_01:22:03 UTC
+ * @build     2016-03-27_07:12:15 UTC
  */
 !(function($,window,document){
     var app = {},
@@ -115,22 +115,18 @@
         for(var job in jobs){
             //called by the system before navigation to temporarily suspend jobs.
             //therefore we make sure a job isnt paused so it wont be resumed after app.done() is called
-            if(jobs[job].state !== 3){
-                safelyStopJob(job,0);
-            }
+            safelyStopJob(job,0);
         }   
     }
     
     function safelyStopJob(job,newState)
     {
-        if(jobs[job].state !== 1 && jobs[job].state !== 2){
+        if(jobs[job].state !== 3){
             jobs[job].state = newState;
-            clearInterval(jobs[job].timer);
-            if(newState == -1){
-                delete jobs[job];
-            }
-        }else{
-            setTimeout(function(){ safelyStopJob(job,newState); }, 10);
+        }
+        clearInterval(jobs[job].timer);
+        if(newState == -1){
+            delete jobs[job];
         }
     }
     
@@ -144,15 +140,11 @@
             }
         }
         for(var job in obj){
-            if(jobs[job].state == 0 || ignoreState !== undefined){
-                jobs[job].state = 1;
-                jobs[job].timer = setInterval(function(){
-                    if(jobs[job].state !== 2){
-                        jobs[job].state = 2;
-                        jobs[job].payload.call(this);
-                        jobs[job].state = 1;
-                    }
-                },jobs[job].interval);
+            if(jobs[job].state !==3 || targets == '*'){
+                safelyStopJob(job,0);
+                var thisJob = jobs[job];
+                thisJob.state = 1;
+                thisJob.timer = setInterval(thisJob.payload,thisJob.interval);
             }
         }          
     }
@@ -198,7 +190,6 @@
     
     function timeParse(t)
     {
-        log('parsing time: '+t);
         if(typeof t == 'string'){
             var m = t.match(/^(\d+)(MS|S|M|H|ms|s|m|h)$/);
             if(m.length == 3){
@@ -215,7 +206,6 @@
                 t = -1;
             }
         }
-        log('parsed time: ' + t);
         return t;
     }
     //override fn.init of jQuery so we can track selectors with bound event handlers.
