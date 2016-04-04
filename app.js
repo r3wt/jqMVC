@@ -1,6 +1,6 @@
 $.jqMVC
 .data({
-	app_path  : 'http://r3wt.github.io/jqMVC/',//app requires to know its base_path. 
+	app_path  : 'https://r3wt.github.io/jqMVC/',//app requires to know its base_path. 
 	view_path : 'jqMVC/views/',
 	module_path : 'modules/',
 	element : $('#main'),
