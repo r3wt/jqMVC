@@ -192,3 +192,15 @@ function xssFilter(a)
     }
     return c.join('');
 }
+
+function loadScript(url,callback,error,modify) 
+{
+	var script = document.createElement('script');
+	script.src = url;
+	script.addEventListener('load',callback, false);
+	script.addEventListener('error',error, false);
+	if(typeof modify === 'function'){
+		modify(script);//pass script to modify to allow it to be edited
+	}
+	document.body.appendChild(script);
+}

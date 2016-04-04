@@ -240,36 +240,23 @@ app.halt = function(callback){
  */
 app.loadModules = function(modules)
 {
-    if(modules.length > 0){
-        app.add(function(stack){
-            function loadScript(url) {
-                var script = document.createElement('script');
-                script.src = url;
-                script.addEventListener('load', function() {
-                    returned++;
-                    $(state).trigger('check');
-                }, false);
-                
-                script.addEventListener('error', function() {
-                    returned++;
-                    $(state).trigger('check');
-                }, false);
-                document.body.appendChild(script);
-            }
-            //load All scripts
-            var returned = 0,
-            state={};
-            for(var i=0;i<modules.length;i++){
-                loadScript(app.path + module_path + modules[i]);
-            }
-            $(state).on('check',function(){
-                if(returned >= modules.length){
-                    stack.next();
-                }
-            });
-        });
-    }
-    return app;
+	if(modules.length > 0){
+		app.add(function(stack){
+			//load All scripts
+			var returned = 0;
+			for(var i=0;i<modules.length;i++){
+				loadScript(app.path + module_path + modules[i],stateCheck,stateCheck);
+			}
+			function stateCheck(){
+				returned +=1;
+				if(returned >= modules.length){
+					stack.next();
+				}
+			}
+			
+		});
+	}
+	return app;
 };
 
 /**
@@ -282,29 +269,12 @@ app.loadModules = function(modules)
  */
 app.loadOnce = function(module,callback,error)
 {
-    var file = app.path + module_path + module;
     if($('script[src="'+file+'"][jq-loadonce]').length){
         $('script[src="'+file+'"][jq-loadonce]').remove();
     }
-    var script = document.createElement('script');
-    script.src = file;
-    script.setAttribute('jq-loadonce','1');
-    script.addEventListener('load', function() {
-        if(typeof callback === 'function'){
-            callback.apply(this);
-        }else{
-			throw 'loadOnce - callback is undefined';
-		}
-    }, false);
-    
-    script.addEventListener('error', function() {
-        if(typeof error === 'function'){
-            error.apply(this);
-        }else{
-            throw 'loadOnce - failed to load resource';
-        }
-    }, false);
-    document.body.appendChild(script);
+	loadScript(app.path + module_path + module,callback,error,function(script){
+		script.setAttribute('jq-loadonce','1');
+	});
     return app;
 };
 
@@ -346,7 +316,6 @@ app.job = function()
                 break;
                 case 'inspect':
                     return jobInspect(arguments[1]);
-                break;
             }
         break;
     }

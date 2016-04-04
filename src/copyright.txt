@@ -6,4 +6,7 @@
  * @copyright (c) {{copyright_years}} Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
  * @build     {{date}}
+ * contains 3rd party code:
+ * jQuery.serializeObject() - Copyright (c) 2013 David Hong - https://github.com/hongymagic/jQuery.serializeObject
+ * touch events by cocco - http://stackoverflow.com/a/17567696/2401804
  */

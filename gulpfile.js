@@ -1,8 +1,7 @@
 var doc   =  require('gulp-documentation'),
     gulp  = require('gulp'),
     fs    = require('fs'),
-    jsp = require('uglify-js').parser,
-    pro = require('uglify-js').uglify,
+    ugly  = require('uglify-js'),
     order = [
         'header.js',//check
         'env.js',//check
@@ -23,7 +22,7 @@ gulp.task('default', function() {
     replace = {
         '{{version}}':fs.readFileSync('./src/version.txt','utf8'),
         '{{date}}': getBuildDate(),
-        '{{copyright_years}}': '2015'
+        '{{copyright_years}}': '2015 - 2016'
     };
     for(var prop in replace){
         copyright = copyright.replace(prop,replace[prop]);
@@ -44,10 +43,13 @@ gulp.task('default', function() {
     }
     fs.writeFile('./build/jqmvc-'+replace['{{version}}']+'.js',copyright+code, 'utf8',function(){
         //now minify
-        var ast = jsp.parse(code); // parse code and get the initial AST
-        ast = pro.ast_mangle(ast); // get a new AST with mangled names
-        ast = pro.ast_squeeze(ast); // get an AST with compression optimizations
-        var final_code = pro.gen_code(ast); // compressed code here
+        var ast = ugly.parse(code); // parse code and get the initial AST
+		ast.figure_out_scope();
+		compressor = ugly.Compressor({hoist_vars:true,unsafe:true});
+		ast.transform(compressor);
+        ast.compute_char_frequency();
+		ast.mangle_names();
+        var final_code = ast.print_to_string(); // compressed code here
         fs.writeFile('./build/jqmvc-'+replace['{{version}}']+'.min.js',copyright+final_code,'utf8');
     });
     

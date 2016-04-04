@@ -18,8 +18,10 @@ router.normalize = function(url,keep_qs)
 
 router.go = function(url)
 {
+	//normalize, keeping query string in order to satisfy history api with correct route
 	url = router.normalize(url,true);
 	history.pushState({}, null, url);
+	//in checkRoutes, normalize will run again, this time stripping querystring. 
 	router.checkRoutes();
 };
 
@@ -119,9 +121,8 @@ router.params = function(url)
             var currentUrlParts = url.split("/");
             var routeParts = route.route.split("/");
             if (routeParts.length == currentUrlParts.length) {
-                var data = {};
-                var matched = true;
-                var matchCounter = 0;
+                var data = {},
+					matchCounter = 0;
 
                 for(var j = 0; j < routeParts.length; j++) {
                     if (routeParts[j].indexOf(":") === 0) {
