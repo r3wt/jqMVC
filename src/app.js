@@ -244,15 +244,17 @@ app.loadModules = function(modules)
 		app.add(function(stack){
 			//load All scripts
 			var returned = 0;
+			var stateCheck = function(){
+				returned +=1;
+				if(returned == modules.length){
+					stack.next();
+				}
+			};
+				
 			for(var i=0;i<modules.length;i++){
 				loadScript(app.path + module_path + modules[i],stateCheck,stateCheck);
 			}
-			function stateCheck(){
-				returned +=1;
-				if(returned >= modules.length){
-					stack.next();
-				}
-			}
+			
 			
 		});
 	}
