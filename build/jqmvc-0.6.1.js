@@ -5,7 +5,7 @@
  * @link      https://github.com/r3wt/jqMVC
  * @copyright (c) 2015 - 2016 Garrett R. Morris
  * @license   https://github.com/r3wt/jqMVC/blob/master/LICENSE (MIT License)
- * @build     2016-04-27_07:53:28 UTC
+ * @build     2016-05-04_19:39:19 UTC
  * contains 3rd party code:
  * jQuery.serializeObject() - Copyright (c) 2013 David Hong - https://github.com/hongymagic/jQuery.serializeObject
  * touch events by cocco - http://stackoverflow.com/a/17567696/2401804
@@ -579,28 +579,6 @@
         router.checkRoutes();
     };
     
-    router.currentId = "";
-    router.currentParameters = {};
-    
-    // get the current parameters for either a specified url or the current one if parameters is ommited
-    router.params = function(url)
-    {
-        // parse the url so that we handle a unified url
-        var currentUrl = router.normalize(url);
-    
-        // get the list of actions for the current url
-        var list = router.params(currentUrl);
-    
-        // if the list is empty, return an empty object
-        if (list.length == 0) {
-            router.currentParameters = {};
-        } else {
-            router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
-        }
-    
-        return router.currentParameters;
-    };
-    
     router.checkRoutes = function()
     {
         var currentUrl = router.normalize(location.href);
@@ -696,7 +674,6 @@
                         var obj = (function(){ return route; }());
                         obj.data = data;
                         dataList.push(obj);
-                        router.currentParameters = data;
                     }
                 }
             }

@@ -25,28 +25,6 @@ router.go = function(url)
 	router.checkRoutes();
 };
 
-router.currentId = "";
-router.currentParameters = {};
-
-// get the current parameters for either a specified url or the current one if parameters is ommited
-router.params = function(url)
-{
-    // parse the url so that we handle a unified url
-    var currentUrl = router.normalize(url);
-
-    // get the list of actions for the current url
-    var list = router.params(currentUrl);
-
-    // if the list is empty, return an empty object
-    if (list.length == 0) {
-        router.currentParameters = {};
-    } else {
-        router.currentParameters = list[0].data;// if we got results, return the first one. at least for now
-    }
-
-    return router.currentParameters;
-};
-
 router.checkRoutes = function()
 {
     var currentUrl = router.normalize(location.href);
@@ -142,7 +120,6 @@ router.params = function(url)
                     var obj = (function(){ return route; }());
                     obj.data = data;
                     dataList.push(obj);
-                    router.currentParameters = data;
                 }
             }
         }
